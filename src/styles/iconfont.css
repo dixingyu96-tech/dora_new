@@ -1,0 +1,21 @@
+@font-face {
+  font-family: 'DoraIconfont';
+  src:
+    url('../../iconfont/iconfont.woff2') format('woff2'),
+    url('../../iconfont/iconfont.woff') format('woff'),
+    url('../../iconfont/iconfont.ttf') format('truetype');
+  font-display: block;
+}
+
+.dora-icon {
+  font-family: 'DoraIconfont' !important;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  speak: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

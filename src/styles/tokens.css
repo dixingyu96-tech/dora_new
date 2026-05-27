@@ -1,0 +1,14 @@
+/**
+ * 设计 Token 入口
+ * 颜色来源：dora_token/Data agent.tokens.json（语义）+ dora_token/dora_Light.tokens.json（基色）
+ * 修改 JSON 后执行：npm run tokens:build
+ */
+@import './generated/primitives.dora-light.css';
+@import './generated/semantic.data-agent.css';
+
+:root {
+  /* 页面布局（非设计 token 文件） */
+  --sidebar-width: 68px;
+  --page-max-width: 1280px;
+  --sender-max-width: 880px;
+}
