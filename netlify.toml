@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA 路由 fallback：所有未匹配到的路径都回到 index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
