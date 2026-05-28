@@ -363,6 +363,7 @@ export default function QuestionPage() {
   ])
   const [activeNav, setActiveNav] = useState('dora')
   const [internalSidebarOpen, setInternalSidebarOpen] = useState(false)
+  const [expertSidebarOpen, setExpertSidebarOpen] = useState(false)
   const [inputText, setInputText] = useState('')
   const [inputFocused, setInputFocused] = useState(false)
   const [practicesPageOpen, setPracticesPageOpen] = useState(false)
@@ -381,7 +382,7 @@ export default function QuestionPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [doraIntroPhase, setDoraIntroPhase] = useState('idle')
   const [doraVisualScheme, setDoraVisualScheme] = useState('scheme1')
-  const [doraSidebarLoading, setDoraSidebarLoading] = useState(false)
+  const [innerSidebarEntering, setInnerSidebarEntering] = useState(false)
 
   const canSend = useMemo(() => inputText.trim().length > 0, [inputText])
 
@@ -405,7 +406,6 @@ export default function QuestionPage() {
     })
   }, [libraryFilter, librarySearch])
 
-  const panelToggleTitle = internalSidebarOpen ? '收起侧栏' : '展开侧栏'
   const senderPlaceholder = isGeneratingSession
     ? '在此输入任何您想查询或分析的问题，输入 @ 引用会话文件'
     : '在此输入任何您想查询或分析的问题'
@@ -417,6 +417,18 @@ export default function QuestionPage() {
     return marked.parse(activeLibraryMarkdown)
   }, [activeLibraryMarkdown])
   const isExpertDetailView = activeNav === 'experts' && Boolean(activeExpertCard)
+  const hasInnerSidebar = activeNav === 'dora' || isExpertDetailView
+  const activeInnerSidebarOpen = isExpertDetailView ? expertSidebarOpen : internalSidebarOpen
+  const panelToggleTitle = activeInnerSidebarOpen ? '收起侧栏' : '展开侧栏'
+
+  const toggleInnerSidebar = () => {
+    if (isExpertDetailView) {
+      setExpertSidebarOpen((prev) => !prev)
+      return
+    }
+
+    setInternalSidebarOpen((prev) => !prev)
+  }
 
   useEffect(() => {
     const full = CAPABILITY_HINTS[hintIndex]
@@ -460,27 +472,23 @@ export default function QuestionPage() {
   }, [activeNav])
 
   useEffect(() => {
-    if (activeNav !== 'dora' || !internalSidebarOpen) {
-      setDoraSidebarLoading(false)
+    if (!hasInnerSidebar || !activeInnerSidebarOpen) {
+      setInnerSidebarEntering(false)
       return undefined
     }
 
-    setDoraSidebarLoading(false)
+    setInnerSidebarEntering(false)
     const frame = requestAnimationFrame(() => {
-      setDoraSidebarLoading(true)
+      setInnerSidebarEntering(true)
     })
 
     return () => {
       cancelAnimationFrame(frame)
     }
-  }, [activeNav, internalSidebarOpen])
+  }, [hasInnerSidebar, activeInnerSidebarOpen])
 
   const selectNav = (id) => {
     setActiveNav(id)
-    if (id !== 'library') {
-      setActiveLibraryItem(null)
-      setLibraryChatCollapsed(false)
-    }
     if (id !== 'dora') {
       setPracticesPageOpen(false)
     }
@@ -562,8 +570,8 @@ export default function QuestionPage() {
           <div className="main-body">
             {activeNav === 'dora' || isExpertDetailView ? (
               <aside
-                className={`inner-sidebar ${internalSidebarOpen ? 'open' : ''} ${
-                  activeNav === 'dora' && internalSidebarOpen && doraSidebarLoading ? 'inner-sidebar--enter' : ''
+                className={`inner-sidebar ${activeInnerSidebarOpen ? 'open' : ''} ${
+                  activeInnerSidebarOpen && innerSidebarEntering ? 'inner-sidebar--enter' : ''
                 }`}
               >
                 <div className="inner-sidebar__head">
@@ -698,12 +706,12 @@ export default function QuestionPage() {
                             tabIndex={0}
                             onClick={() => {
                               setActiveExpertCard(card)
-                              setInternalSidebarOpen(false)
+                              setExpertSidebarOpen(true)
                             }}
                             onKeyDown={(e) =>
                               onEnterKey(e, () => {
                                 setActiveExpertCard(card)
-                                setInternalSidebarOpen(false)
+                                setExpertSidebarOpen(true)
                               })
                             }
                           >
@@ -737,7 +745,7 @@ export default function QuestionPage() {
                         className="expert-detail-page__back"
                         title={panelToggleTitle}
                         aria-label={panelToggleTitle}
-                        onClick={() => setInternalSidebarOpen((prev) => !prev)}
+                        onClick={toggleInnerSidebar}
                       >
                         <span className="dora-icon icon-16" aria-hidden="true">
                           {ICONS.sidebar}
@@ -1063,9 +1071,6 @@ export default function QuestionPage() {
                       </header>
 
                       <div className="library-detail-chat__empty">
-                        <div className="robot robot--orb" aria-hidden="true">
-                          <Orb hue={315} hoverIntensity={0.5} rotateOnHover={false} backgroundColor="#ffffff" />
-                        </div>
                         <h3>嗨，我是 Dora，全能助手随时待命</h3>
                         <div className="subtitle-row">
                           <span className="subtitle-prefix">我可以帮你</span>
