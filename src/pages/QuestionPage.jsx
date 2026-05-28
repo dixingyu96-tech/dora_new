@@ -353,6 +353,8 @@ const EXPERT_DETAIL_PROMPTS = [
   '整理下雷军最近在公开场合的讲话要点，帮我提炼出小米明年的三个战略关键词。',
 ]
 
+const EXPERT_DETAIL_PREVIEW_PROMPTS = EXPERT_DETAIL_PROMPTS.slice(2)
+
 export default function QuestionPage() {
   const [historyItems, setHistoryItems] = useState([
     { id: 'history-1', label: '广东省潜量最高的10个客户', badge: '' },
@@ -379,6 +381,7 @@ export default function QuestionPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [doraIntroPhase, setDoraIntroPhase] = useState('idle')
   const [doraVisualScheme, setDoraVisualScheme] = useState('scheme1')
+  const [doraSidebarLoading, setDoraSidebarLoading] = useState(false)
 
   const canSend = useMemo(() => inputText.trim().length > 0, [inputText])
 
@@ -456,11 +459,24 @@ export default function QuestionPage() {
     setDoraIntroPhase('content')
   }, [activeNav])
 
+  useEffect(() => {
+    if (activeNav !== 'dora' || !internalSidebarOpen) {
+      setDoraSidebarLoading(false)
+      return undefined
+    }
+
+    setDoraSidebarLoading(false)
+    const frame = requestAnimationFrame(() => {
+      setDoraSidebarLoading(true)
+    })
+
+    return () => {
+      cancelAnimationFrame(frame)
+    }
+  }, [activeNav, internalSidebarOpen])
+
   const selectNav = (id) => {
     setActiveNav(id)
-    if (id !== 'experts') {
-      setActiveExpertCard(null)
-    }
     if (id !== 'library') {
       setActiveLibraryItem(null)
       setLibraryChatCollapsed(false)
@@ -545,7 +561,11 @@ export default function QuestionPage() {
         <div className="main-card">
           <div className="main-body">
             {activeNav === 'dora' || isExpertDetailView ? (
-              <aside className={`inner-sidebar ${internalSidebarOpen ? 'open' : ''}`}>
+              <aside
+                className={`inner-sidebar ${internalSidebarOpen ? 'open' : ''} ${
+                  activeNav === 'dora' && internalSidebarOpen && doraSidebarLoading ? 'inner-sidebar--enter' : ''
+                }`}
+              >
                 <div className="inner-sidebar__head">
                   {isExpertDetailView ? (
                     <div className="inner-sidebar__detail-head">
@@ -678,12 +698,12 @@ export default function QuestionPage() {
                             tabIndex={0}
                             onClick={() => {
                               setActiveExpertCard(card)
-                              setInternalSidebarOpen(true)
+                              setInternalSidebarOpen(false)
                             }}
                             onKeyDown={(e) =>
                               onEnterKey(e, () => {
                                 setActiveExpertCard(card)
-                                setInternalSidebarOpen(true)
+                                setInternalSidebarOpen(false)
                               })
                             }
                           >
@@ -737,10 +757,7 @@ export default function QuestionPage() {
                     <div className="expert-detail-page__body">
                       <div className="expert-detail-page__panel">
                         <div className="expert-intro-card">
-                          <p>您好！我是数据分析专家。</p>
-                          <p>您可以向我提问关于数据收集、分析或可视化的问题。</p>
-                          <p>您可以向我提问关于数据收集、分析或可视化的问题。</p>
-                          <p>您可以向我提问关于数据收集、分析或可视化的问题。</p>
+                          <p>您好！我是数据分析专家。您可以向我提问关于数据收集、分析或可视化的问题。</p>
                         </div>
 
                         <div className="expert-tab-wrap">
@@ -757,11 +774,11 @@ export default function QuestionPage() {
                         </div>
 
                         <div className="expert-prompts">
-                          {EXPERT_DETAIL_PROMPTS.map((prompt, idx) => (
+                          {EXPERT_DETAIL_PREVIEW_PROMPTS.map((prompt, idx) => (
                             <button
                               key={prompt}
                               type="button"
-                              className={`expert-prompt-item ${idx === 1 ? 'active' : ''}`}
+                              className={`expert-prompt-item ${idx === 0 ? 'active' : ''}`}
                               onClick={() => setInputText(prompt)}
                             >
                               <span className="expert-prompt-item__icon">✦</span>
