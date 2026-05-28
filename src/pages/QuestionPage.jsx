@@ -382,7 +382,6 @@ export default function QuestionPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [doraIntroPhase, setDoraIntroPhase] = useState('idle')
   const [doraVisualScheme, setDoraVisualScheme] = useState('scheme1')
-  const [innerSidebarEntering, setInnerSidebarEntering] = useState(false)
 
   const canSend = useMemo(() => inputText.trim().length > 0, [inputText])
 
@@ -417,7 +416,6 @@ export default function QuestionPage() {
     return marked.parse(activeLibraryMarkdown)
   }, [activeLibraryMarkdown])
   const isExpertDetailView = activeNav === 'experts' && Boolean(activeExpertCard)
-  const hasInnerSidebar = activeNav === 'dora' || isExpertDetailView
   const activeInnerSidebarOpen = isExpertDetailView ? expertSidebarOpen : internalSidebarOpen
   const panelToggleTitle = activeInnerSidebarOpen ? '收起侧栏' : '展开侧栏'
 
@@ -470,22 +468,6 @@ export default function QuestionPage() {
 
     setDoraIntroPhase('content')
   }, [activeNav])
-
-  useEffect(() => {
-    if (!hasInnerSidebar || !activeInnerSidebarOpen) {
-      setInnerSidebarEntering(false)
-      return undefined
-    }
-
-    setInnerSidebarEntering(false)
-    const frame = requestAnimationFrame(() => {
-      setInnerSidebarEntering(true)
-    })
-
-    return () => {
-      cancelAnimationFrame(frame)
-    }
-  }, [hasInnerSidebar, activeInnerSidebarOpen])
 
   const selectNav = (id) => {
     setActiveNav(id)
@@ -571,7 +553,7 @@ export default function QuestionPage() {
             {activeNav === 'dora' || isExpertDetailView ? (
               <aside
                 className={`inner-sidebar ${activeInnerSidebarOpen ? 'open' : ''} ${
-                  activeInnerSidebarOpen && innerSidebarEntering ? 'inner-sidebar--enter' : ''
+                  activeInnerSidebarOpen ? 'inner-sidebar--enter' : ''
                 }`}
               >
                 <div className="inner-sidebar__head">
