@@ -211,8 +211,8 @@ if (aiOutlineToken) {
 }
 
 // 盒子阴影（由投影色组合）
-const shadow1 = agentFlat.get('🔵非业务.盒子阴影.boxShadowSubtle.Color 1')
-const shadow2 = agentFlat.get('🔵非业务.盒子阴影.boxShadowSubtle.Color 2')
+const shadow1 = agentFlat.get('🔵基础.盒子阴影.boxShadowSubtle.Color 1')
+const shadow2 = agentFlat.get('🔵基础.盒子阴影.boxShadowSubtle.Color 2')
 if (shadow1 && shadow2) {
   const c1 = resolveToken(shadow1, agentFlat).css
   const c2 = resolveToken(shadow2, agentFlat).css
@@ -220,10 +220,6 @@ if (shadow1 && shadow2) {
     semanticVars.set('--fd-shadow-subtle', {
       css: `0 0 2px ${c1}, 0 1px 4px ${c2}`,
       tokenPath: 'boxShadowSubtle',
-    })
-    semanticVars.set('--fd-shadow-logo', {
-      css: `0 0 1px ${c1}, 0 1px 2px ${c2}`,
-      tokenPath: 'boxShadowSubtle (logo)',
     })
   }
 }

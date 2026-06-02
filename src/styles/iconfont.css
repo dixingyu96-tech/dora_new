@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'DoraIconfont';
   src:
-    url('../../iconfont/iconfont.woff2') format('woff2'),
-    url('../../iconfont/iconfont.woff') format('woff'),
-    url('../../iconfont/iconfont.ttf') format('truetype');
+    url('../../iconfont/iconfont.woff2?v=20260601') format('woff2'),
+    url('../../iconfont/iconfont.woff?v=20260601') format('woff'),
+    url('../../iconfont/iconfont.ttf?v=20260601') format('truetype');
   font-display: block;
 }
 
@@ -18,4 +18,23 @@
   justify-content: center;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* @引用 e804、取消引用 e807 — iconfont/iconfont.json */
+.dora-icon.icon-a-yinyong::before,
+.dora-icon.icon-quxiaoyinyong::before {
+  display: block;
+  font-family: 'DoraIconfont' !important;
+  font-size: inherit;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.dora-icon.icon-a-yinyong::before {
+  content: '\e804';
+}
+
+.dora-icon.icon-quxiaoyinyong::before {
+  content: '\e807';
 }

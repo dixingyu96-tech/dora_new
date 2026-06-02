@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "47733528",
+      "name": "取消引用",
+      "font_class": "quxiaoyinyong",
+      "unicode": "e807",
+      "unicode_decimal": 59399
+    },
+    {
+      "icon_id": "47733527",
+      "name": "新窗口打开",
+      "font_class": "xinchuangkoudakai",
+      "unicode": "e808",
+      "unicode_decimal": 59400
+    },
+    {
+      "icon_id": "47705478",
+      "name": "已添加",
+      "font_class": "yitianjia",
+      "unicode": "e806",
+      "unicode_decimal": 59398
+    },
+    {
       "icon_id": "47677523",
       "name": "专家团_默认",
       "font_class": "zhuanjiatuan_moren",
@@ -28,7 +49,7 @@
     },
     {
       "icon_id": "47677520",
-      "name": "data agent logo_默认",
+      "name": "dora_默认",
       "font_class": "a-dataagentlogo_moren",
       "unicode": "e805",
       "unicode_decimal": 59397

@@ -197,6 +197,7 @@
   --fd-result-height-image: 80px;
   --fd-result-height-image-lg: 175px;
   --fd-result-height-image-sm: 60px;
+  --fd-shadow-subtle: 0 0 2px rgba(9, 30, 64, 0.02), 0 1px 4px rgba(9, 30, 64, 0.06);
   --fd-slider-handle-color-disabled: #CCCFD9;
   --fd-spin-height: 20px;
   --fd-spin-height-lg: 32px;
