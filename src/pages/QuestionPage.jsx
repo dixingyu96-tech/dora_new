@@ -11,14 +11,30 @@ import avatarImage from '../assets/images/avatar.png'
 import robotImage from '../assets/images/robot.png'
 import btnBiImage from '../assets/images/btn_bi.png'
 import btnFrImage from '../assets/images/btn_fr.png'
+import connectorImage from '../assets/images/connector.png'
+import connectorBiImage from '../assets/images/connector_bi.png'
+import attachDashboardImage from '../assets/images/attach_dashboard.png'
+import attachTreeRootImage from '../assets/images/attach_tree_root.png'
+import attachTreeLeafImage from '../assets/images/attach_tree_leaf.png'
+import attachTreeFolderOpenImage from '../assets/images/attach_tree_folder_open.png'
 import menuFineBiImage from '../assets/images/menu_finebi.png'
 import menuFineReportImage from '../assets/images/menu_finereport.png'
 import libraryHtmlImage from '../assets/images/lib_html.png'
 import libraryMdImage from '../assets/images/lib_md.png'
 import libraryPptImage from '../assets/images/lib_ppt.png'
-import uploadPdfImage from '../assets/images/upload_pdf.png'
-import uploadMdImage from '../assets/images/upload_md.png'
+import uploadPdfImage from '../assets/images/upload_pdf_new.png'
+import uploadMdImage from '../assets/images/upload_md_new.png'
 import uploadJsonImage from '../assets/images/upload_json.png'
+import uploadVideoImage from '../assets/images/upload_video.png'
+import uploadUnknownImage from '../assets/images/upload_unknown.png'
+import uploadImageImage from '../assets/images/upload_image.png'
+import uploadAudioImage from '../assets/images/upload_audio.png'
+import uploadTxtImage from '../assets/images/upload_txt.png'
+import uploadHtmlImage from '../assets/images/upload_html.png'
+import uploadDocImage from '../assets/images/upload_doc.png'
+import uploadExcelImage from '../assets/images/upload_excel.png'
+import uploadZipImage from '../assets/images/upload_zip.png'
+import uploadPptImage from '../assets/images/upload_ppt.png'
 import libraryOwnerPrimaryImage from '../assets/images/lib_owner_primary.png'
 import libraryOwnerSecondaryImage from '../assets/images/lib_owner_secondary.png'
 import libraryCover86Image from '../assets/images/lib_cover86.png'
@@ -75,6 +91,7 @@ const ICONS = {
   delete: '\ue7b2',
   more: '\ue793',
   rename: '\ue7ac',
+  editLine: '\ue7af',
   openWindow: '\ue7d9',
 }
 
@@ -164,13 +181,13 @@ const SENDER_MENTION_CONNECTOR_GROUPS = [
 ]
 
 const SENDER_MENTION_FALLBACK_UPLOADS = [
-  { id: 'fallback-upload-1', label: '市场调研报告_01.doc', icon: uploadPdfImage, sessionFileId: null },
+  { id: 'fallback-upload-1', label: '市场调研报告_01.doc', icon: uploadDocImage, sessionFileId: null },
   { id: 'fallback-upload-2', label: '金融行业BI软件市场调研报告_01.md', icon: uploadMdImage, sessionFileId: 'md-1' },
 ]
 
 const SENDER_MENTION_FALLBACK_OUTPUTS = [
   { id: 'fallback-output-1', label: 'chat_main_01.pdf', icon: uploadPdfImage, sessionFileId: 'html-1' },
-  { id: 'fallback-output-2', label: '金融行业BI软件市场调研报告_01.md', icon: uploadMdImage, sessionFileId: 'md-1' },
+  { id: 'fallback-output-2', label: '经营分析结果_01.pptx', icon: uploadPptImage, sessionFileId: 'md-1' },
 ]
 
 const DEFAULT_COMPOSER_SEGMENTS = [{ type: 'text', value: '' }]
@@ -668,14 +685,84 @@ const ATTACH_CONNECT_FOLDER_OPTIONS = [
 ]
 
 const ATTACH_CONNECT_TREE_NODES = [
-  { id: 'root', label: '全部数据', level: 0, type: 'group', expanded: true },
-  { id: 'topic-1', label: '销售分析主题包', level: 1, type: 'leaf', checked: true },
-  { id: 'topic-2', label: '经营指标主题包', level: 1, type: 'leaf', checked: true },
-  { id: 'topic-3', label: '客户运营主题包', level: 1, type: 'leaf', checked: true },
-  { id: 'topic-4', label: '区域复盘主题包', level: 1, type: 'leaf', checked: true },
-  { id: 'topic-5', label: '品类策略主题包', level: 1, type: 'leaf', checked: false },
-  { id: 'topic-6', label: '活动复盘主题包', level: 1, type: 'leaf', checked: false },
+  {
+    id: 'root',
+    label: '全部数据',
+    kind: 'root',
+    children: [
+      { id: 'topic-a', label: '分析主题A', kind: 'leaf' },
+      { id: 'topic-b', label: '分析主题B的名称很长', kind: 'leaf' },
+      {
+        id: 'folder-1',
+        label: '文件夹1',
+        kind: 'folder',
+        children: [
+          { id: 'folder-1-topic-1', label: '分析主题1', kind: 'leaf' },
+          { id: 'folder-1-topic-2', label: '节点名称2', kind: 'leaf' },
+        ],
+      },
+      {
+        id: 'folder-2',
+        label: '文件夹2',
+        kind: 'folder',
+        children: [
+          { id: 'folder-2-topic-1', label: '分析主题3', kind: 'leaf' },
+          { id: 'folder-2-topic-2', label: '分析主题分析主题', kind: 'leaf' },
+        ],
+      },
+      { id: 'folder-3', label: '文件夹3的名称很长很长', kind: 'folder' },
+    ],
+  },
 ]
+
+const ATTACH_CONNECT_DEFAULT_CHECKED_IDS = ['topic-a', 'topic-b', 'folder-1-topic-1', 'folder-3']
+const ATTACH_CONNECT_DEFAULT_EXPANDED_IDS = ['root', 'folder-1', 'folder-2']
+const ATTACH_CONNECT_DEFAULT_ACTIVE_ID = 'topic-b'
+
+const findAttachConnectTreeNode = (nodes, nodeId) => {
+  for (const node of nodes) {
+    if (node.id === nodeId) return node
+    if (node.children?.length) {
+      const childMatch = findAttachConnectTreeNode(node.children, nodeId)
+      if (childMatch) return childMatch
+    }
+  }
+
+  return null
+}
+
+const getAttachConnectCheckTargetIds = (node) => {
+  if (!node) return []
+  if (!node.children?.length) return node.kind === 'root' ? [] : [node.id]
+
+  return node.children.flatMap((child) => getAttachConnectCheckTargetIds(child))
+}
+
+const getAttachConnectCheckState = (node, checkedIds) => {
+  const targetIds = getAttachConnectCheckTargetIds(node)
+  if (!targetIds.length) return 'unchecked'
+
+  const checkedCount = targetIds.filter((id) => checkedIds.has(id)).length
+  if (checkedCount === 0) return 'unchecked'
+  if (checkedCount === targetIds.length) return 'checked'
+  return 'indeterminate'
+}
+
+const filterAttachConnectTreeNodes = (nodes, query) => {
+  if (!query) return nodes
+
+  return nodes.reduce((acc, node) => {
+    const nextChildren = node.children?.length ? filterAttachConnectTreeNodes(node.children, query) : []
+    const matchesSelf = node.label.toLowerCase().includes(query)
+    const shouldKeep = node.kind === 'root' ? nextChildren.length > 0 : matchesSelf || nextChildren.length > 0
+
+    if (shouldKeep) {
+      acc.push(nextChildren.length ? { ...node, children: nextChildren } : node)
+    }
+
+    return acc
+  }, [])
+}
 
 const ATTACH_CONNECT_DIMENSIONS = [
   { id: 'dim-1', label: '权限测试_销售运营分析情况汇总表' },
@@ -690,24 +777,11 @@ const ATTACH_CONNECT_TABLE_ROWS = Array.from({ length: 13 }, (_, index) => ({
 }))
 
 function AttachConnectDetailViewIcon() {
-  return (
-    <svg className="attach-connect-view-tabs__icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <rect x="2" y="2" width="4.5" height="4.5" rx="1" stroke="currentColor" strokeWidth="1.2" />
-      <rect x="9.5" y="2" width="4.5" height="4.5" rx="1" stroke="currentColor" strokeWidth="1.2" />
-      <rect x="2" y="9.5" width="4.5" height="4.5" rx="1" stroke="currentColor" strokeWidth="1.2" />
-      <rect x="9.5" y="9.5" width="4.5" height="4.5" rx="1" stroke="currentColor" strokeWidth="1.2" />
-    </svg>
-  )
+  return <span className="dora-icon attach-connect-view-tabs__icon" aria-hidden="true">{'\ue7a9'}</span>
 }
 
 function AttachConnectStructureViewIcon() {
-  return (
-    <svg className="attach-connect-view-tabs__icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <rect x="2" y="2" width="12" height="3.5" rx="0.8" stroke="currentColor" strokeWidth="1.2" />
-      <rect x="2" y="7.25" width="5" height="6.75" rx="0.8" stroke="currentColor" strokeWidth="1.2" />
-      <rect x="9" y="7.25" width="5" height="6.75" rx="0.8" stroke="currentColor" strokeWidth="1.2" />
-    </svg>
-  )
+  return <span className="dora-icon attach-connect-view-tabs__icon" aria-hidden="true">{'\ue7b1'}</span>
 }
 
 const formatAttachmentFileSize = (bytes) => {
@@ -725,30 +799,59 @@ const getAttachmentFileIcon = (filename) => {
   const ext = filename.split('.').pop()?.toLowerCase() ?? ''
 
   switch (ext) {
+    case 'mp4':
+    case 'mov':
+    case 'avi':
+    case 'mkv':
+    case 'webm':
+      return uploadVideoImage
+    case 'jpg':
+    case 'jpeg':
+    case 'png':
+    case 'gif':
+    case 'webp':
+    case 'svg':
+    case 'bmp':
+      return uploadImageImage
+    case 'mp3':
+    case 'wav':
+    case 'flac':
+    case 'aac':
+    case 'm4a':
+    case 'ogg':
+      return uploadAudioImage
+    case 'txt':
+    case 'log':
+      return uploadTxtImage
+    case 'html':
+    case 'htm':
+      return uploadHtmlImage
+    case 'doc':
+    case 'docx':
+      return uploadDocImage
+    case 'xls':
+    case 'xlsx':
+    case 'csv':
+      return uploadExcelImage
+    case 'zip':
+    case 'rar':
+    case '7z':
+      return uploadZipImage
     case 'pdf':
       return uploadPdfImage
     case 'md':
       return uploadMdImage
+    case 'ppt':
+    case 'pptx':
+      return uploadPptImage
     case 'json':
     case 'js':
     case 'ts':
     case 'jsx':
     case 'tsx':
       return uploadJsonImage
-    case 'ppt':
-    case 'pptx':
-      return libraryPptImage
-    case 'html':
-    case 'htm':
-      return libraryHtmlImage
-    case 'jpg':
-    case 'jpeg':
-    case 'png':
-    case 'gif':
-    case 'webp':
-      return uploadMdImage
     default:
-      return uploadPdfImage
+      return uploadUnknownImage
   }
 }
 
@@ -985,37 +1088,86 @@ const SESSION_FILES_SOURCE_SECTIONS = [
         id: 'src-local-1',
         title: '市场调研报告.pdf',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: uploadPdfImage,
+        icon: getAttachmentFileIcon('市场调研报告.pdf'),
         scopes: ['session', 'existing'],
       },
       {
         id: 'src-local-2',
         title: '金融行业BI软件市场调研报告.md',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: uploadMdImage,
+        icon: getAttachmentFileIcon('金融行业BI软件市场调研报告.md'),
         sessionFileId: 'md-1',
         scopes: ['session'],
       },
       {
         id: 'src-local-3',
-        title: '金融行业BI软件市场调研报告.md',
+        title: '演示方案总结.pptx',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: libraryPptImage,
+        icon: getAttachmentFileIcon('演示方案总结.pptx'),
         scopes: ['session', 'existing'],
       },
       {
         id: 'src-local-4',
-        title: '市场调研报告.doc',
+        title: '客户名单.docx',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: menuFineReportImage,
+        icon: getAttachmentFileIcon('客户名单.docx'),
         scopes: ['session'],
       },
       {
         id: 'src-local-5',
-        title: '金融行业BI软件市场调研报告.md',
+        title: 'ROI分析表.xlsx',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: uploadMdImage,
-        sessionFileId: 'md-1',
+        icon: getAttachmentFileIcon('ROI分析表.xlsx'),
+        scopes: ['existing'],
+      },
+      {
+        id: 'src-local-6',
+        title: '页面模板.html',
+        size: SESSION_FILES_SOURCE_FILE_SIZE,
+        icon: getAttachmentFileIcon('页面模板.html'),
+        sessionFileId: 'html-1',
+        scopes: ['session', 'existing'],
+      },
+      {
+        id: 'src-local-7',
+        title: '访谈录音.mp3',
+        size: SESSION_FILES_SOURCE_FILE_SIZE,
+        icon: getAttachmentFileIcon('访谈录音.mp3'),
+        scopes: ['session'],
+      },
+      {
+        id: 'src-local-8',
+        title: '宣传片.mp4',
+        size: SESSION_FILES_SOURCE_FILE_SIZE,
+        icon: getAttachmentFileIcon('宣传片.mp4'),
+        scopes: ['session', 'existing'],
+      },
+      {
+        id: 'src-local-9',
+        title: '产品截图.png',
+        size: SESSION_FILES_SOURCE_FILE_SIZE,
+        icon: getAttachmentFileIcon('产品截图.png'),
+        scopes: ['session'],
+      },
+      {
+        id: 'src-local-10',
+        title: '会议纪要.txt',
+        size: SESSION_FILES_SOURCE_FILE_SIZE,
+        icon: getAttachmentFileIcon('会议纪要.txt'),
+        scopes: ['existing'],
+      },
+      {
+        id: 'src-local-11',
+        title: '历史归档.zip',
+        size: SESSION_FILES_SOURCE_FILE_SIZE,
+        icon: getAttachmentFileIcon('历史归档.zip'),
+        scopes: ['session', 'existing'],
+      },
+      {
+        id: 'src-local-12',
+        title: '临时附件.unknown',
+        size: SESSION_FILES_SOURCE_FILE_SIZE,
+        icon: getAttachmentFileIcon('临时附件.unknown'),
         scopes: ['existing'],
       },
     ],
@@ -1027,24 +1179,24 @@ const SESSION_FILES_SOURCE_SECTIONS = [
     files: [
       {
         id: 'src-c1-1',
-        title: '金融行业BI软件市场调研报告.md',
+        title: '连接器输出报告.md',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: uploadMdImage,
+        icon: getAttachmentFileIcon('连接器输出报告.md'),
         sessionFileId: 'md-1',
         scopes: ['session', 'existing'],
       },
       {
         id: 'src-c1-2',
-        title: '金融行业BI软件市场调研报告.md',
+        title: '销售明细.xlsx',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: libraryPptImage,
+        icon: getAttachmentFileIcon('销售明细.xlsx'),
         scopes: ['session'],
       },
       {
         id: 'src-c1-3',
-        title: '市场调研报告.doc',
+        title: '连接器归档.zip',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: menuFineReportImage,
+        icon: getAttachmentFileIcon('连接器归档.zip'),
         scopes: ['session', 'existing'],
       },
     ],
@@ -1056,17 +1208,16 @@ const SESSION_FILES_SOURCE_SECTIONS = [
     files: [
       {
         id: 'src-c2-1',
-        title: '金融行业BI软件市场调研报告.md',
+        title: '连接器快照.png',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: uploadMdImage,
-        sessionFileId: 'md-1',
+        icon: getAttachmentFileIcon('连接器快照.png'),
         scopes: ['session', 'existing'],
       },
       {
         id: 'src-c2-2',
-        title: '金融行业BI软件市场调研报告.md',
+        title: '素材包.ppt',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: libraryPptImage,
+        icon: getAttachmentFileIcon('素材包.ppt'),
         scopes: ['existing'],
       },
     ],
@@ -1168,104 +1319,237 @@ const LIBRARY_ASSETS = {
   cover95: libraryCover95Image,
 }
 
+const buildLibrarySourceOwner = (agentTitle, conversationTitle) => `${agentTitle}：${conversationTitle}`
+
+const createLibraryItem = ({
+  title,
+  type,
+  ownerIcon,
+  cover,
+  sourceHistoryId,
+  sourceScope,
+  sourceAgentTitle,
+  sourceConversationTitle,
+}) => ({
+  title,
+  owner: buildLibrarySourceOwner(sourceAgentTitle, sourceConversationTitle),
+  type,
+  ownerIcon,
+  cover,
+  sourceHistoryId,
+  sourceScope,
+  sourceAgentTitle,
+  sourceConversationTitle,
+})
+
 const LIBRARY_ITEMS = [
-  {
+  createLibraryItem({
     title: '销售预测系统.html',
-    owner: '财务小助手：这是什么什么什么的好行都可以',
     type: 'html',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover86,
-    sourceHistoryId: 'history-1',
-  },
-  {
+    sourceHistoryId: 'library-source-history-1',
+    sourceScope: 'experts',
+    sourceAgentTitle: '财务小助手',
+    sourceConversationTitle: '销售预测系统解读',
+  }),
+  createLibraryItem({
     title: '国内金融行业商业智能软件市场调研报告.md',
-    owner: '产品小助手：华润集团销售情况解读',
     type: 'md',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover90,
-    sourceHistoryId: 'history-2',
-  },
-  {
+    sourceHistoryId: 'library-source-history-2',
+    sourceScope: 'experts',
+    sourceAgentTitle: '产品小助手',
+    sourceConversationTitle: '华润集团销售情况解读',
+  }),
+  createLibraryItem({
     title: '风险营销系统.html',
-    owner: 'Dora：这是什么什么什么的好行都可以',
     type: 'html',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover91,
-    sourceHistoryId: 'history-3',
-  },
-  {
+    sourceHistoryId: 'library-source-history-3',
+    sourceScope: 'dora',
+    sourceAgentTitle: 'Dora',
+    sourceConversationTitle: '风险营销系统复盘',
+  }),
+  createLibraryItem({
     title: '销售预测系统.html',
-    owner: '财务小助手：这是什么什么什么的好行都可以',
     type: 'html',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover92,
-    sourceHistoryId: 'history-4',
-  },
-  {
+    sourceHistoryId: 'library-source-history-4',
+    sourceScope: 'experts',
+    sourceAgentTitle: '财务小助手',
+    sourceConversationTitle: '销售预测系统经营预测',
+  }),
+  createLibraryItem({
     title: '华润集团销售拓客速读.md',
-    owner: '产品小助手：这是什么什么什么的好行都可以',
     type: 'md',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover93,
-    sourceHistoryId: 'history-5',
-  },
-  {
+    sourceHistoryId: 'library-source-history-5',
+    sourceScope: 'experts',
+    sourceAgentTitle: '产品小助手',
+    sourceConversationTitle: '华润集团销售拓客速读',
+  }),
+  createLibraryItem({
     title: '产品架构说明.html',
-    owner: '产品小助手：这是什么什么什么的好行都可以',
     type: 'html',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover94,
-    sourceHistoryId: 'history-6',
-  },
-  {
+    sourceHistoryId: 'library-source-history-6',
+    sourceScope: 'experts',
+    sourceAgentTitle: '产品小助手',
+    sourceConversationTitle: '产品架构说明',
+  }),
+  createLibraryItem({
     title: '产品架构说明.html',
-    owner: '产品小助手：这是什么什么什么的好行都可以',
     type: 'ppt',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover93,
-    sourceHistoryId: 'history-7',
-  },
-  {
+    sourceHistoryId: 'library-source-history-7',
+    sourceScope: 'experts',
+    sourceAgentTitle: '产品小助手',
+    sourceConversationTitle: '产品架构说明',
+  }),
+  createLibraryItem({
     title: '风险营销系统.html',
-    owner: 'Dora：这是什么什么什么的好行都可以',
     type: 'html',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover95,
-    sourceHistoryId: 'history-8',
-  },
-  {
+    sourceHistoryId: 'library-source-history-8',
+    sourceScope: 'dora',
+    sourceAgentTitle: 'Dora',
+    sourceConversationTitle: '风险营销系统分析',
+  }),
+  createLibraryItem({
     title: '产品架构说明.html',
-    owner: '产品小助手：这是什么什么什么的好行都可以',
     type: 'html',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover94,
-    sourceHistoryId: 'history-9',
-  },
-  {
+    sourceHistoryId: 'library-source-history-9',
+    sourceScope: 'experts',
+    sourceAgentTitle: '产品小助手',
+    sourceConversationTitle: '产品架构说明',
+  }),
+  createLibraryItem({
     title: '产品架构说明.html',
-    owner: '产品小助手：这是什么什么什么的好行都可以',
     type: 'ppt',
     ownerIcon: LIBRARY_ASSETS.ownerSecondary,
     cover: LIBRARY_ASSETS.cover93,
-    sourceHistoryId: 'history-10',
-  },
-  {
+    sourceHistoryId: 'library-source-history-10',
+    sourceScope: 'experts',
+    sourceAgentTitle: '财务小助手',
+    sourceConversationTitle: '产品架构说明',
+  }),
+  createLibraryItem({
     title: '风险营销系统.html',
-    owner: 'Dora：这是什么什么什么的好行都可以',
     type: 'html',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover88,
-    sourceHistoryId: 'history-11',
-  },
-  {
+    sourceHistoryId: 'library-source-history-11',
+    sourceScope: 'dora',
+    sourceAgentTitle: 'Dora',
+    sourceConversationTitle: '风险营销系统洞察',
+  }),
+  createLibraryItem({
     title: '产品架构说明.html',
-    owner: '产品小助手：这是什么什么什么的好行都可以',
     type: 'html',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover94,
-    sourceHistoryId: 'history-12',
+    sourceHistoryId: 'library-source-history-12',
+    sourceScope: 'experts',
+    sourceAgentTitle: '产品小助手',
+    sourceConversationTitle: '产品架构说明',
+  }),
+]
+
+const SESSION_HEADER_SOURCE_LIBRARY_RULES = [
+  {
+    scope: 'dora',
+    agentTitle: 'Dora',
+    sessions: [
+      {
+        historyId: 'history-2',
+        sessionTitle: '江苏省销售额',
+        librarySourceHistoryId: 'library-source-history-11',
+        libraryTitle: '风险营销系统.html',
+      },
+      {
+        historyId: 'history-8',
+        sessionTitle: '对比各区域业绩并给出提升建议',
+        librarySourceHistoryId: 'library-source-history-8',
+        libraryTitle: '风险营销系统.html',
+      },
+      {
+        historyId: 'history-12',
+        sessionTitle: '浙江省渠道退货率分析',
+        librarySourceHistoryId: 'library-source-history-3',
+        libraryTitle: '风险营销系统.html',
+      },
+    ],
+  },
+  {
+    scope: 'experts',
+    agentTitle: '财务小助手',
+    sessions: [
+      {
+        historyId: 'history-1',
+        sessionTitle: '广东省潜量最高的10个客户',
+        librarySourceHistoryId: 'library-source-history-1',
+        libraryTitle: '销售预测系统.html',
+      },
+      {
+        historyId: 'history-4',
+        sessionTitle: '江苏省销售额',
+        librarySourceHistoryId: 'library-source-history-4',
+        libraryTitle: '销售预测系统.html',
+      },
+      {
+        historyId: 'history-9',
+        sessionTitle: '江苏省销售额',
+        librarySourceHistoryId: 'library-source-history-10',
+        libraryTitle: '产品架构说明.html',
+      },
+    ],
+  },
+  {
+    scope: 'experts',
+    agentTitle: '产品小助手',
+    sessions: [
+      {
+        historyId: 'history-2',
+        sessionTitle: '江苏省销售额',
+        librarySourceHistoryId: 'library-source-history-2',
+        libraryTitle: '国内金融行业商业智能软件市场调研报告.md',
+      },
+      {
+        historyId: 'history-5',
+        sessionTitle: '去年门店销售额最高的商品是哪个如果问题很长展示不下那么久是省略',
+        librarySourceHistoryId: 'library-source-history-5',
+        libraryTitle: '华润集团销售拓客速读.md',
+      },
+      {
+        historyId: 'history-11',
+        sessionTitle: '广东省潜量最高的10个客户',
+        librarySourceHistoryId: 'library-source-history-12',
+        libraryTitle: '产品架构说明.html',
+      },
+    ],
   },
 ]
+
+const SESSION_HEADER_SOURCE_LIBRARY_LINKS = SESSION_HEADER_SOURCE_LIBRARY_RULES.flatMap((group) =>
+  group.sessions.map((session) => ({
+    scope: group.scope,
+    agentTitle: group.agentTitle,
+    historyId: session.historyId,
+    sessionTitle: session.sessionTitle,
+    librarySourceHistoryId: session.librarySourceHistoryId,
+    libraryTitle: session.libraryTitle,
+  })),
+)
 
 const EXPERT_FILTER_OPTIONS = [
   { value: 'all', label: '全部' },
@@ -1417,6 +1701,23 @@ const EXPERT_CARDS = [
   },
 ]
 
+const LIBRARY_SOURCE_EXPERT_CARDS = {
+  财务小助手: {
+    title: '财务小助手',
+    desc: '聚焦财报、经营指标与利润结构分析。',
+    category: 'analysis',
+    editedAt: '2026/06/03',
+    alertCount: 0,
+  },
+  产品小助手: {
+    title: '产品小助手',
+    desc: '聚焦产品资料、方案解读与业务价值提炼。',
+    category: 'report',
+    editedAt: '2026/06/03',
+    alertCount: 0,
+  },
+}
+
 const getExpertCardKey = (card) => `${card.title}-${card.editedAt}`
 
 const buildExpertAlertSnapshot = () => {
@@ -1456,7 +1757,7 @@ const getLibraryItemKey = (item) => `${item.type}-${item.title}-${item.cover}`
 const LIBRARY_SOURCE_AGENT_ICONS = {
   财务小助手: agentDefaultAvatarImage,
   产品小助手: agentDefaultAvatarImage,
-  Dora: robotImage,
+  Dora: activeDoraImage,
 }
 
 const parseLibrarySourceAgentName = (owner) => {
@@ -1471,6 +1772,50 @@ const parseLibrarySourceAgentName = (owner) => {
 const getLibrarySourceAgentIcon = (owner) => {
   const agentName = parseLibrarySourceAgentName(owner)
   return LIBRARY_SOURCE_AGENT_ICONS[agentName] ?? agentDefaultAvatarImage
+}
+
+const getLibrarySourceExpertCard = (agentTitle) =>
+  EXPERT_CARDS.find((card) => card.title === agentTitle) ??
+  LIBRARY_SOURCE_EXPERT_CARDS[agentTitle] ?? {
+    title: agentTitle,
+    desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
+    category: 'analysis',
+    editedAt: '2026/06/03',
+    alertCount: 0,
+  }
+
+const createSessionOutputItemFromLibraryItem = (item) => {
+  if (!item) return null
+
+  return {
+    id: `session-output-${item.sourceHistoryId ?? getLibraryItemKey(item)}`,
+    type: item.type,
+    title: item.title,
+    desc: '当前会话产出文件',
+    icon: LIBRARY_ASSETS[item.type] ?? libraryMdImage,
+    sourceLibraryKey: getLibraryItemKey(item),
+  }
+}
+
+const mergeDerivedSessionOutputFiles = (baseFiles, libraryItem) => {
+  const currentSourceOutput = createSessionOutputItemFromLibraryItem(libraryItem)
+  if (!currentSourceOutput) return baseFiles
+
+  const sourceLibraryKey = currentSourceOutput.sourceLibraryKey
+  const hasSameLibraryFile = baseFiles.some((item) => item.sourceLibraryKey === sourceLibraryKey)
+  const hasSameFileIdentity = baseFiles.some(
+    (item) => item.title === currentSourceOutput.title && item.type === currentSourceOutput.type,
+  )
+
+  if (hasSameLibraryFile || hasSameFileIdentity) {
+    return baseFiles.map((item) =>
+      item.title === currentSourceOutput.title && item.type === currentSourceOutput.type
+        ? { ...item, sourceLibraryKey }
+        : item,
+    )
+  }
+
+  return [currentSourceOutput, ...baseFiles]
 }
 
 const HISTORY_GROUPS = [
@@ -1494,6 +1839,11 @@ const INITIAL_HISTORY_ITEMS = [
   { id: 'history-11', group: 'earlier', label: '广东省潜量最高的10个客户', badge: '' },
   { id: 'history-12', group: 'earlier', label: '浙江省渠道退货率分析', badge: '3' },
 ]
+
+const upsertHistoryItem = (items, nextItem) => {
+  const filtered = items.filter((item) => item.id !== nextItem.id)
+  return [nextItem, ...filtered]
+}
 
 const HISTORY_SESSION_MENU_ITEMS = [
   { id: 'rename', label: '重命名', icon: ICONS.rename },
@@ -1898,10 +2248,9 @@ export default function QuestionPage() {
   const [attachConnectModal, setAttachConnectModal] = useState(null)
   const [attachConnectFolder, setAttachConnectFolder] = useState('catalog')
   const [attachConnectSearch, setAttachConnectSearch] = useState('')
-  const [attachConnectCheckedIds, setAttachConnectCheckedIds] = useState(
-    () => new Set(ATTACH_CONNECT_TREE_NODES.filter((node) => node.checked).map((node) => node.id)),
-  )
-  const [attachConnectTreeExpanded, setAttachConnectTreeExpanded] = useState(true)
+  const [attachConnectCheckedIds, setAttachConnectCheckedIds] = useState(() => new Set(ATTACH_CONNECT_DEFAULT_CHECKED_IDS))
+  const [attachConnectExpandedIds, setAttachConnectExpandedIds] = useState(() => new Set(ATTACH_CONNECT_DEFAULT_EXPANDED_IDS))
+  const [attachConnectActiveTreeNodeId, setAttachConnectActiveTreeNodeId] = useState(ATTACH_CONNECT_DEFAULT_ACTIVE_ID)
   const [attachConnectActiveDimensionId, setAttachConnectActiveDimensionId] = useState('dim-1')
   const [attachConnectTableView, setAttachConnectTableView] = useState('detail')
   const [sessionFilesTab, setSessionFilesTab] = useState('materials')
@@ -1910,6 +2259,7 @@ export default function QuestionPage() {
   const [sessionFilesSourceScope, setSessionFilesSourceScope] = useState('session')
   const [sessionFilesSourceSearch, setSessionFilesSourceSearch] = useState('')
   const [sessionFilesSourceCollapsed, setSessionFilesSourceCollapsed] = useState({})
+  const [sessionFilesSourceSections, setSessionFilesSourceSections] = useState(() => SESSION_FILES_SOURCE_SECTIONS)
   const [sessionFilesPanelWidth, setSessionFilesPanelWidth] = useState(598)
   const [sessionSplitMounted, setSessionSplitMounted] = useState(false)
   const [sessionSplitEntered, setSessionSplitEntered] = useState(false)
@@ -2011,16 +2361,6 @@ export default function QuestionPage() {
     })
   }, [libraryFilter, librarySearch])
 
-  const filteredSessionFiles = useMemo(() => {
-    const keyword = sessionFilesSearch.trim().toLowerCase()
-
-    return sessionOutputFiles.filter((item) => {
-      const matchesFilter = sessionFilesFilter === 'all' || item.type === sessionFilesFilter
-      const matchesKeyword = !keyword || `${item.title} ${item.desc}`.toLowerCase().includes(keyword)
-      return matchesFilter && matchesKeyword
-    })
-  }, [sessionFilesFilter, sessionFilesSearch, sessionOutputFiles])
-
   const filteredSessionExistingData = useMemo(() => {
     const keyword = sessionFilesSourceSearch.trim().toLowerCase()
 
@@ -2038,16 +2378,6 @@ export default function QuestionPage() {
         .filter((group) => group.items.length > 0),
     })).filter((block) => block.groups.length > 0)
   }, [sessionFilesSourceSearch])
-
-  const activeSessionFile = useMemo(
-    () => sessionOutputFiles.find((item) => item.id === activeSessionFileId) ?? null,
-    [activeSessionFileId, sessionOutputFiles],
-  )
-
-  const activeSessionFileHtml = useMemo(() => {
-    if (activeSessionFile?.type !== 'md') return ''
-    return marked.parse(financialBiMdContent)
-  }, [activeSessionFile])
 
   const isExpertDetailView = activeNav === 'experts' && Boolean(activeExpertCard)
   const expertAlertCards = useMemo(() => EXPERT_CARDS.filter((card) => card.alertCount > 0), [])
@@ -2068,6 +2398,12 @@ export default function QuestionPage() {
     () => getExpertDetailConfig(activeExpertCard),
     [activeExpertCard],
   )
+  const expertAgentOptions = useMemo(() => {
+    if (!activeExpertCard) return EXPERT_CARDS
+    return EXPERT_CARDS.some((card) => card.title === activeExpertCard.title)
+      ? EXPERT_CARDS
+      : [activeExpertCard, ...EXPERT_CARDS]
+  }, [activeExpertCard])
   const activeExpertTabs = useMemo(
     () => getVisibleExpertTabs(activeExpertDetailConfig.tabs),
     [activeExpertDetailConfig],
@@ -2115,7 +2451,7 @@ export default function QuestionPage() {
   const filteredSessionSourceSections = useMemo(() => {
     const keyword = sessionFilesSourceSearch.trim().toLowerCase()
 
-    return SESSION_FILES_SOURCE_SECTIONS.map((section) => ({
+    return sessionFilesSourceSections.map((section) => ({
       ...section,
       files: section.files.filter((file) => {
         const inScope = file.scopes?.includes(sessionFilesSourceScope) ?? true
@@ -2126,10 +2462,55 @@ export default function QuestionPage() {
         return inScope && matchesKeyword
       }),
     })).filter((section) => (keyword ? section.files.length > 0 : true))
-  }, [isQuestionMode, sessionFilesSourceScope, sessionFilesSourceSearch])
+  }, [isQuestionMode, sessionFilesSourceScope, sessionFilesSourceSearch, sessionFilesSourceSections])
   const showSessionSplit =
     sessionFilesPanelOpen && (activeNav === 'dora' || isExpertDetailView)
   const activeHistoryItemId = activeSessionState.activeHistoryItemId
+  const activeSessionSourceLibraryItem = useMemo(() => {
+    if (!isQuestionMode || activeNav === 'library') return null
+
+    if (activeHistoryItemId) {
+      const directMatch = LIBRARY_ITEMS.find((item) => item.sourceHistoryId === activeHistoryItemId)
+      if (directMatch) return directMatch
+    }
+
+    const agentTitle = isExpertDetailView ? activeExpertCard?.title ?? '' : ''
+    const linkedConfig = SESSION_HEADER_SOURCE_LIBRARY_LINKS.find((item) => {
+      if (item.scope !== activeSessionScope) return false
+      if (item.historyId !== activeHistoryItemId) return false
+      if (item.scope === 'experts' && item.agentTitle !== agentTitle) return false
+      return true
+    })
+
+    if (!linkedConfig) return null
+    return LIBRARY_ITEMS.find((item) => item.sourceHistoryId === linkedConfig.librarySourceHistoryId) ?? null
+  }, [activeHistoryItemId, activeNav, activeSessionScope, activeExpertCard, isExpertDetailView, isQuestionMode])
+  const derivedSessionOutputFiles = useMemo(
+    () => mergeDerivedSessionOutputFiles(sessionOutputFiles, activeSessionSourceLibraryItem),
+    [activeSessionSourceLibraryItem, sessionOutputFiles],
+  )
+  const isNewChatActive = (activeNav === 'dora' || isExpertDetailView) && !activeSessionPrompt && !isGeneratingSession
+  const visibleSessionOutputFiles = useMemo(
+    () => (isNewChatActive ? [] : derivedSessionOutputFiles),
+    [derivedSessionOutputFiles, isNewChatActive],
+  )
+  const filteredSessionFiles = useMemo(() => {
+    const keyword = sessionFilesSearch.trim().toLowerCase()
+
+    return visibleSessionOutputFiles.filter((item) => {
+      const matchesFilter = sessionFilesFilter === 'all' || item.type === sessionFilesFilter
+      const matchesKeyword = !keyword || `${item.title} ${item.desc}`.toLowerCase().includes(keyword)
+      return matchesFilter && matchesKeyword
+    })
+  }, [sessionFilesFilter, sessionFilesSearch, visibleSessionOutputFiles])
+  const activeSessionFile = useMemo(
+    () => visibleSessionOutputFiles.find((item) => item.id === activeSessionFileId) ?? null,
+    [activeSessionFileId, visibleSessionOutputFiles],
+  )
+  const activeSessionFileHtml = useMemo(() => {
+    if (activeSessionFile?.type !== 'md') return ''
+    return marked.parse(financialBiMdContent)
+  }, [activeSessionFile])
   const composerFiles = activeSessionState.composerFiles ?? []
   const canSend = useMemo(() => {
     const hasText = composerPlainText.trim().length > 0 || getComposerHasContent(composerSegments)
@@ -2142,13 +2523,12 @@ export default function QuestionPage() {
     if (!mentionPanel.open) return []
     return buildSenderMentionGroups({
       composerFiles: mentionScopeComposerFiles,
-      sessionOutputFiles,
+      sessionOutputFiles: derivedSessionOutputFiles,
       query: mentionPanel.query,
     })
-  }, [mentionPanel.open, mentionPanel.scope, mentionPanel.query, mentionScopeComposerFiles, sessionOutputFiles])
+  }, [derivedSessionOutputFiles, mentionPanel.open, mentionPanel.scope, mentionPanel.query, mentionScopeComposerFiles])
   const senderMentionFlatItems = useMemo(() => flattenSenderMentionGroups(senderMentionGroups), [senderMentionGroups])
   const senderPlaceholder = '在此输入任何您想查询或分析的问题，输入 @ 引用会话文件'
-  const isNewChatActive = (activeNav === 'dora' || isExpertDetailView) && !activeSessionPrompt && !isGeneratingSession
   const activeLibraryTitle = activeLibraryItem ? activeLibraryItem.title : ''
   const activeLibraryMarkdown = activeLibraryItem?.type === 'md' ? financialBiMdContent : ''
   const activeLibraryHtml = useMemo(() => {
@@ -2433,12 +2813,12 @@ export default function QuestionPage() {
   }
 
   const resolveReferencedSessionFileId = (fileId, label) => {
-    if (fileId && sessionOutputFiles.some((file) => file.id === fileId)) {
+    if (fileId && derivedSessionOutputFiles.some((file) => file.id === fileId)) {
       return fileId
     }
 
     if (label) {
-      const matched = sessionOutputFiles.find((file) => file.title === label)
+      const matched = derivedSessionOutputFiles.find((file) => file.title === label)
       if (matched) return matched.id
     }
 
@@ -2449,7 +2829,7 @@ export default function QuestionPage() {
     if (!composerFile) return fileId || null
 
     const resolvedId = `upload-${composerFile.id}`
-    if (!sessionOutputFiles.some((file) => file.id === resolvedId)) {
+    if (!derivedSessionOutputFiles.some((file) => file.id === resolvedId)) {
       setSessionOutputFiles((prev) => [
         {
           id: resolvedId,
@@ -3039,10 +3419,9 @@ export default function QuestionPage() {
     setAttachConnectModal({ title })
     setAttachConnectFolder('catalog')
     setAttachConnectSearch('')
-    setAttachConnectCheckedIds(
-      new Set(ATTACH_CONNECT_TREE_NODES.filter((node) => node.checked).map((node) => node.id)),
-    )
-    setAttachConnectTreeExpanded(true)
+    setAttachConnectCheckedIds(new Set(ATTACH_CONNECT_DEFAULT_CHECKED_IDS))
+    setAttachConnectExpandedIds(new Set(ATTACH_CONNECT_DEFAULT_EXPANDED_IDS))
+    setAttachConnectActiveTreeNodeId(ATTACH_CONNECT_DEFAULT_ACTIVE_ID)
     setAttachConnectActiveDimensionId('dim-1')
     setAttachConnectTableView('detail')
   }
@@ -3052,13 +3431,24 @@ export default function QuestionPage() {
   }
 
   const toggleAttachConnectTreeNode = (nodeId) => {
+    const node = findAttachConnectTreeNode(ATTACH_CONNECT_TREE_NODES, nodeId)
+    if (!node) return
+
+    const targetIds = getAttachConnectCheckTargetIds(node)
+    if (!targetIds.length) return
+
     setAttachConnectCheckedIds((prev) => {
       const next = new Set(prev)
-      if (next.has(nodeId)) {
-        next.delete(nodeId)
-      } else {
-        next.add(nodeId)
-      }
+      const shouldSelect = targetIds.some((id) => !next.has(id))
+
+      targetIds.forEach((id) => {
+        if (shouldSelect) {
+          next.add(id)
+        } else {
+          next.delete(id)
+        }
+      })
+
       return next
     })
   }
@@ -3066,12 +3456,99 @@ export default function QuestionPage() {
   const renderAttachConnectModal = () => {
     if (!attachConnectModal) return null
 
+    const showLeafDashboardIcon = attachConnectModal.title === '连接「***_02」'
     const query = attachConnectSearch.trim().toLowerCase()
-    const filteredTreeNodes = ATTACH_CONNECT_TREE_NODES.filter((node) => {
-      if (node.type === 'group') return true
-      if (!query) return attachConnectTreeExpanded
-      return node.label.toLowerCase().includes(query)
-    })
+    const forceExpandTree = Boolean(query)
+    const filteredTreeNodes = filterAttachConnectTreeNodes(ATTACH_CONNECT_TREE_NODES, query)
+
+    const toggleAttachConnectExpand = (nodeId) => {
+      setAttachConnectExpandedIds((prev) => {
+        const next = new Set(prev)
+        if (next.has(nodeId)) {
+          next.delete(nodeId)
+        } else {
+          next.add(nodeId)
+        }
+        return next
+      })
+    }
+
+    const renderAttachConnectTreeNodes = (nodes, level = 0) =>
+      nodes.flatMap((node) => {
+        const hasChildren = Boolean(node.children?.length)
+        const isRoot = node.kind === 'root'
+        const isExpanded = forceExpandTree || attachConnectExpandedIds.has(node.id)
+        const isActive = attachConnectActiveTreeNodeId === node.id
+        const checkState = isRoot ? 'unchecked' : getAttachConnectCheckState(node, attachConnectCheckedIds)
+        const row = isRoot ? (
+          <button
+            key={node.id}
+            type="button"
+            className="attach-connect-tree__node attach-connect-tree__node--group attach-connect-tree__node--root"
+            onClick={() => toggleAttachConnectExpand(node.id)}
+          >
+            <span className="dora-icon attach-connect-tree__caret" aria-hidden="true">
+              {isExpanded ? ICONS.triangleDown : ICONS.triangleRight}
+            </span>
+            <span className="attach-connect-tree__icon" aria-hidden="true">
+              <img src={attachTreeRootImage} alt="" />
+            </span>
+            <span className="attach-connect-tree__label">{node.label}</span>
+          </button>
+        ) : (
+          <div
+            key={node.id}
+            className={`attach-connect-tree__node attach-connect-tree__node--leaf${isActive ? ' is-active' : ''}`}
+            style={{ paddingLeft: `${8 + level * 20}px` }}
+          >
+            {hasChildren ? (
+              <button
+                type="button"
+                className="attach-connect-tree__expander"
+                aria-label={isExpanded ? '收起' : '展开'}
+                onClick={() => toggleAttachConnectExpand(node.id)}
+              >
+                <span className="dora-icon attach-connect-tree__caret" aria-hidden="true">
+                  {isExpanded ? ICONS.triangleDown : ICONS.triangleRight}
+                </span>
+              </button>
+            ) : (
+              <span className="attach-connect-tree__expander-spacer" aria-hidden="true" />
+            )}
+            <input
+              ref={(element) => {
+                if (element) {
+                  element.indeterminate = checkState === 'indeterminate'
+                }
+              }}
+              type="checkbox"
+              className="attach-connect-tree__checkbox"
+              checked={checkState === 'checked'}
+              onChange={() => toggleAttachConnectTreeNode(node.id)}
+            />
+            <span className="attach-connect-tree__icon" aria-hidden="true">
+              <img
+                src={hasChildren ? attachTreeFolderOpenImage : showLeafDashboardIcon ? attachDashboardImage : attachTreeLeafImage}
+                alt=""
+              />
+            </span>
+            <button
+              type="button"
+              className="attach-connect-tree__content"
+              onClick={() => {
+                setAttachConnectActiveTreeNodeId(node.id)
+                if (hasChildren) {
+                  toggleAttachConnectExpand(node.id)
+                }
+              }}
+            >
+              <span className="attach-connect-tree__label">{node.label}</span>
+            </button>
+          </div>
+        )
+
+        return [row, ...(hasChildren && isExpanded ? renderAttachConnectTreeNodes(node.children, level + 1) : [])]
+      })
 
     return createPortal(
       <div
@@ -3124,37 +3601,7 @@ export default function QuestionPage() {
                 />
               </label>
               <div className="attach-connect-tree" role="tree" aria-label="分析主题">
-                {filteredTreeNodes.map((node) =>
-                  node.type === 'group' ? (
-                    <button
-                      key={node.id}
-                      type="button"
-                      className="attach-connect-tree__node attach-connect-tree__node--group"
-                      onClick={() => setAttachConnectTreeExpanded((prev) => !prev)}
-                    >
-                      <span
-                        className={`dora-icon attach-connect-tree__caret ${attachConnectTreeExpanded ? 'is-expanded' : ''}`}
-                        aria-hidden="true"
-                      >
-                        {ICONS.arrowDown}
-                      </span>
-                      <span className="attach-connect-tree__icon" aria-hidden="true">
-                        <img src={menuFineBiImage} alt="" />
-                      </span>
-                      <span className="attach-connect-tree__label">{node.label}</span>
-                    </button>
-                  ) : (
-                    <label key={node.id} className="attach-connect-tree__node attach-connect-tree__node--leaf">
-                      <input
-                        type="checkbox"
-                        className="attach-connect-tree__checkbox"
-                        checked={attachConnectCheckedIds.has(node.id)}
-                        onChange={() => toggleAttachConnectTreeNode(node.id)}
-                      />
-                      <span className="attach-connect-tree__label">{node.label}</span>
-                    </label>
-                  ),
-                )}
+                {renderAttachConnectTreeNodes(filteredTreeNodes)}
               </div>
               <div className="attach-connect-dialog__sidebar-foot">
                 <span className="attach-connect-dialog__sidebar-foot-label">已选择分析主题：</span>
@@ -3174,8 +3621,8 @@ export default function QuestionPage() {
                         }`}
                         onClick={() => setAttachConnectActiveDimensionId(dimension.id)}
                       >
-                        <span className="attach-connect-dimensions__icon" aria-hidden="true">
-                          <img src={menuFineReportImage} alt="" />
+                        <span className="dora-icon attach-connect-dimensions__icon" aria-hidden="true">
+                          {'\ue7c2'}
                         </span>
                         <span className="attach-connect-dimensions__label">{dimension.label}</span>
                       </button>
@@ -3273,11 +3720,12 @@ export default function QuestionPage() {
           <IconButton
             type="button"
             className="attach-btn attach-btn--mode attach-btn--bi"
+            tip={undefined}
             aria-label="FineBI 连接"
             onClick={() => openAttachConnectModal(BI_ATTACH_MENU_ITEMS[0].label)}
           >
             <span className="attach-btn__visual">
-              <img className="attach-btn__img" src={btnBiImage} alt="BI" />
+              <img className="attach-btn__img" src={connectorImage} alt="连接器" />
             </span>
           </IconButton>
           <div className="attach-menu" role="menu" aria-label="FineBI 连接列表">
@@ -3301,13 +3749,18 @@ export default function QuestionPage() {
         <IconButton
           type="button"
           className="attach-btn attach-btn--mode attach-btn--bi"
+          tip={doraVisualScheme === 'scheme5' ? undefined : doraVisualScheme === 'scheme4' ? '连接「***_01」' : '添加 FineBI 资产'}
           aria-label={doraVisualScheme === 'scheme4' ? '连接「***_01」' : '添加 FineBI 资产'}
           onClick={() =>
             openAttachConnectModal(doraVisualScheme === 'scheme4' ? '连接「***_01」' : '添加 FineBI 资产')
           }
         >
           <span className="attach-btn__visual">
-            <img className="attach-btn__img" src={btnBiImage} alt="BI" />
+            <img
+              className="attach-btn__img"
+              src={doraVisualScheme === 'scheme4' ? connectorBiImage : btnBiImage}
+              alt={doraVisualScheme === 'scheme4' ? '连接器 BI' : 'BI'}
+            />
           </span>
         </IconButton>
       )}
@@ -3315,6 +3768,7 @@ export default function QuestionPage() {
         <IconButton
           type="button"
           className="attach-btn attach-btn--mode attach-btn--fr"
+          tip={doraVisualScheme === 'scheme5' ? undefined : doraVisualScheme === 'scheme4' ? '连接「***_02」' : '添加 FineReport 资产'}
           aria-label={doraVisualScheme === 'scheme4' ? '连接「***_02」' : '添加 FineReport 资产'}
           onClick={() =>
             openAttachConnectModal(doraVisualScheme === 'scheme4' ? '连接「***_02」' : '添加 FineReport 资产')
@@ -3439,6 +3893,34 @@ export default function QuestionPage() {
     </div>
   )
 
+  const openSessionSourceLibraryItem = (item) => {
+    if (!item) return
+    setActiveNav('library')
+    setActiveExpertCard(null)
+    setPracticesPageOpen(false)
+    openLibraryItem(item, { trackRecent: true })
+  }
+
+  const renderSessionSourceTag = () => {
+    if (!activeSessionSourceLibraryItem) return null
+
+    return (
+      <button
+        type="button"
+        className="main-header__session-source"
+        onClick={() => openSessionSourceLibraryItem(activeSessionSourceLibraryItem)}
+        aria-label={`打开资料来源：${activeSessionSourceLibraryItem.title}`}
+      >
+        <img
+          src={LIBRARY_ASSETS[activeSessionSourceLibraryItem.type]}
+          alt=""
+          className="main-header__session-source-icon"
+        />
+        <span className="main-header__session-source-label">{activeSessionSourceLibraryItem.title}</span>
+      </button>
+    )
+  }
+
   const renderSessionHeaderActions = () => (
     <div className="main-header__session-tools">
       <IconButton
@@ -3481,6 +3963,15 @@ export default function QuestionPage() {
       ...prev,
       [sectionId]: !prev[sectionId],
     }))
+  }
+
+  const removeSessionSourceFile = (fileId) => {
+    setSessionFilesSourceSections((prev) =>
+      prev.map((section) => ({
+        ...section,
+        files: section.files.filter((file) => file.id !== fileId),
+      })),
+    )
   }
 
   const blurSessionFileCardFocus = (event) => {
@@ -3531,7 +4022,11 @@ export default function QuestionPage() {
     const hasVisibleBlocks = filteredSessionExistingData.some((block) => block.groups.length > 0)
 
     if (!hasVisibleBlocks) {
-      return <div className="session-files-panel__empty session-files-panel__empty--tab">暂无匹配数据</div>
+      return (
+        <div className="session-files-panel__empty session-files-panel__empty--tab">
+          {sessionFilesSourceSearch.trim() ? '暂无匹配数据' : '暂无内容'}
+        </div>
+      )
     }
 
     return (
@@ -3593,7 +4088,11 @@ export default function QuestionPage() {
     return (
       <>
         {renderSessionCiteAction(file)}
-        <IconButton tip="删除" className="session-files-panel__action-btn session-files-panel__action-btn--danger">
+        <IconButton
+          tip="删除"
+          className="session-files-panel__action-btn session-files-panel__action-btn--danger"
+          onClick={() => removeSessionSourceFile(file.id)}
+        >
           <span className="dora-icon icon-16" aria-hidden="true">
             {ICONS.delete}
           </span>
@@ -3693,13 +4192,17 @@ export default function QuestionPage() {
                   ) : null}
 
                   {!isCollapsed && !section.files.length ? (
-                    <div className="session-files-panel__source-empty">暂无文件</div>
+                    <div className="session-files-panel__source-empty">
+                      {sessionFilesSourceSearch.trim() ? '暂无匹配数据' : '暂无内容'}
+                    </div>
                   ) : null}
                 </section>
               )
             })
           ) : !hasVisibleContent ? (
-            <div className="session-files-panel__empty session-files-panel__empty--tab">暂无文件</div>
+            <div className="session-files-panel__empty session-files-panel__empty--tab">
+              {sessionFilesSourceSearch.trim() ? '暂无匹配数据' : '暂无内容'}
+            </div>
           ) : null}
         </div>
       </div>
@@ -3889,7 +4392,9 @@ export default function QuestionPage() {
                 ))}
 
                 {!filteredSessionFiles.length ? (
-                  <div className="session-files-panel__empty">暂无匹配文件</div>
+                  <div className="session-files-panel__empty">
+                    {sessionFilesSearch.trim() ? '暂无匹配文件' : '暂无内容'}
+                  </div>
                 ) : null}
               </div>
             </>
@@ -4130,9 +4635,12 @@ export default function QuestionPage() {
             </IconButton>
             {isQuestionMode ? (
               <>
-                <h2 className="main-header__session-title" title={activeSessionPrompt}>
-                  {activeSessionPrompt}
-                </h2>
+                <div className="main-header__session-meta">
+                  <h2 className="main-header__session-title" title={activeSessionPrompt}>
+                    {activeSessionPrompt}
+                  </h2>
+                  {renderSessionSourceTag()}
+                </div>
                 {renderSessionHeaderActions()}
               </>
             ) : (
@@ -4525,8 +5033,16 @@ export default function QuestionPage() {
   }, [sessionFilesPanelOpen, sessionFilesPanelFullscreen])
 
   useEffect(() => {
-    setActiveSessionFileId(null)
+    if (sessionFilesTab !== 'output') {
+      setActiveSessionFileId(null)
+    }
   }, [sessionFilesTab])
+
+  useEffect(() => {
+    if (isNewChatActive) {
+      setActiveSessionFileId(null)
+    }
+  }, [isNewChatActive])
 
   useEffect(() => {
     if (!showSessionSplit) {
@@ -4988,15 +5504,54 @@ export default function QuestionPage() {
     openHistorySession(nextHistoryItem)
   }
 
-  const openAgentSession = ({ id = null, label = '' }) => {
-    setActiveNav('dora')
-    setActiveExpertCard(null)
+  const openScopedHistorySession = ({ scope = 'dora', id = null, label = '', agentTitle = '' }) => {
+    const nextHistoryItem = {
+      id,
+      group: 'today',
+      label,
+      badge: '',
+    }
+
     setActiveLibraryItem(null)
     setLibraryChatCollapsed(false)
+    setPracticesPageOpen(false)
+    setInternalSidebarOpen(true)
+
+    if (scope === 'experts') {
+      setActiveNav('experts')
+      setActiveExpertCard(getLibrarySourceExpertCard(agentTitle))
+      updateSessionScopeState('experts', (prev) => {
+        clearScopeComposerUploadTimers(prev.composerFiles)
+        const nextHistoryItems =
+          id && !prev.historyItems.some((item) => item.id === id)
+            ? upsertHistoryItem(prev.historyItems, nextHistoryItem)
+            : prev.historyItems
+        return {
+          ...prev,
+          historyItems: nextHistoryItems,
+          activeSessionPrompt: label,
+          activeHistoryItemId: id,
+          isGeneratingSession: true,
+          inputText: '',
+          inputFocused: false,
+          composerFiles: [],
+          composerSegments: DEFAULT_COMPOSER_SEGMENTS,
+        }
+      })
+      return
+    }
+
+    setActiveNav('dora')
+    setActiveExpertCard(null)
     updateSessionScopeState('dora', (prev) => {
       clearScopeComposerUploadTimers(prev.composerFiles)
+      const nextHistoryItems =
+        id && !prev.historyItems.some((item) => item.id === id)
+          ? upsertHistoryItem(prev.historyItems, nextHistoryItem)
+          : prev.historyItems
       return {
         ...prev,
+        historyItems: nextHistoryItems,
         activeSessionPrompt: label,
         activeHistoryItemId: id,
         isGeneratingSession: true,
@@ -5006,7 +5561,10 @@ export default function QuestionPage() {
         composerSegments: DEFAULT_COMPOSER_SEGMENTS,
       }
     })
-    setPracticesPageOpen(false)
+  }
+
+  const openAgentSession = ({ id = null, label = '' }) => {
+    openScopedHistorySession({ scope: 'dora', id, label, agentTitle: 'Dora' })
   }
 
   const startNewAgentChat = () => {
@@ -5050,12 +5608,15 @@ export default function QuestionPage() {
 
   const openLibrarySourceHistory = () => {
     const sourceHistoryId = activeLibraryItem?.sourceHistoryId
-    if (!sourceHistoryId) return
+    const sourceConversationTitle = activeLibraryItem?.sourceConversationTitle
+    if (!sourceHistoryId || !sourceConversationTitle) return
 
-    const historyItem = sessionStates.dora.historyItems.find((entry) => entry.id === sourceHistoryId)
-    if (!historyItem) return
-
-    openAgentSession({ id: historyItem.id, label: historyItem.label })
+    openScopedHistorySession({
+      scope: activeLibraryItem?.sourceScope ?? 'dora',
+      id: sourceHistoryId,
+      label: sourceConversationTitle,
+      agentTitle: activeLibraryItem?.sourceAgentTitle ?? parseLibrarySourceAgentName(activeLibraryItem?.owner),
+    })
   }
 
   const openHistorySession = (item) => {
@@ -5403,7 +5964,7 @@ export default function QuestionPage() {
                                 aria-label="切换分身"
                                 style={{ top: agentMenuPos.top, left: agentMenuPos.left }}
                               >
-                                {EXPERT_CARDS.map((card, index) => (
+                                {expertAgentOptions.map((card, index) => (
                                   <button
                                     key={`${card.title}-${index}`}
                                     type="button"
@@ -5430,7 +5991,7 @@ export default function QuestionPage() {
                   )}
                   <IconButton tip="管理后台" className="icon-btn inner-sidebar__admin">
                     <span className="dora-icon icon-16" aria-hidden="true">
-                      {ICONS.admin}
+                      {ICONS.editLine}
                     </span>
                   </IconButton>
                 </div>
