@@ -1,0 +1,26 @@
+.falling-pattern {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.falling-pattern__viewport,
+.falling-pattern__motion,
+.falling-pattern__overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.falling-pattern__viewport {
+  z-index: 0;
+}
+
+.falling-pattern__motion {
+  z-index: 0;
+}
+
+.falling-pattern__overlay {
+  z-index: 1;
+  opacity: 0.72;
+}

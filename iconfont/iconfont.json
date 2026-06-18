@@ -6,6 +6,188 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "47845851",
+      "name": "已收藏",
+      "font_class": "yishoucang",
+      "unicode": "e816",
+      "unicode_decimal": 59414
+    },
+    {
+      "icon_id": "47845850",
+      "name": "字段排序",
+      "font_class": "ziduanpaixu1",
+      "unicode": "e81e",
+      "unicode_decimal": 59422
+    },
+    {
+      "icon_id": "47845848",
+      "name": "语义信息",
+      "font_class": "yuyixinxi1",
+      "unicode": "e81f",
+      "unicode_decimal": 59423
+    },
+    {
+      "icon_id": "47845849",
+      "name": "收藏",
+      "font_class": "shoucang",
+      "unicode": "e820",
+      "unicode_decimal": 59424
+    },
+    {
+      "icon_id": "47845847",
+      "name": "表关系",
+      "font_class": "biaoguanxi1",
+      "unicode": "e821",
+      "unicode_decimal": 59425
+    },
+    {
+      "icon_id": "47834489",
+      "name": "2x",
+      "font_class": "a-2x",
+      "unicode": "e817",
+      "unicode_decimal": 59415
+    },
+    {
+      "icon_id": "47834490",
+      "name": "暂停",
+      "font_class": "zanting",
+      "unicode": "e818",
+      "unicode_decimal": 59416
+    },
+    {
+      "icon_id": "47834488",
+      "name": "3x",
+      "font_class": "a-3x",
+      "unicode": "e819",
+      "unicode_decimal": 59417
+    },
+    {
+      "icon_id": "47834485",
+      "name": "1x",
+      "font_class": "a-1x",
+      "unicode": "e81a",
+      "unicode_decimal": 59418
+    },
+    {
+      "icon_id": "47834486",
+      "name": "快进",
+      "font_class": "kuaijin",
+      "unicode": "e81b",
+      "unicode_decimal": 59419
+    },
+    {
+      "icon_id": "47834484",
+      "name": "快退",
+      "font_class": "kuaitui",
+      "unicode": "e81c",
+      "unicode_decimal": 59420
+    },
+    {
+      "icon_id": "47834483",
+      "name": "播放",
+      "font_class": "bofang",
+      "unicode": "e81d",
+      "unicode_decimal": 59421
+    },
+    {
+      "icon_id": "47834461",
+      "name": "表关系",
+      "font_class": "biaoguanxi",
+      "unicode": "e813",
+      "unicode_decimal": 59411
+    },
+    {
+      "icon_id": "47834460",
+      "name": "字段排序",
+      "font_class": "ziduanpaixu",
+      "unicode": "e814",
+      "unicode_decimal": 59412
+    },
+    {
+      "icon_id": "47834459",
+      "name": "语义信息",
+      "font_class": "yuyixinxi",
+      "unicode": "e815",
+      "unicode_decimal": 59413
+    },
+    {
+      "icon_id": "47807063",
+      "name": "风格",
+      "font_class": "fengge",
+      "unicode": "e810",
+      "unicode_decimal": 59408
+    },
+    {
+      "icon_id": "47807062",
+      "name": "公开可见",
+      "font_class": "gongkaikejian",
+      "unicode": "e811",
+      "unicode_decimal": 59409
+    },
+    {
+      "icon_id": "47807061",
+      "name": "存入资料库",
+      "font_class": "cunruziliaoku",
+      "unicode": "e812",
+      "unicode_decimal": 59410
+    },
+    {
+      "icon_id": "47807070",
+      "name": "缩小",
+      "font_class": "suoxiao",
+      "unicode": "e80a",
+      "unicode_decimal": 59402
+    },
+    {
+      "icon_id": "47807069",
+      "name": "放大",
+      "font_class": "fangda",
+      "unicode": "e80b",
+      "unicode_decimal": 59403
+    },
+    {
+      "icon_id": "47807068",
+      "name": "适应模式",
+      "font_class": "shiyingmoshi",
+      "unicode": "e80c",
+      "unicode_decimal": 59404
+    },
+    {
+      "icon_id": "47807067",
+      "name": "旋转",
+      "font_class": "xuanzhuan",
+      "unicode": "e80d",
+      "unicode_decimal": 59405
+    },
+    {
+      "icon_id": "47807065",
+      "name": "生成链接",
+      "font_class": "shengchenglianjie",
+      "unicode": "e80e",
+      "unicode_decimal": 59406
+    },
+    {
+      "icon_id": "47807064",
+      "name": "生成图片",
+      "font_class": "shengchengtupian",
+      "unicode": "e80f",
+      "unicode_decimal": 59407
+    },
+    {
+      "icon_id": "47805152",
+      "name": "模型",
+      "font_class": "moxing",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "47756467",
+      "name": "发布",
+      "font_class": "fabu",
+      "unicode": "e809",
+      "unicode_decimal": 59401
+    },
+    {
       "icon_id": "47733528",
       "name": "取消引用",
       "font_class": "quxiaoyinyong",

@@ -1,0 +1,111 @@
+.four-point-star-loader {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  overflow: visible;
+}
+
+.four-point-star-loader__star {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.four-point-star-loader__svg {
+  width: 14px;
+  height: 14px;
+  overflow: visible;
+  transform-origin: center;
+  animation: session-wait-star-rotate 2.1s linear infinite;
+}
+
+.four-point-star-loader__path {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0.96;
+}
+
+.four-point-star-loader__stop--start {
+  stop-color: var(--fd-color-primary, #2562ff);
+  animation: session-wait-star-stop-start 3.6s ease-in-out infinite;
+}
+
+.four-point-star-loader__stop--middle {
+  stop-color: var(--dora-light-紫色-6, #8c5df7);
+  animation: session-wait-star-stop-middle 3.6s ease-in-out infinite;
+}
+
+.four-point-star-loader__stop--end {
+  stop-color: var(--dora-light-青色-6, #00b0d4);
+  animation: session-wait-star-stop-end 3.6s ease-in-out infinite;
+}
+
+@keyframes session-wait-star-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes session-wait-star-stop-start {
+  0%,
+  100% {
+    stop-color: var(--fd-color-primary, #2562ff);
+  }
+
+  33% {
+    stop-color: var(--dora-light-紫色-6, #8c5df7);
+  }
+
+  66% {
+    stop-color: var(--dora-light-青色-6, #00b0d4);
+  }
+}
+
+@keyframes session-wait-star-stop-middle {
+  0%,
+  100% {
+    stop-color: var(--dora-light-紫色-6, #8c5df7);
+  }
+
+  33% {
+    stop-color: var(--dora-light-青色-6, #00b0d4);
+  }
+
+  66% {
+    stop-color: var(--fd-color-primary, #2562ff);
+  }
+}
+
+@keyframes session-wait-star-stop-end {
+  0%,
+  100% {
+    stop-color: var(--dora-light-青色-6, #00b0d4);
+  }
+
+  33% {
+    stop-color: var(--fd-color-primary, #2562ff);
+  }
+
+  66% {
+    stop-color: var(--dora-light-紫色-6, #8c5df7);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .four-point-star-loader__svg,
+  .four-point-star-loader__path,
+  .four-point-star-loader__stop {
+    animation: none;
+  }
+}

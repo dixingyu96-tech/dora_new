@@ -38,3 +38,7 @@
 .dora-icon.icon-quxiaoyinyong::before {
   content: '\e807';
 }
+
+.dora-icon.icon-thinking-step-done::before {
+  content: '\e6de';
+}

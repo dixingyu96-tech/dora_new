@@ -6,9 +6,8 @@ import activeExpertsImage from '../assets/images/专家团_选中.png'
 import activeLibraryImage from '../assets/images/资料库_选中.png'
 import agentDefaultAvatarImage from '../assets/images/Agent默认头像.png'
 import doraTitleImage from '../assets/images/dora标题.png'
-import doraImage from '../assets/images/Dora.png'
+import doraUploadedImage from '../assets/images/Dora_uploaded.png'
 import avatarImage from '../assets/images/avatar.png'
-import robotImage from '../assets/images/robot.png'
 import btnBiImage from '../assets/images/btn_bi.png'
 import btnFrImage from '../assets/images/btn_fr.png'
 import connectorImage from '../assets/images/connector.png'
@@ -54,9 +53,13 @@ import tabCurveLeftImage from '../assets/images/tab-curve-left.svg'
 import tabCurveRightImage from '../assets/images/tab-curve-right.svg'
 import financialBiMdContent from '../assets/content/国内金融行业商业智能软件市场调研报告.md?raw'
 import Orb from '../components/Orb'
+import FlowLinesBackground from '../components/FlowLinesBackground'
+import SparklesText from '../components/SparklesText'
 import IconButton from '../components/IconButton'
 import SessionFilesToolbarRow from '../components/SessionFilesToolbarRow'
+import SessionThread from '../components/SessionThread'
 import LibraryDetailMainMeta from '../components/LibraryDetailMainMeta'
+import FourPointStarLoader from '../components/FourPointStarLoader'
 import './QuestionPage.css'
 
 const ICONS = {
@@ -65,7 +68,7 @@ const ICONS = {
   library: '\ue803',
   search: '\ue79f',
   sidebar: '\ue78e',
-  admin: '\ue796',
+  settings: '\ue7c1',
   create: '\ue78f',
   newChat: '\ue7a0',
   schedule: '\ue7ec',
@@ -93,6 +96,9 @@ const ICONS = {
   rename: '\ue7ac',
   editLine: '\ue7af',
   openWindow: '\ue7d9',
+  aiDecor: '\ue7d0',
+  star: '\ue806',
+  goTo: '\ue7dc',
 }
 
 const ACTIVE_NAV_IMAGES = {
@@ -153,6 +159,10 @@ const HEATMAP_BASE_COLS = 13
 const HEATMAP_BASE_ROWS = 9
 const HEATMAP_CELL_WIDTH = 100
 const HEATMAP_CELL_HEIGHT = 78
+const HEATMAP_SCHEME_TARGETS = {
+  scheme4: { cellWidth: HEATMAP_CELL_WIDTH, cellHeight: HEATMAP_CELL_HEIGHT },
+  scheme5: { cellWidth: 84, cellHeight: 64 },
+}
 const SENDER_TEXTAREA_MIN_HEIGHT = 60
 const SENDER_TEXTAREA_MAX_HEIGHT = 144
 const SENDER_MENTION_PANEL_MAX_HEIGHT = 450
@@ -862,6 +872,14 @@ const getAttachmentFileType = (filename) => {
   if (ext === 'ppt' || ext === 'pptx') return 'ppt'
   return 'md'
 }
+
+const mapComposerFilesToSessionUserFiles = (files = []) =>
+  files.map((file) => ({
+    id: file.id,
+    name: file.name,
+    size: formatAttachmentFileSize(file.size),
+    icon: file.icon,
+  }))
 const HEATMAP_RING_ALPHA = [0.32, 0.24, 0.16, 0.08, 0.04, 0.02, 0.01]
 const HEATMAP_FADE_RADIUS = 7.5
 const HEATMAP_CORNER_RADIUS = 9
@@ -996,15 +1014,18 @@ const createHeatmapCells = (rows, cols, colors) =>
     }
   })
 
-const getHeatmapLayout = (width, height) => {
-  const cols = width ? Math.max(1, Math.ceil(width / HEATMAP_CELL_WIDTH)) : HEATMAP_BASE_COLS
-  const rows = height ? Math.max(1, Math.ceil(height / HEATMAP_CELL_HEIGHT)) : HEATMAP_BASE_ROWS
+const getHeatmapLayout = (width, height, scheme = 'scheme4') => {
+  const target = HEATMAP_SCHEME_TARGETS[scheme] ?? HEATMAP_SCHEME_TARGETS.scheme4
+  const cols = width ? Math.max(1, Math.ceil(width / target.cellWidth)) : HEATMAP_BASE_COLS
+  const rows = height ? Math.max(1, Math.ceil(height / target.cellHeight)) : HEATMAP_BASE_ROWS
+  const cellWidth = width ? width / cols : target.cellWidth
+  const cellHeight = height ? height / rows : target.cellHeight
 
   return {
     rows,
     cols,
-    cellWidth: HEATMAP_CELL_WIDTH,
-    cellHeight: HEATMAP_CELL_HEIGHT,
+    cellWidth,
+    cellHeight,
   }
 }
 
@@ -1718,7 +1739,21 @@ const LIBRARY_SOURCE_EXPERT_CARDS = {
   },
 }
 
-const getExpertCardKey = (card) => `${card.title}-${card.editedAt}`
+const getExpertCardKey = (card) => card.id ?? `${card.title}-${card.editedAt}`
+
+const EXPERT_CATEGORY_TAGS = {
+  report: ['报告', '自动化', '经营'],
+  analysis: ['分析', '问数', '洞察'],
+  strategy: ['策略', '增长', '建议'],
+}
+
+const normalizeExpertCard = (card, index = 0) => ({
+  ...card,
+  id: card.id ?? `expert-${index + 1}`,
+  creator: card.creator ?? 'Admin',
+  tags: card.tags ?? EXPERT_CATEGORY_TAGS[card.category] ?? ['标签1', '标签22', '标签33'],
+  usage: card.usage ?? `${(7.9 + (index % 5) * 0.18).toFixed(2)}k 次使用`,
+})
 
 const buildExpertAlertSnapshot = () => {
   const snapshot = {}
@@ -1749,8 +1784,69 @@ const sumMessageBadgeCounts = (items) =>
   items.reduce((sum, item) => sum + parseMessageBadgeCount(item.badge), 0)
 
 const formatNavBadgeCount = (count) => (count > 99 ? '99+' : count)
+const formatHistoryBadgeCount = (count) => (count > 99 ? '99+' : count > 0 ? `${count}` : '')
+
+const updateHistoryItemById = (items, itemId, updater) => {
+  let changed = false
+  const nextItems = items.map((item) => {
+    if (item.id !== itemId) return item
+    const nextItem = updater(item)
+    if (nextItem !== item) changed = true
+    return nextItem
+  })
+
+  return changed ? nextItems : items
+}
+
+const markHistoryItemViewed = (items, itemId) =>
+  updateHistoryItemById(items, itemId, (item) => {
+    if (!item.badge) return item
+    return { ...item, badge: '' }
+  })
+
+const markHistoryItemGenerating = (items, itemId, isGenerating) =>
+  updateHistoryItemById(items, itemId, (item) => {
+    if (Boolean(item.isGenerating) === isGenerating) return item
+    return { ...item, isGenerating }
+  })
+
+const completeHistoryItemGeneration = (items, itemId, { incrementUnread } = {}) =>
+  updateHistoryItemById(items, itemId, (item) => {
+    const nextBadge = incrementUnread
+      ? formatHistoryBadgeCount(parseMessageBadgeCount(item.badge) + 1)
+      : ''
+
+    if (!item.isGenerating && item.badge === nextBadge) return item
+    return {
+      ...item,
+      isGenerating: false,
+      badge: nextBadge,
+    }
+  })
+
+const buildCompletedSessionMeta = ({ completedCount, durationMs, summaryStatus } = {}) => ({
+  completedCount: completedCount ?? 0,
+  durationMs: durationMs ?? 0,
+  summaryStatus: summaryStatus ?? '',
+})
+
+const createSessionSentAt = (date = new Date()) => date.toISOString()
+
+const createMockHistorySentAt = (group, index) => {
+  const baseByGroup = {
+    today: new Date(2026, 5, 11, 12, 44),
+    week: new Date(2026, 5, 8, 15, 18),
+    month: new Date(2026, 5, 1, 10, 26),
+    earlier: new Date(2026, 4, 12, 9, 12),
+  }
+
+  const base = new Date((baseByGroup[group] ?? baseByGroup.today).getTime())
+  base.setMinutes(base.getMinutes() - index * 17)
+  return base.toISOString()
+}
 
 const HISTORY_LONG_LABEL = '去年门店销售额最高的商品是哪个如果问题很长展示不下那么久是省略'
+const HISTORY_BACKGROUND_COMPLETE_DELAY_MS = 2600
 
 const getLibraryItemKey = (item) => `${item.type}-${item.title}-${item.cover}`
 
@@ -1838,11 +1934,31 @@ const INITIAL_HISTORY_ITEMS = [
   { id: 'history-10', group: 'earlier', label: HISTORY_LONG_LABEL, badge: '' },
   { id: 'history-11', group: 'earlier', label: '广东省潜量最高的10个客户', badge: '' },
   { id: 'history-12', group: 'earlier', label: '浙江省渠道退货率分析', badge: '3' },
-]
+].map((item, index) => ({
+  ...item,
+  sentAt: createMockHistorySentAt(item.group, index),
+}))
 
 const upsertHistoryItem = (items, nextItem) => {
   const filtered = items.filter((item) => item.id !== nextItem.id)
   return [nextItem, ...filtered]
+}
+
+const prepareHistoryItemsForSession = (items, sessionItem) => {
+  if (!sessionItem?.id) return items
+
+  const preparedItem = {
+    ...sessionItem,
+    badge: '',
+    isGenerating: true,
+  }
+
+  const hasExisting = items.some((item) => item.id === sessionItem.id)
+  if (!hasExisting) {
+    return upsertHistoryItem(items, preparedItem)
+  }
+
+  return markHistoryItemGenerating(markHistoryItemViewed(items, sessionItem.id), sessionItem.id, true)
 }
 
 const HISTORY_SESSION_MENU_ITEMS = [
@@ -2188,8 +2304,11 @@ export default function QuestionPage() {
       historyItems: INITIAL_HISTORY_ITEMS,
       inputText: '',
       inputFocused: false,
+      isTransitioningSession: false,
       isGeneratingSession: false,
       activeSessionPrompt: '',
+      activeSessionUserFiles: [],
+      activeSessionCompletedMeta: null,
       activeHistoryItemId: null,
       composerFiles: [],
       composerSegments: DEFAULT_COMPOSER_SEGMENTS,
@@ -2198,8 +2317,11 @@ export default function QuestionPage() {
       historyItems: INITIAL_HISTORY_ITEMS,
       inputText: '',
       inputFocused: false,
+      isTransitioningSession: false,
       isGeneratingSession: false,
       activeSessionPrompt: '',
+      activeSessionUserFiles: [],
+      activeSessionCompletedMeta: null,
       activeHistoryItemId: null,
       composerFiles: [],
       composerSegments: DEFAULT_COMPOSER_SEGMENTS,
@@ -2212,6 +2334,8 @@ export default function QuestionPage() {
   const [agentMenuPos, setAgentMenuPos] = useState({ top: 0, left: 0 })
   const [activeExpertCard, setActiveExpertCard] = useState(null)
   const [activeExpertTab, setActiveExpertTab] = useState(0)
+  const [expertRecentCards, setExpertRecentCards] = useState([])
+  const [expertFavoriteKeys, setExpertFavoriteKeys] = useState([])
   const [activeLibraryItem, setActiveLibraryItem] = useState(null)
   const [libraryRecentItems, setLibraryRecentItems] = useState([])
   const [libraryChatCollapsed, setLibraryChatCollapsed] = useState(false)
@@ -2231,7 +2355,8 @@ export default function QuestionPage() {
   const [displayedHint, setDisplayedHint] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   const [doraIntroPhase, setDoraIntroPhase] = useState('idle')
-  const [doraVisualScheme, setDoraVisualScheme] = useState('scheme4')
+  const [doraVisualScheme, setDoraVisualScheme] = useState('scheme5')
+  const [heroSparkleReplayKey, setHeroSparkleReplayKey] = useState(0)
   const [heatmapGrid, setHeatmapGrid] = useState({
     rows: HEATMAP_BASE_ROWS,
     cols: HEATMAP_BASE_COLS,
@@ -2308,6 +2433,8 @@ export default function QuestionPage() {
   const languageMenuPanelRef = useRef(null)
   const fileInputRef = useRef(null)
   const uploadTimersRef = useRef(new Map())
+  const sessionTransitionTimersRef = useRef(new Map())
+  const historyGenerationTimersRef = useRef(new Map())
   const senderEditorRef = useRef(null)
   const composerSyncRef = useRef(false)
   const composerComposingRef = useRef(false)
@@ -2341,15 +2468,17 @@ export default function QuestionPage() {
     [heatmapFocus, heatmapGrid, heatmapTokenColors],
   )
 
+  const expertCards = useMemo(() => EXPERT_CARDS.map(normalizeExpertCard), [])
+
   const filteredExpertCards = useMemo(() => {
     const keyword = expertSearch.trim().toLowerCase()
 
-    return EXPERT_CARDS.filter((card) => {
+    return expertCards.filter((card) => {
       const matchesFilter = expertFilter === 'all' || card.category === expertFilter
-      const matchesKeyword = !keyword || `${card.title} ${card.desc}`.toLowerCase().includes(keyword)
+      const matchesKeyword = !keyword || `${card.title} ${card.desc} ${card.creator}`.toLowerCase().includes(keyword)
       return matchesFilter && matchesKeyword
     })
-  }, [expertFilter, expertSearch])
+  }, [expertCards, expertFilter, expertSearch])
 
   const filteredLibraryItems = useMemo(() => {
     const keyword = librarySearch.trim().toLowerCase()
@@ -2380,10 +2509,10 @@ export default function QuestionPage() {
   }, [sessionFilesSourceSearch])
 
   const isExpertDetailView = activeNav === 'experts' && Boolean(activeExpertCard)
-  const expertAlertCards = useMemo(() => EXPERT_CARDS.filter((card) => card.alertCount > 0), [])
+  const expertAlertCards = useMemo(() => expertCards.filter((card) => card.alertCount > 0), [expertCards])
   const expertAlertCount = useMemo(
-    () => EXPERT_CARDS.reduce((sum, card) => sum + card.alertCount, 0),
-    [],
+    () => expertCards.reduce((sum, card) => sum + card.alertCount, 0),
+    [expertCards],
   )
   const showExpertsAlerts = useMemo(
     () => expertAlertCount > 0 && hasNewExpertAlertsSinceDismiss(expertsAlertsDismissedSnapshot),
@@ -2399,11 +2528,16 @@ export default function QuestionPage() {
     [activeExpertCard],
   )
   const expertAgentOptions = useMemo(() => {
-    if (!activeExpertCard) return EXPERT_CARDS
-    return EXPERT_CARDS.some((card) => card.title === activeExpertCard.title)
-      ? EXPERT_CARDS
-      : [activeExpertCard, ...EXPERT_CARDS]
-  }, [activeExpertCard])
+    if (!activeExpertCard) return expertCards
+    return expertCards.some((card) => card.title === activeExpertCard.title)
+      ? expertCards
+      : [activeExpertCard, ...expertCards]
+  }, [activeExpertCard, expertCards])
+  const expertFavoriteCards = useMemo(
+    () => expertCards.filter((card) => expertFavoriteKeys.includes(getExpertCardKey(card))),
+    [expertCards, expertFavoriteKeys],
+  )
+  const showExpertSidePanel = expertRecentCards.length > 0 || expertFavoriteCards.length > 0
   const activeExpertTabs = useMemo(
     () => getVisibleExpertTabs(activeExpertDetailConfig.tabs),
     [activeExpertDetailConfig],
@@ -2412,6 +2546,18 @@ export default function QuestionPage() {
     () => pickRandomExpertPrompts(activeExpertTabs[activeExpertTab]),
     [activeExpertCard, activeExpertTab, activeExpertTabs],
   )
+  const openExpertCard = (card) => {
+    setExpertRecentCards((prev) => {
+      const key = getExpertCardKey(card)
+      return [card, ...prev.filter((entry) => getExpertCardKey(entry) !== key)].slice(0, 7)
+    })
+    setActiveExpertCard(card)
+    setInternalSidebarOpen(true)
+  }
+  const toggleExpertFavorite = (card) => {
+    const key = getExpertCardKey(card)
+    setExpertFavoriteKeys((prev) => (prev.includes(key) ? prev.filter((item) => item !== key) : [key, ...prev]))
+  }
   const activeSessionScope = isExpertDetailView ? 'experts' : 'dora'
   const activeSessionState = sessionStates[activeSessionScope]
   const historyItems = activeSessionState.historyItems
@@ -2434,8 +2580,18 @@ export default function QuestionPage() {
   const composerSegments = normalizeComposerSegments(activeSessionState)
   const composerPlainText = useMemo(() => getComposerPlainText(composerSegments), [composerSegments])
   const inputFocused = activeSessionState.inputFocused
+  const isTransitioningSession = activeSessionState.isTransitioningSession
   const isGeneratingSession = activeSessionState.isGeneratingSession
+  const isSessionBusy = isTransitioningSession || isGeneratingSession
   const activeSessionPrompt = activeSessionState.activeSessionPrompt
+  const activeSessionUserFiles = activeSessionState.activeSessionUserFiles ?? []
+  const activeSessionCompletedMeta = activeSessionState.activeSessionCompletedMeta
+  const activeHistoryItemId = activeSessionState.activeHistoryItemId
+  const activeSessionHistoryItem = useMemo(
+    () => activeSessionState.historyItems.find((item) => item.id === activeHistoryItemId) ?? null,
+    [activeHistoryItemId, activeSessionState.historyItems],
+  )
+  const activeSessionSentAt = activeSessionHistoryItem?.sentAt ?? null
   const isQuestionMode = Boolean(activeSessionPrompt)
   const isLibraryDetailView = activeNav === 'library' && Boolean(activeLibraryItem)
   const activeLibraryKey = activeLibraryItem ? getLibraryItemKey(activeLibraryItem) : ''
@@ -2465,7 +2621,6 @@ export default function QuestionPage() {
   }, [isQuestionMode, sessionFilesSourceScope, sessionFilesSourceSearch, sessionFilesSourceSections])
   const showSessionSplit =
     sessionFilesPanelOpen && (activeNav === 'dora' || isExpertDetailView)
-  const activeHistoryItemId = activeSessionState.activeHistoryItemId
   const activeSessionSourceLibraryItem = useMemo(() => {
     if (!isQuestionMode || activeNav === 'library') return null
 
@@ -2489,7 +2644,7 @@ export default function QuestionPage() {
     () => mergeDerivedSessionOutputFiles(sessionOutputFiles, activeSessionSourceLibraryItem),
     [activeSessionSourceLibraryItem, sessionOutputFiles],
   )
-  const isNewChatActive = (activeNav === 'dora' || isExpertDetailView) && !activeSessionPrompt && !isGeneratingSession
+  const isNewChatActive = (activeNav === 'dora' || isExpertDetailView) && !activeSessionPrompt && !isSessionBusy
   const visibleSessionOutputFiles = useMemo(
     () => (isNewChatActive ? [] : derivedSessionOutputFiles),
     [derivedSessionOutputFiles, isNewChatActive],
@@ -2551,6 +2706,66 @@ export default function QuestionPage() {
     updateSessionScopeState(activeSessionScope, updater)
   }
 
+  const clearHistoryGenerationTimer = useCallback((scope, itemId) => {
+    const timerKey = `${scope}:${itemId}`
+    const timer = historyGenerationTimersRef.current.get(timerKey)
+    if (!timer) return
+    window.clearTimeout(timer)
+    historyGenerationTimersRef.current.delete(timerKey)
+  }, [])
+
+  useEffect(() => {
+    const trackedKeys = new Set()
+
+    Object.entries(sessionStates).forEach(([scope, state]) => {
+      state.historyItems.forEach((item) => {
+        const timerKey = `${scope}:${item.id}`
+        const isForegroundGenerating =
+          state.activeHistoryItemId === item.id && (state.isTransitioningSession || state.isGeneratingSession)
+
+        if (!item.isGenerating || isForegroundGenerating) {
+          clearHistoryGenerationTimer(scope, item.id)
+          return
+        }
+
+        trackedKeys.add(timerKey)
+        if (historyGenerationTimersRef.current.has(timerKey)) return
+
+        const timer = window.setTimeout(() => {
+          historyGenerationTimersRef.current.delete(timerKey)
+          updateSessionScopeState(scope, (prev) => {
+            const target = prev.historyItems.find((entry) => entry.id === item.id)
+            if (!target?.isGenerating) return prev
+
+            return {
+              ...prev,
+              historyItems: completeHistoryItemGeneration(prev.historyItems, item.id, {
+                incrementUnread: prev.activeHistoryItemId !== item.id,
+              }),
+            }
+          })
+        }, HISTORY_BACKGROUND_COMPLETE_DELAY_MS)
+
+        historyGenerationTimersRef.current.set(timerKey, timer)
+      })
+    })
+
+    Array.from(historyGenerationTimersRef.current.keys()).forEach((timerKey) => {
+      if (trackedKeys.has(timerKey)) return
+      const timer = historyGenerationTimersRef.current.get(timerKey)
+      window.clearTimeout(timer)
+      historyGenerationTimersRef.current.delete(timerKey)
+    })
+  }, [clearHistoryGenerationTimer, sessionStates])
+
+  useEffect(
+    () => () => {
+      historyGenerationTimersRef.current.forEach((timer) => window.clearTimeout(timer))
+      historyGenerationTimersRef.current.clear()
+    },
+    [],
+  )
+
   const updateAgentMenuPosition = () => {
     const rect = agentTitleRef.current?.getBoundingClientRect()
     if (!rect) return
@@ -2572,6 +2787,27 @@ export default function QuestionPage() {
       clearInterval(timer)
       uploadTimersRef.current.delete(fileId)
     }
+  }
+
+  const clearSessionTransitionTimer = (scope) => {
+    const timer = sessionTransitionTimersRef.current.get(scope)
+    if (timer) {
+      window.clearTimeout(timer)
+      sessionTransitionTimersRef.current.delete(scope)
+    }
+  }
+
+  const beginSessionTransition = (scope, userFiles = []) => {
+    clearSessionTransitionTimer(scope)
+    void userFiles
+    updateSessionScopeState(scope, (prev) => {
+      if (!prev.isTransitioningSession) return prev
+      return {
+        ...prev,
+        isTransitioningSession: false,
+        isGeneratingSession: true,
+      }
+    })
   }
 
   const clearScopeComposerUploadTimers = (files) => {
@@ -3121,6 +3357,9 @@ export default function QuestionPage() {
       setHistoryRenamingId(null)
       setHistoryRenameDraft('')
     }
+    if (activeHistoryItemId === itemId) {
+      clearSessionTransitionTimer(activeSessionScope)
+    }
     updateSessionScopeState(activeSessionScope, (prev) => {
       const nextItems = prev.historyItems.filter((item) => item.id !== itemId)
       if (prev.activeHistoryItemId !== itemId) {
@@ -3133,6 +3372,8 @@ export default function QuestionPage() {
         historyItems: nextItems,
         activeHistoryItemId: null,
         activeSessionPrompt: '',
+        activeSessionUserFiles: [],
+        isTransitioningSession: false,
         isGeneratingSession: false,
         inputText: '',
         inputFocused: false,
@@ -3839,7 +4080,7 @@ export default function QuestionPage() {
         )}
         {!isRenaming && isGenerating ? (
           <span className="inner-history-item__trailing">
-            <span className="inner-history-item__loader session-progress__loader" aria-label="正在生成" />
+            <FourPointStarLoader className="inner-history-item__loader" label="正在生成" />
           </span>
         ) : !isRenaming ? (
           <span className="inner-history-item__trailing">
@@ -3878,18 +4119,46 @@ export default function QuestionPage() {
     <div className="dora-visual-switch" role="tablist" aria-label="首页动效方案切换">
       <button
         type="button"
-        className={`dora-visual-switch__btn ${doraVisualScheme === 'scheme4' ? 'active' : ''}`}
-        onClick={() => setDoraVisualScheme('scheme4')}
-      >
-        方案一
-      </button>
-      <button
-        type="button"
         className={`dora-visual-switch__btn ${doraVisualScheme === 'scheme5' ? 'active' : ''}`}
         onClick={() => setDoraVisualScheme('scheme5')}
       >
-        方案二
+        流动网格背景
       </button>
+      <button
+        type="button"
+        className={`dora-visual-switch__btn ${doraVisualScheme === 'scheme7' ? 'active' : ''}`}
+        onClick={() => setDoraVisualScheme('scheme7')}
+      >
+        动态光球背景
+      </button>
+      <button
+        type="button"
+        className={`dora-visual-switch__btn ${doraVisualScheme === 'scheme9' ? 'active' : ''}`}
+        onClick={() => setDoraVisualScheme('scheme9')}
+      >
+        流光线条背景
+      </button>
+    </div>
+  )
+
+  const renderOrbBackgroundBanner = () => (
+    <div className="scheme-orb-banner" aria-hidden="true">
+    </div>
+  )
+
+  const renderFlowLinesBanner = () => (
+    <div className="scheme-flowlines-banner" aria-hidden="true">
+      <div className="scheme-flowlines-banner__halo" />
+      <div className="scheme-flowlines-banner__network">
+        <FlowLinesBackground
+          className="scheme-flowlines-banner__svg"
+          anchorSelector=".dora-stage__sender .sender-editor"
+          rightAnchorSelector=".dora-stage__sender .send-btn"
+          addAnchorSelector=".dora-stage__sender .attach-btn--plus"
+          bottomAnchorSelector=".dora-stage__practices .practice-card h3[data-practice-title='增长拆解']"
+        />
+      </div>
+      <div className="scheme-flowlines-banner__fade" />
     </div>
   )
 
@@ -3923,6 +4192,13 @@ export default function QuestionPage() {
 
   const renderSessionHeaderActions = () => (
     <div className="main-header__session-tools">
+      {!isNewChatActive ? (
+        <IconButton tip="分享" className="icon-btn main-header__session-action">
+          <span className="dora-icon icon-16" aria-hidden="true">
+            {ICONS.share}
+          </span>
+        </IconButton>
+      ) : null}
       <IconButton
         tip="会话文件"
         className={`icon-btn panel-toggle main-header__session-action${sessionFilesPanelOpen ? ' is-active' : ''}`}
@@ -4433,7 +4709,7 @@ export default function QuestionPage() {
   const renderLibrarySessionFilesModal = () => renderSessionFilesModal(() => setLibrarySessionFilesModalOpen(false))
 
   const sessionAssistantName = isExpertDetailView ? activeExpertCard?.title ?? 'Agent' : 'Dora'
-  const sessionAssistantAvatar = isExpertDetailView ? agentDefaultAvatarImage : robotImage
+  const sessionAssistantAvatar = isExpertDetailView ? agentDefaultAvatarImage : doraUploadedImage
 
   const renderPracticesBackButton = () => (
     <button type="button" className="practices-back practices-back--header" onClick={() => setPracticesPageOpen(false)}>
@@ -4445,82 +4721,47 @@ export default function QuestionPage() {
   )
 
   const renderSessionThread = () => (
-    <div className="session-thread">
-      <div className="session-thread__user">{activeSessionPrompt}</div>
-
-      <div className="session-thread__assistant">
-        <div className="session-thread__assistant-head">
-          <img src={sessionAssistantAvatar} alt="" className="session-thread__assistant-avatar" />
-          <span>{sessionAssistantName}</span>
-        </div>
-
-        <div className="session-progress">
-          {isGeneratingSession ? (
-            <>
-              <div className="session-progress__working">
-                <span className="session-progress__working-dot"></span>
-                <span>正在工作...</span>
-              </div>
-
-              <div className="session-progress__card">
-                <div className="session-progress__skill-row">
-                  <span className="session-progress__caret">▾</span>
-                  <span>使用</span>
-                  <span className="session-progress__skill-tag">技能1：分析主题数据查询</span>
-                </div>
-
-                <div className="session-progress__step">
-                  <span className="session-progress__caret">▾</span>
-                  <span>第一步：主题选择</span>
-                </div>
-                <p className="session-progress__desc">
-                  这里技能下第1步的思考产出内容。采用纯文字“流式输出”的方式呈现思考内容，如果有图片生成或引用，则另起一行展示。
-                </p>
-
-                <div className="session-progress__querying">
-                  <span className="session-progress__loader" aria-hidden="true"></span>
-                  <span>正在查询中...</span>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="session-progress__card session-progress__card--stopped">
-              <div className="session-progress__skill-row">
-                <span className="session-progress__caret">▾</span>
-                <span>使用</span>
-                <span className="session-progress__skill-tag">技能1：分析主题数据查询</span>
-              </div>
-
-              <div className="session-progress__step">
-                <span className="session-progress__caret">▾</span>
-                <span>第一步：主题选择</span>
-              </div>
-              <p className="session-progress__desc">
-                这里技能下第1步的思考产出内容。采用纯文字“流式输出”的方式呈现思考内容，如果有图片生成或引用，则另起一行展示。
-              </p>
-
-              <p className="session-progress__stopped">已停止生成</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+    <SessionThread
+      userPrompt={activeSessionPrompt}
+      userFiles={activeSessionUserFiles}
+      userSentAt={activeSessionSentAt}
+      assistantName={sessionAssistantName}
+      assistantAvatar={sessionAssistantAvatar}
+      isTransitioning={isTransitioningSession}
+      isGenerating={isGeneratingSession}
+      completedSessionMeta={activeSessionCompletedMeta}
+      onGenerationComplete={handleSessionGenerationComplete}
+    />
   )
 
-  const openLibrarySession = ({ id = null, label = '' }) => {
+  const openLibrarySession = ({ id = null, label = '', userFiles = [] }) => {
     updateSessionScopeState('dora', (prev) => {
       clearScopeComposerUploadTimers(prev.composerFiles)
+      const nextHistoryItems =
+        id && prev.historyItems.some((item) => item.id === id)
+          ? prepareHistoryItemsForSession(prev.historyItems, {
+              id,
+              group: 'today',
+              label,
+              badge: '',
+            })
+          : prev.historyItems
       return {
         ...prev,
+        historyItems: nextHistoryItems,
         activeSessionPrompt: label,
+        activeSessionUserFiles: userFiles,
+        activeSessionCompletedMeta: null,
         activeHistoryItemId: id,
-        isGeneratingSession: true,
+        isTransitioningSession: true,
+        isGeneratingSession: false,
         inputText: '',
         inputFocused: false,
         composerFiles: [],
         composerSegments: DEFAULT_COMPOSER_SEGMENTS,
       }
     })
+    beginSessionTransition('dora', userFiles)
     setLibraryChatCollapsed(false)
   }
 
@@ -4555,12 +4796,15 @@ export default function QuestionPage() {
 
   const startNewLibraryChat = () => {
     closeLibraryChatSessionMenu()
+    clearSessionTransitionTimer('dora')
     updateSessionScopeState('dora', (prev) => {
       clearScopeComposerUploadTimers(prev.composerFiles)
       return {
         ...prev,
+        isTransitioningSession: false,
         isGeneratingSession: false,
         activeSessionPrompt: '',
+        activeSessionUserFiles: [],
         activeHistoryItemId: null,
         inputText: '',
         inputFocused: false,
@@ -4568,6 +4812,11 @@ export default function QuestionPage() {
         composerSegments: DEFAULT_COMPOSER_SEGMENTS,
       }
     })
+  }
+
+  const handleHeroSparklesReplay = () => {
+    if (doraVisualScheme !== 'scheme7') return
+    setHeroSparkleReplayKey((prev) => prev + 1)
   }
 
   const renderSharedSessionStage = (introPhase) => (
@@ -4589,6 +4838,8 @@ export default function QuestionPage() {
           <div className="scheme3-banner__glow"></div>
         </div>
       ) : null}
+      {!isQuestionMode && !isExpertDetailView && doraVisualScheme === 'scheme7' ? renderOrbBackgroundBanner() : null}
+      {!isQuestionMode && !isExpertDetailView && doraVisualScheme === 'scheme9' ? renderFlowLinesBanner() : null}
       {!isQuestionMode && !isExpertDetailView && (doraVisualScheme === 'scheme4' || doraVisualScheme === 'scheme5') ? (
         <div className="scheme-heatmap-banner" aria-hidden="true">
           <div className="scheme-heatmap-stage" ref={heatmapStageRef}>
@@ -4639,7 +4890,6 @@ export default function QuestionPage() {
                   <h2 className="main-header__session-title" title={activeSessionPrompt}>
                     {activeSessionPrompt}
                   </h2>
-                  {renderSessionSourceTag()}
                 </div>
                 {renderSessionHeaderActions()}
               </>
@@ -4658,20 +4908,47 @@ export default function QuestionPage() {
           <div className="practices-grid">
             {PRACTICE_CARDS.map((card) => (
               <article key={`browser-${card.title}`} className="practice-browser-card">
-                <h3>{card.title}</h3>
+                <h3 data-practice-title={card.title}>{card.title}</h3>
                 <p>{card.desc}</p>
               </article>
             ))}
           </div>
         </section>
       ) : (
-        <section className="hero dora-stage__hero">
+        <section className={`hero dora-stage__hero ${isQuestionMode ? 'hero--session' : ''}`}>
             {isQuestionMode ? (
               <div className="session-generating dora-stage__session">{renderSessionThread()}</div>
             ) : (
               <div className="hero-inner dora-stage__hero-inner">
-                <div className="welcome">
-                  <h1 className="title">嗨，我是 Dora，全能助手随时待命</h1>
+                <div
+                  className={`welcome${doraVisualScheme === 'scheme7' ? ' welcome--orb-layout' : ''}`}
+                  onMouseEnter={handleHeroSparklesReplay}
+                >
+                  {doraVisualScheme === 'scheme7' ? (
+                    <div className="robot robot--orb robot--orb-hero" aria-hidden="true">
+                      <Orb
+                        className="robot--orb-canvas"
+                        hoverIntensity={0.25}
+                        rotateOnHover={true}
+                        hue={0}
+                        forceHoverState={false}
+                        backgroundColor="#ffffff"
+                      />
+                    </div>
+                  ) : null}
+                  <h1 className={`title${doraVisualScheme === 'scheme7' ? ' title--orb-layout' : ''}`}>
+                    {doraVisualScheme === 'scheme7' ? (
+                      <SparklesText
+                        className="title-sparkles"
+                        text="嗨，我是 Dora，全能助手随时待命"
+                        sparklesCount={12}
+                        activeDuration={3000}
+                        triggerKey={`hero-title-${doraVisualScheme}-${heroSparkleReplayKey}`}
+                      />
+                    ) : (
+                      '嗨，我是 Dora，全能助手随时待命'
+                    )}
+                  </h1>
                 </div>
                 <div className="subtitle-row">
                   <span className="subtitle-prefix">我可以帮你</span>
@@ -4685,8 +4962,12 @@ export default function QuestionPage() {
 
             <div className={`sender-wrap dora-stage__sender ${isQuestionMode ? 'sender-wrap--session' : ''}`}>
               <div
-                className={`sender ${inputFocused ? 'focused' : ''} ${canSend ? 'has-value' : ''} ${isGeneratingSession ? 'is-sending' : ''} ${
-                  !isQuestionMode && (doraVisualScheme === 'scheme4' || doraVisualScheme === 'scheme5')
+                className={`sender ${inputFocused ? 'focused' : ''} ${canSend ? 'has-value' : ''} ${isSessionBusy ? 'is-sending' : ''} ${
+                  !isQuestionMode &&
+                  (doraVisualScheme === 'scheme4' ||
+                    doraVisualScheme === 'scheme5' ||
+                    doraVisualScheme === 'scheme7' ||
+                    doraVisualScheme === 'scheme9')
                     ? 'dora-sender--ring'
                     : ''
                 }`}
@@ -4698,11 +4979,11 @@ export default function QuestionPage() {
                     <button
                       type="button"
                       className="send-btn"
-                      aria-label={isGeneratingSession ? '停止生成' : '发送'}
-                      disabled={!canSend && !isGeneratingSession}
-                      onClick={isGeneratingSession ? handleStopGeneration : handleSend}
+                      aria-label={isSessionBusy ? '停止生成' : '发送'}
+                      disabled={!canSend && !isSessionBusy}
+                      onClick={isSessionBusy ? handleStopGeneration : handleSend}
                     >
-                      {isGeneratingSession ? (
+                      {isSessionBusy ? (
                         <span className="send-stop-icon" aria-hidden="true"></span>
                       ) : (
                         <span className="dora-icon send-icon" aria-hidden="true">
@@ -4754,6 +5035,8 @@ export default function QuestionPage() {
     }
   }, [displayedHint, hintIndex, isDeleting])
 
+  useEffect(() => {  }, [doraVisualScheme])
+
   useEffect(() => {
     if (activeNav !== 'dora' || !practicesPageOpen) return
 
@@ -4769,11 +5052,14 @@ export default function QuestionPage() {
   }, [activeNav, practicesPageOpen])
 
   useEffect(() => {
-    const canHandlePracticesScroll =
-      activeNav === 'dora' &&
-      !isGeneratingSession &&
-      !activeSessionPrompt &&
-      (doraVisualScheme === 'scheme4' || doraVisualScheme === 'scheme5')
+      const canHandlePracticesScroll =
+        activeNav === 'dora' &&
+        !isSessionBusy &&
+        !activeSessionPrompt &&
+      (doraVisualScheme === 'scheme4' ||
+        doraVisualScheme === 'scheme5' ||
+        doraVisualScheme === 'scheme7' ||
+        doraVisualScheme === 'scheme9')
 
     if (!canHandlePracticesScroll) return undefined
 
@@ -4875,7 +5161,7 @@ export default function QuestionPage() {
       practicesTouchStartY = null
       resetAccumulator()
     }
-  }, [activeNav, practicesPageOpen, isGeneratingSession, activeSessionPrompt, doraVisualScheme])
+  }, [activeNav, practicesPageOpen, isSessionBusy, activeSessionPrompt, doraVisualScheme])
 
   useEffect(() => {
     if (composerUpdateSourceRef.current === 'editor') {
@@ -4892,12 +5178,14 @@ export default function QuestionPage() {
     const editor = senderEditorRef.current
     if (!editor) return
     resizeSenderEditor(editor)
-  }, [composerPlainText, activeNav, isExpertDetailView, activeLibraryItem, isGeneratingSession])
+  }, [composerPlainText, activeNav, isExpertDetailView, activeLibraryItem, isSessionBusy])
 
   useEffect(
     () => () => {
       uploadTimersRef.current.forEach((timer) => clearInterval(timer))
       uploadTimersRef.current.clear()
+      sessionTransitionTimersRef.current.forEach((timer) => window.clearTimeout(timer))
+      sessionTransitionTimersRef.current.clear()
     },
     [],
   )
@@ -4938,12 +5226,15 @@ export default function QuestionPage() {
   useEffect(() => {
     if (!activeLibraryKey) return
     closeLibraryChatSessionMenu()
+    clearSessionTransitionTimer('dora')
     updateSessionScopeState('dora', (prev) => {
       clearScopeComposerUploadTimers(prev.composerFiles)
       return {
         ...prev,
+        isTransitioningSession: false,
         isGeneratingSession: false,
         activeSessionPrompt: '',
+        activeSessionUserFiles: [],
         activeHistoryItemId: null,
         inputText: '',
         inputFocused: false,
@@ -5266,6 +5557,12 @@ export default function QuestionPage() {
   }, [])
 
   useEffect(() => {
+    if (doraVisualScheme === 'scheme6') {
+      setDoraVisualScheme('scheme5')
+    }
+  }, [doraVisualScheme])
+
+  useEffect(() => {
     if (doraVisualScheme !== 'scheme4' && doraVisualScheme !== 'scheme5') return undefined
     const stage = heatmapStageRef.current
     if (!stage) return undefined
@@ -5274,7 +5571,7 @@ export default function QuestionPage() {
       const rect = stage.getBoundingClientRect()
       if (!rect.width || !rect.height) return
 
-      const layout = getHeatmapLayout(rect.width, rect.height)
+      const layout = getHeatmapLayout(rect.width, rect.height, doraVisualScheme)
       const { rows, cols, cellWidth, cellHeight } = layout
 
       setHeatmapGrid((prev) => {
@@ -5411,9 +5708,8 @@ export default function QuestionPage() {
 
   const openExpertFromNavPopover = (card) => {
     setActiveNav('experts')
-    setActiveExpertCard(card)
+    openExpertCard(card)
     setPracticesPageOpen(false)
-    setInternalSidebarOpen(true)
     closeExpertsNavPopover()
   }
 
@@ -5444,8 +5740,48 @@ export default function QuestionPage() {
   }
 
   const handleStopGeneration = () => {
-    updateActiveSessionState((prev) => ({ ...prev, isGeneratingSession: false }))
+    clearSessionTransitionTimer(activeSessionScope)
+    updateActiveSessionState((prev) => ({
+      ...prev,
+      historyItems: prev.activeHistoryItemId
+        ? completeHistoryItemGeneration(prev.historyItems, prev.activeHistoryItemId, {
+            incrementUnread: false,
+          })
+        : prev.historyItems,
+      activeSessionCompletedMeta: null,
+      isTransitioningSession: false,
+      isGeneratingSession: false,
+    }))
   }
+
+  const handleSessionGenerationComplete = useCallback(({ completedCount, durationMs, streamKey } = {}) => {
+    updateActiveSessionState((prev) => ({
+      ...prev,
+      historyItems: prev.activeHistoryItemId
+        ? updateHistoryItemById(
+            completeHistoryItemGeneration(prev.historyItems, prev.activeHistoryItemId, {
+              incrementUnread: false,
+            }),
+            prev.activeHistoryItemId,
+            (item) => ({
+              ...item,
+              completedSessionMeta: buildCompletedSessionMeta({
+                completedCount,
+                durationMs,
+                summaryStatus: item.completedSessionMeta?.summaryStatus ?? '',
+                streamKey,
+              }),
+            }),
+          )
+        : prev.historyItems,
+      activeSessionCompletedMeta: buildCompletedSessionMeta({
+        completedCount,
+        durationMs,
+        streamKey,
+      }),
+      isGeneratingSession: false,
+    }))
+  }, [activeSessionScope])
 
   const handleSend = () => {
     const text = composerPlainText.trim()
@@ -5470,11 +5806,14 @@ export default function QuestionPage() {
     readyFiles.forEach((file) => clearComposerUploadTimer(file.id))
 
     const historyId = `history-${Date.now()}`
+    const sentUserFiles = mapComposerFilesToSessionUserFiles(readyFiles)
     const nextHistoryItem = {
       id: historyId,
       group: 'today',
       label,
       badge: '',
+      isGenerating: true,
+      sentAt: createSessionSentAt(),
     }
 
     if (isLibraryDetailView) {
@@ -5489,7 +5828,7 @@ export default function QuestionPage() {
         composerFiles: [],
         composerSegments: DEFAULT_COMPOSER_SEGMENTS,
       }))
-      openLibrarySession({ id: historyId, label })
+      openLibrarySession({ id: historyId, label, userFiles: sentUserFiles })
       return
     }
 
@@ -5501,15 +5840,22 @@ export default function QuestionPage() {
       composerSegments: DEFAULT_COMPOSER_SEGMENTS,
     }))
 
-    openHistorySession(nextHistoryItem)
+    openHistorySession(nextHistoryItem, sentUserFiles)
   }
 
-  const openScopedHistorySession = ({ scope = 'dora', id = null, label = '', agentTitle = '' }) => {
+  const openScopedHistorySession = ({
+    scope = 'dora',
+    id = null,
+    label = '',
+    agentTitle = '',
+    userFiles = [],
+  }) => {
     const nextHistoryItem = {
       id,
       group: 'today',
       label,
       badge: '',
+      sentAt: createSessionSentAt(),
     }
 
     setActiveLibraryItem(null)
@@ -5522,22 +5868,23 @@ export default function QuestionPage() {
       setActiveExpertCard(getLibrarySourceExpertCard(agentTitle))
       updateSessionScopeState('experts', (prev) => {
         clearScopeComposerUploadTimers(prev.composerFiles)
-        const nextHistoryItems =
-          id && !prev.historyItems.some((item) => item.id === id)
-            ? upsertHistoryItem(prev.historyItems, nextHistoryItem)
-            : prev.historyItems
+        const nextHistoryItems = prepareHistoryItemsForSession(prev.historyItems, nextHistoryItem)
         return {
           ...prev,
           historyItems: nextHistoryItems,
           activeSessionPrompt: label,
+          activeSessionUserFiles: userFiles,
+          activeSessionCompletedMeta: null,
           activeHistoryItemId: id,
-          isGeneratingSession: true,
+          isTransitioningSession: true,
+          isGeneratingSession: false,
           inputText: '',
           inputFocused: false,
           composerFiles: [],
           composerSegments: DEFAULT_COMPOSER_SEGMENTS,
         }
       })
+      beginSessionTransition('experts', userFiles)
       return
     }
 
@@ -5545,36 +5892,41 @@ export default function QuestionPage() {
     setActiveExpertCard(null)
     updateSessionScopeState('dora', (prev) => {
       clearScopeComposerUploadTimers(prev.composerFiles)
-      const nextHistoryItems =
-        id && !prev.historyItems.some((item) => item.id === id)
-          ? upsertHistoryItem(prev.historyItems, nextHistoryItem)
-          : prev.historyItems
+      const nextHistoryItems = prepareHistoryItemsForSession(prev.historyItems, nextHistoryItem)
       return {
         ...prev,
         historyItems: nextHistoryItems,
         activeSessionPrompt: label,
+        activeSessionUserFiles: userFiles,
+        activeSessionCompletedMeta: null,
         activeHistoryItemId: id,
-        isGeneratingSession: true,
+        isTransitioningSession: true,
+        isGeneratingSession: false,
         inputText: '',
         inputFocused: false,
         composerFiles: [],
         composerSegments: DEFAULT_COMPOSER_SEGMENTS,
       }
     })
+    beginSessionTransition('dora', userFiles)
   }
 
-  const openAgentSession = ({ id = null, label = '' }) => {
-    openScopedHistorySession({ scope: 'dora', id, label, agentTitle: 'Dora' })
+  const openAgentSession = ({ id = null, label = '', userFiles = [] }) => {
+    openScopedHistorySession({ scope: 'dora', id, label, agentTitle: 'Dora', userFiles })
   }
 
   const startNewAgentChat = () => {
     if (isExpertDetailView) {
+      clearSessionTransitionTimer('experts')
       updateSessionScopeState('experts', (prev) => {
         clearScopeComposerUploadTimers(prev.composerFiles)
         return {
           ...prev,
+          isTransitioningSession: false,
           isGeneratingSession: false,
           activeSessionPrompt: '',
+          activeSessionUserFiles: [],
+          activeSessionCompletedMeta: null,
           activeHistoryItemId: null,
           inputText: '',
           inputFocused: false,
@@ -5590,12 +5942,16 @@ export default function QuestionPage() {
     setActiveExpertCard(null)
     setActiveLibraryItem(null)
     setLibraryChatCollapsed(false)
+    clearSessionTransitionTimer('dora')
     updateSessionScopeState('dora', (prev) => {
       clearScopeComposerUploadTimers(prev.composerFiles)
       return {
         ...prev,
+        isTransitioningSession: false,
         isGeneratingSession: false,
         activeSessionPrompt: '',
+        activeSessionUserFiles: [],
+        activeSessionCompletedMeta: null,
         activeHistoryItemId: null,
         inputText: '',
         inputFocused: false,
@@ -5619,10 +5975,46 @@ export default function QuestionPage() {
     })
   }
 
-  const openHistorySession = (item) => {
+  const openCompletedHistorySession = (scope, item, userFiles = []) => {
+    updateSessionScopeState(scope, (prev) => {
+      clearScopeComposerUploadTimers(prev.composerFiles)
+      return {
+        ...prev,
+        historyItems: markHistoryItemViewed(prev.historyItems, item.id),
+        activeSessionPrompt: item.label,
+        activeSessionUserFiles: userFiles,
+        activeSessionCompletedMeta: item.completedSessionMeta ?? buildCompletedSessionMeta(),
+        activeHistoryItemId: item.id,
+        isTransitioningSession: false,
+        isGeneratingSession: false,
+        inputText: '',
+        inputFocused: false,
+        composerFiles: [],
+        composerSegments: DEFAULT_COMPOSER_SEGMENTS,
+      }
+    })
+  }
+
+  const openHistorySession = (item, userFiles = []) => {
     setHistoryMenuOpenId(null)
     if (isLibraryDetailView) {
-      openLibrarySession({ id: item.id, label: item.label })
+      openLibrarySession({ id: item.id, label: item.label, userFiles })
+      return
+    }
+    if (!item.isGenerating) {
+      if (isExpertDetailView) {
+        openCompletedHistorySession('experts', item, userFiles)
+        setPracticesPageOpen(false)
+        return
+      }
+
+      setActiveNav('dora')
+      setActiveExpertCard(null)
+      setActiveLibraryItem(null)
+      setLibraryChatCollapsed(false)
+      clearSessionTransitionTimer('dora')
+      openCompletedHistorySession('dora', item, userFiles)
+      setPracticesPageOpen(false)
       return
     }
     if (isExpertDetailView) {
@@ -5630,20 +6022,25 @@ export default function QuestionPage() {
         clearScopeComposerUploadTimers(prev.composerFiles)
         return {
           ...prev,
+          historyItems: prepareHistoryItemsForSession(prev.historyItems, item),
           activeSessionPrompt: item.label,
+          activeSessionUserFiles: userFiles,
+          activeSessionCompletedMeta: null,
           activeHistoryItemId: item.id,
-          isGeneratingSession: true,
+          isTransitioningSession: true,
+          isGeneratingSession: false,
           inputText: '',
           inputFocused: false,
           composerFiles: [],
           composerSegments: DEFAULT_COMPOSER_SEGMENTS,
         }
       })
+      beginSessionTransition('experts', userFiles)
       setPracticesPageOpen(false)
       return
     }
 
-    openAgentSession({ id: item.id, label: item.label })
+    openAgentSession({ id: item.id, label: item.label, userFiles })
   }
 
   const handleInnerActionClick = (actionId) => {
@@ -5867,7 +6264,7 @@ export default function QuestionPage() {
                     className="experts-nav-popover__hide"
                     onClick={dismissExpertsAlerts}
                   >
-                    隐藏
+                    一键已读
                   </button>
                 </div>
                 <div className="experts-nav-popover__list">
@@ -5894,9 +6291,9 @@ export default function QuestionPage() {
           : null}
 
         <div className="sidebar-footer">
-          <IconButton tip="管理后台" tipPlacement="right">
+          <IconButton tip="设置" tipPlacement="right">
             <span className="dora-icon icon-16" aria-hidden="true">
-              {ICONS.admin}
+              {ICONS.settings}
             </span>
           </IconButton>
           <button
@@ -5989,9 +6386,9 @@ export default function QuestionPage() {
                   ) : (
                     <img src={doraTitleImage} alt="Dora" className="inner-sidebar__title-image" />
                   )}
-                  <IconButton tip="管理后台" className="icon-btn inner-sidebar__admin">
+                  <IconButton tip="设置" className="icon-btn inner-sidebar__admin">
                     <span className="dora-icon icon-16" aria-hidden="true">
-                      {ICONS.editLine}
+                      {ICONS.settings}
                     </span>
                   </IconButton>
                 </div>
@@ -6046,77 +6443,187 @@ export default function QuestionPage() {
                       ref={expertsPageBodyRef}
                       className={`experts-page__body ${expertsPageScrolled ? 'experts-page__body--scrolled' : ''}`}
                     >
-                      <div className="experts-toolbar">
-                        <div className="experts-toolbar__filters">
-                          <FieldSelect
-                            classPrefix="experts"
-                            value={expertFilter}
-                            options={EXPERT_FILTER_OPTIONS}
-                            onChange={setExpertFilter}
-                            ariaLabel="筛选类型"
-                            minWidth={150}
-                          />
+                      <div className={`experts-page__layout ${showExpertSidePanel ? 'has-side-panel' : ''}`}>
+                        <div className="experts-page__main">
+                          <div className="experts-toolbar">
+                            <div className="experts-toolbar__filters">
+                              <label className="experts-search">
+                                <span className="dora-icon experts-search__icon" aria-hidden="true">
+                                  {ICONS.search}
+                                </span>
+                                <input
+                                  value={expertSearch}
+                                  onChange={(e) => setExpertSearch(e.target.value)}
+                                  type="text"
+                                  className="experts-search__input"
+                                  placeholder="搜索名称/描述"
+                                />
+                              </label>
 
-                          <label className="experts-search">
-                            <span className="dora-icon experts-search__icon" aria-hidden="true">
-                              {ICONS.search}
-                            </span>
-                            <input
-                              value={expertSearch}
-                              onChange={(e) => setExpertSearch(e.target.value)}
-                              type="text"
-                              className="experts-search__input"
-                              placeholder="搜索名称/描述"
-                            />
-                          </label>
+                              <FieldSelect
+                                classPrefix="experts"
+                                value={expertFilter}
+                                options={EXPERT_FILTER_OPTIONS}
+                                onChange={setExpertFilter}
+                                ariaLabel="筛选类型"
+                                minWidth={150}
+                              />
+                            </div>
+
+                            <button type="button" className="experts-create-btn">
+                              <span className="dora-icon icon-16" aria-hidden="true">
+                                {ICONS.create}
+                              </span>
+                              <span>去创建</span>
+                            </button>
+                          </div>
+
+                          <div className="session-files-panel__tabs-shell experts-tabs" aria-label="专家分类">
+                            <div className="session-files-panel__tabs experts-tabs__list" role="tablist" aria-label="专家分类">
+                              {['全部', '财务', '销售', '运营', '市场', '人力', '供应链', '客户', '产品', '风控'].map((tab, index) => (
+                                <button
+                                  key={tab}
+                                  type="button"
+                                  role="tab"
+                                  aria-selected={index === 0}
+                                  className={`session-files-panel__tab experts-tab ${index === 0 ? 'active' : ''}`}
+                                >
+                                  {tab}
+                                </button>
+                              ))}
+                              <button type="button" className="experts-tabs__more" aria-label="更多分类">
+                                <span className="dora-icon" aria-hidden="true">
+                                  {ICONS.more}
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+
+                          {filteredExpertCards.length ? (
+                            <div className="experts-grid">
+                              {filteredExpertCards.map((card) => {
+                                const cardKey = getExpertCardKey(card)
+                                const isFavorite = expertFavoriteKeys.includes(cardKey)
+
+                                return (
+                                  <article
+                                    key={`${cardKey}-${card.desc}`}
+                                    className="expert-card"
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => openExpertCard(card)}
+                                    onKeyDown={(e) => onEnterKey(e, () => openExpertCard(card))}
+                                  >
+                                    <div className="expert-card__content">
+                                      <div className="expert-card__head">
+                                        <div className="expert-card__avatar-wrap">
+                                          <img src={agentDefaultAvatarImage} alt="" className="expert-card__avatar" />
+                                          {card.alertCount > 0 ? <span className="expert-card__alert"></span> : null}
+                                        </div>
+
+                                        <div className="expert-card__meta">
+                                          <h3>{highlightSearchText(card.title, expertSearch)}</h3>
+                                          <p>创建人：{card.creator}</p>
+                                        </div>
+
+                                        <button
+                                          type="button"
+                                          className={`expert-card__favorite ${isFavorite ? 'active' : ''}`}
+                                          aria-label={isFavorite ? '取消收藏' : '收藏'}
+                                          onClick={(event) => {
+                                            event.stopPropagation()
+                                            toggleExpertFavorite(card)
+                                          }}
+                                        >
+                                          <span className="dora-icon" aria-hidden="true">
+                                            {ICONS.star}
+                                          </span>
+                                        </button>
+                                      </div>
+
+                                      <p className="expert-card__desc">{highlightSearchText(card.desc, expertSearch)}</p>
+                                    </div>
+
+                                    <div className="expert-card__footer">
+                                      <div className="expert-card__tags">
+                                        {card.tags.slice(0, 3).map((tag) => (
+                                          <span key={tag} className="expert-card__tag">
+                                            {tag}
+                                          </span>
+                                        ))}
+                                      </div>
+                                      <span className="expert-card__usage">{card.usage}</span>
+                                      <button
+                                        type="button"
+                                        className="expert-card__consult"
+                                        onClick={(event) => {
+                                          event.stopPropagation()
+                                          openExpertCard(card)
+                                        }}
+                                      >
+                                        <span>去咨询</span>
+                                        <span className="dora-icon" aria-hidden="true">
+                                          {ICONS.goTo}
+                                        </span>
+                                      </button>
+                                    </div>
+                                  </article>
+                                )
+                              })}
+                            </div>
+                          ) : (
+                            <div className="experts-search-empty">暂无搜索结果</div>
+                          )}
                         </div>
 
-                        <button type="button" className="experts-create-btn">
-                          <span className="dora-icon icon-16" aria-hidden="true">
-                            {ICONS.create}
-                          </span>
-                          <span>去创建</span>
-                        </button>
+                        {showExpertSidePanel ? (
+                          <aside className="experts-side-panel" aria-label="专家快捷入口">
+                            {expertRecentCards.length ? (
+                              <section className="experts-side-section">
+                                <div className="experts-side-section__title">
+                                  <span className="experts-side-section__accent"></span>
+                                  <span>最近使用</span>
+                                </div>
+                                <div className="experts-side-grid">
+                                  {expertRecentCards.map((card, index) => (
+                                    <button
+                                      key={`recent-${getExpertCardKey(card)}`}
+                                      type="button"
+                                      className={`experts-side-avatar ${index === 4 ? 'is-featured' : ''}`}
+                                      onClick={() => openExpertCard(card)}
+                                      title={card.title}
+                                    >
+                                      <img src={agentDefaultAvatarImage} alt="" />
+                                    </button>
+                                  ))}
+                                </div>
+                              </section>
+                            ) : null}
+
+                            {expertFavoriteCards.length ? (
+                              <section className="experts-side-section">
+                                <div className="experts-side-section__title">
+                                  <span className="experts-side-section__accent"></span>
+                                  <span>我收藏的</span>
+                                </div>
+                                <div className="experts-side-grid">
+                                  {expertFavoriteCards.map((card) => (
+                                    <button
+                                      key={`favorite-${getExpertCardKey(card)}`}
+                                      type="button"
+                                      className="experts-side-avatar"
+                                      onClick={() => openExpertCard(card)}
+                                      title={card.title}
+                                    >
+                                      <img src={agentDefaultAvatarImage} alt="" />
+                                    </button>
+                                  ))}
+                                </div>
+                              </section>
+                            ) : null}
+                          </aside>
+                        ) : null}
                       </div>
-
-                      {filteredExpertCards.length ? (
-                        <div className="experts-grid">
-                          {filteredExpertCards.map((card) => (
-                            <article
-                              key={`${card.title}-${card.editedAt}-${card.desc}`}
-                              className="expert-card"
-                              role="button"
-                              tabIndex={0}
-                              onClick={() => {
-                                setActiveExpertCard(card)
-                                setInternalSidebarOpen(true)
-                              }}
-                              onKeyDown={(e) =>
-                                onEnterKey(e, () => {
-                                  setActiveExpertCard(card)
-                                  setInternalSidebarOpen(true)
-                                })
-                              }
-                            >
-                              <div className="expert-card__head">
-                                <div className="expert-card__avatar-wrap">
-                                  <img src={agentDefaultAvatarImage} alt="" className="expert-card__avatar" />
-                                  {card.alertCount > 0 ? <span className="expert-card__alert"></span> : null}
-                                </div>
-
-                                <div className="expert-card__meta">
-                                  <h3>{highlightSearchText(card.title, expertSearch)}</h3>
-                                  <p>最近编辑：{card.editedAt}</p>
-                                </div>
-                              </div>
-
-                              <p className="expert-card__desc">{highlightSearchText(card.desc, expertSearch)}</p>
-                            </article>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="experts-search-empty">暂无搜索结果</div>
-                      )}
                     </div>
                   </section>
                 ) : isQuestionMode ? (
@@ -6199,7 +6706,9 @@ export default function QuestionPage() {
                                       }))
                                     }
                                   >
-                                    <span className="expert-prompt-item__icon">✦</span>
+                                    <span className="dora-icon expert-prompt-item__icon" aria-hidden="true">
+                                      {ICONS.aiDecor}
+                                    </span>
                                     <span>{prompt}</span>
                                   </button>
                                 ))}
@@ -6468,7 +6977,7 @@ export default function QuestionPage() {
 
                       <div className="library-detail-chat__sender">
                         <div
-                          className={`sender ${inputFocused ? 'focused' : ''} ${canSend ? 'has-value' : ''} ${isGeneratingSession ? 'is-sending' : ''}`}
+                          className={`sender ${inputFocused ? 'focused' : ''} ${canSend ? 'has-value' : ''} ${isSessionBusy ? 'is-sending' : ''}`}
                         >
                           <div className="sender-inner">
                             {renderSenderInnerContent(activeSessionScope)}
@@ -6477,11 +6986,11 @@ export default function QuestionPage() {
                               <button
                                 type="button"
                                 className="send-btn"
-                                aria-label={isGeneratingSession ? '停止生成' : '发送'}
-                                disabled={!canSend && !isGeneratingSession}
-                                onClick={isGeneratingSession ? handleStopGeneration : handleSend}
+                                aria-label={isSessionBusy ? '停止生成' : '发送'}
+                                disabled={!canSend && !isSessionBusy}
+                                onClick={isSessionBusy ? handleStopGeneration : handleSend}
                               >
-                                {isGeneratingSession ? (
+                                {isSessionBusy ? (
                                   <span className="send-stop-icon" aria-hidden="true"></span>
                                 ) : (
                                   <span className="dora-icon send-icon" aria-hidden="true">
@@ -6526,6 +7035,8 @@ export default function QuestionPage() {
                       <div className="scheme3-banner__glow"></div>
                     </div>
                   ) : null}
+                  {doraVisualScheme === 'scheme7' ? renderOrbBackgroundBanner() : null}
+                  {doraVisualScheme === 'scheme9' ? renderFlowLinesBanner() : null}
                   {doraVisualScheme === 'scheme4' || doraVisualScheme === 'scheme5' ? (
                     <div className="scheme-heatmap-banner" aria-hidden="true">
                       <div className="scheme-heatmap-stage" ref={heatmapStageRef}>
@@ -6583,7 +7094,7 @@ export default function QuestionPage() {
                       <div className="practices-grid">
                         {PRACTICE_CARDS.map((card) => (
                           <article key={`browser-${card.title}`} className="practice-browser-card">
-                            <h3>{card.title}</h3>
+                            <h3 data-practice-title={card.title}>{card.title}</h3>
                             <p>{card.desc}</p>
                           </article>
                         ))}
@@ -6593,8 +7104,35 @@ export default function QuestionPage() {
                     <>
                       <section className="hero dora-stage__hero">
                         <div className="hero-inner dora-stage__hero-inner">
-                          <div className="welcome">
-                            <h1 className="title">嗨，我是 Dora，全能助手随时待命</h1>
+                          <div
+                            className={`welcome${doraVisualScheme === 'scheme7' ? ' welcome--orb-layout' : ''}`}
+                            onMouseEnter={handleHeroSparklesReplay}
+                          >
+                            {doraVisualScheme === 'scheme7' ? (
+                              <div className="robot robot--orb robot--orb-hero" aria-hidden="true">
+                                <Orb
+                                  className="robot--orb-canvas"
+                                  hoverIntensity={0.25}
+                                  rotateOnHover={true}
+                                  hue={0}
+                                  forceHoverState={false}
+                                  backgroundColor="#ffffff"
+                                />
+                              </div>
+                            ) : null}
+                            <h1 className={`title${doraVisualScheme === 'scheme7' ? ' title--orb-layout' : ''}`}>
+                              {doraVisualScheme === 'scheme7' ? (
+                                <SparklesText
+                                  className="title-sparkles"
+                                  text="嗨，我是 Dora，全能助手随时待命"
+                                  sparklesCount={12}
+                                  activeDuration={3000}
+                                  triggerKey={`hero-title-${doraVisualScheme}-${heroSparkleReplayKey}`}
+                                />
+                              ) : (
+                                '嗨，我是 Dora，全能助手随时待命'
+                              )}
+                            </h1>
                           </div>
                           <div className="subtitle-row">
                             <span className="subtitle-prefix">我可以帮你</span>
@@ -6608,7 +7146,12 @@ export default function QuestionPage() {
                         <div className="sender-wrap dora-stage__sender">
                           <div
                             className={`sender ${inputFocused ? 'focused' : ''} ${canSend ? 'has-value' : ''} ${
-                              doraVisualScheme === 'scheme4' || doraVisualScheme === 'scheme5' ? 'dora-sender--ring' : ''
+                              doraVisualScheme === 'scheme4' ||
+                              doraVisualScheme === 'scheme5' ||
+                              doraVisualScheme === 'scheme7' ||
+                              doraVisualScheme === 'scheme9'
+                                ? 'dora-sender--ring'
+                                : ''
                             }`}
                           >
                             <div className="sender-inner">
@@ -6638,7 +7181,7 @@ export default function QuestionPage() {
                           <div className="cards-track">
                             {PRACTICE_PREVIEW_CARDS.map((card) => (
                               <article key={card.title} className="practice-card">
-                                <h3>{card.title}</h3>
+                                <h3 data-practice-title={card.title}>{card.title}</h3>
                                 <p>{card.desc}</p>
                               </article>
                             ))}

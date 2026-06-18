@@ -1,0 +1,52 @@
+.flow-lines-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.flow-lines-bg__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.flow-lines-bg__line,
+.flow-lines-bg__marker {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.flow-lines-bg__line--soft {
+  opacity: 0.42;
+}
+
+.flow-lines-bg__line--strong {
+  opacity: 1;
+}
+
+.flow-lines-bg__line--soft-strong {
+  opacity: 0.62;
+}
+
+.flow-lines-bg__line {
+  stroke-dasharray: none;
+}
+
+.flow-lines-bg__marker {
+  opacity: 0.95;
+  mix-blend-mode: multiply;
+}
+
+.flow-lines-bg__light {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-lines-bg__marker {
+    opacity: 0.42;
+  }
+}
