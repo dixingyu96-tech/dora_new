@@ -8,19 +8,34 @@ import agentDefaultAvatarImage from '../assets/images/Agent默认头像.png'
 import doraTitleImage from '../assets/images/dora标题.png'
 import doraUploadedImage from '../assets/images/Dora_uploaded.png'
 import avatarImage from '../assets/images/avatar.png'
+import builtinAnalysisThemeImage from '../assets/images/agent-builtins/analysis_theme_bi.png'
+import builtinDashboardCatalogImage from '../assets/images/agent-builtins/dashboard_bi_catalog.png'
+import builtinDatasetCatalogImage from '../assets/images/agent-builtins/dataset_bi_catalog.png'
+import builtinExcelFileImage from '../assets/images/agent-builtins/excel_file_builtin.png'
+import builtinModelMetricsImage from '../assets/images/agent-builtins/model_metrics_dataset.png'
+import connectorBiAnalysisSelfServiceImage from '../assets/images/connector-sources/bi_analysis_self_service.png'
+import connectorBiAnalysisStandardImage from '../assets/images/connector-sources/bi_analysis_standard.png'
+import connectorBiCatalogImage from '../assets/images/connector-sources/bi_catalog.png'
+import connectorBusinessModelExtractImage from '../assets/images/connector-sources/business_model_extract.png'
+import connectorExcelExtractImage from '../assets/images/connector-sources/excel_extract.png'
 import btnBiImage from '../assets/images/btn_bi.png'
-import btnFrImage from '../assets/images/btn_fr.png'
-import connectorImage from '../assets/images/connector.png'
-import connectorBiImage from '../assets/images/connector_bi.png'
 import attachDashboardImage from '../assets/images/attach_dashboard.png'
 import attachTreeRootImage from '../assets/images/attach_tree_root.png'
 import attachTreeLeafImage from '../assets/images/attach_tree_leaf.png'
 import attachTreeFolderOpenImage from '../assets/images/attach_tree_folder_open.png'
 import menuFineBiImage from '../assets/images/menu_finebi.png'
 import menuFineReportImage from '../assets/images/menu_finereport.png'
-import libraryHtmlImage from '../assets/images/lib_html.png'
-import libraryMdImage from '../assets/images/lib_md.png'
-import libraryPptImage from '../assets/images/lib_ppt.png'
+import outputFileDocImage from '../assets/images/output_file_doc.png'
+import outputFileExcelImage from '../assets/images/output_file_excel.png'
+import outputFileHtmlImage from '../assets/images/output_file_html.png'
+import outputFileImageImage from '../assets/images/output_file_image.png'
+import outputFileMdImage from '../assets/images/output_file_md.png'
+import outputFileOtherImage from '../assets/images/output_file_other.png'
+import outputFilePdfImage from '../assets/images/output_file_pdf.png'
+import outputFilePptImage from '../assets/images/output_file_ppt.png'
+import outputFileUnknownImage from '../assets/images/output_file_unknown.png'
+import outputFileZipImage from '../assets/images/output_file_zip.png'
+import outputSkillImage from '../assets/images/output_skill.png'
 import uploadPdfImage from '../assets/images/upload_pdf_new.png'
 import uploadMdImage from '../assets/images/upload_md_new.png'
 import uploadJsonImage from '../assets/images/upload_json.png'
@@ -46,6 +61,15 @@ import libraryCover92Image from '../assets/images/lib_cover92.png'
 import libraryCover93Image from '../assets/images/lib_cover93.png'
 import libraryCover94Image from '../assets/images/lib_cover94.png'
 import libraryCover95Image from '../assets/images/lib_cover95.png'
+import bestPracticeSupplyChainImage from '../assets/images/best-practices/供应链收支分析师.png'
+import bestPracticeSalesFunnelPptImage from '../assets/images/best-practices/季度销售漏斗诊断报告-ppt.png'
+import bestPracticeSalesFunnelImage from '../assets/images/best-practices/季度销售漏斗诊断报告.png'
+import bestPracticeCustomerHealthImage from '../assets/images/best-practices/客户健康度与分层运营策略报告.png'
+import bestPracticeInventoryHealthImage from '../assets/images/best-practices/库存健康度诊断报告.png'
+import bestPracticeStoreReportImage from '../assets/images/best-practices/门店经营报告.png'
+import bestPracticeBenefitCardImage from '../assets/images/best-practices/生成权益卡片.png'
+import bestPracticeFinanceBriefImage from '../assets/images/best-practices/月度财务经营分析简报.png'
+import bestPracticeStoreBenchmarkImage from '../assets/images/best-practices/月度门店经营对标分析报告.png'
 import wechatImage from '../assets/images/企业微信.png'
 import dingImage from '../assets/images/钉钉.png'
 import feishuImage from '../assets/images/飞书.png'
@@ -53,7 +77,6 @@ import tabCurveLeftImage from '../assets/images/tab-curve-left.svg'
 import tabCurveRightImage from '../assets/images/tab-curve-right.svg'
 import financialBiMdContent from '../assets/content/国内金融行业商业智能软件市场调研报告.md?raw'
 import Orb from '../components/Orb'
-import FlowLinesBackground from '../components/FlowLinesBackground'
 import SparklesText from '../components/SparklesText'
 import IconButton from '../components/IconButton'
 import SessionFilesToolbarRow from '../components/SessionFilesToolbarRow'
@@ -69,11 +92,14 @@ const ICONS = {
   search: '\ue79f',
   sidebar: '\ue78e',
   settings: '\ue7c1',
+  adminPanel: '\ue796',
   create: '\ue78f',
+  frbiConnector: '\ue823',
   newChat: '\ue7a0',
   schedule: '\ue7ec',
   send: '\ue791',
   back: '\ue790',
+  arrowLeft: '\ue7da',
   download: '\ue7b9',
   share: '\ue7a5',
   collapseCatalog: '\ue7cc',
@@ -97,7 +123,8 @@ const ICONS = {
   editLine: '\ue7af',
   openWindow: '\ue7d9',
   aiDecor: '\ue7d0',
-  star: '\ue806',
+  favorite: '\ue820',
+  favoriteActive: '\ue816',
   goTo: '\ue7dc',
 }
 
@@ -138,22 +165,98 @@ const CAPABILITY_HINTS = [
   '从多源数据自动汇总经营分析看板',
 ]
 
-const PRACTICE_CARDS = [
-  { title: '经营分析', desc: '一键生成月度经营复盘与关键指标解读' },
-  { title: '销售洞察', desc: '漏斗转化、客单价与复购趋势对比' },
-  { title: '增长拆解', desc: '同比环比与驱动因素结构化分析' },
-  { title: '异常预警', desc: '自动识别波动异常并给出根因假设' },
-  { title: 'ROI 复盘', desc: '评估投放回报率与渠道贡献结构' },
-  { title: '客户洞察', desc: '分析区域、层级与客户价值分层' },
-  { title: '门店分析', desc: '定位高潜门店与关键异常门店' },
-  { title: '品类策略', desc: '对比品类增长与毛利表现趋势' },
-  { title: '活动复盘', desc: '拆解营销活动带来的增量影响' },
-  { title: '库存预警', desc: '识别库存积压与缺货风险变化' },
-  { title: '渠道对比', desc: '横向比较各渠道效率与投入产出' },
-  { title: '经营看板', desc: '快速汇总核心经营指标与变化趋势' },
+const HERO_SKILL_TAGS = [
+  { id: 'data-explore', label: '数据探索', icon: '\ue82d' },
+  { id: 'deep-analysis', label: '深度分析', icon: '\ue82b' },
+  { id: 'attribution', label: '归因诊断', icon: '\ue82a' },
+  { id: 'trend-forecast', label: '趋势预测', icon: '\ue82c' },
+  { id: 'analysis-report', label: '分析报告', icon: '\ue826' },
+  { id: 'slides', label: '幻灯片', icon: '\ue827' },
+  { id: 'data-viz', label: '数据可视化', icon: '\ue829' },
+  { id: 'monitor-alert', label: '监控预警', icon: '\ue828' },
+  { id: 'metric-mgmt', label: '指标管理', icon: '\ue82f' },
+  { id: 'business-insight', label: '业务洞察', icon: '\ue82e' },
 ]
 
-const PRACTICE_PREVIEW_CARDS = PRACTICE_CARDS.slice(0, 4)
+const HERO_SKILL_TAG_PLACEHOLDERS = {
+  'data-explore': '试试添加 Excel 或数据表，让我帮你快速查数、汇总和排序',
+  'deep-analysis': '请给我业务数据，我帮你多维对比、拆解波动和发现问题',
+  attribution: '告诉我异常指标或上传数据，让我帮你定位原因和影响因素',
+  'trend-forecast': '添加历史数据，让我帮你预测趋势、测算影响和判断目标达成',
+  'analysis-report': '告诉我主题，让我帮你生成经营分析、周报或管理简报',
+  slides: '请给我数据或文档，让我帮你整理成结构清晰的商务 PPT',
+  'data-viz': '添加历史数据，让我帮你生成看板、图表、漏斗或地图可视化',
+  'monitor-alert': '告诉我预警规则，让我帮你自动监控异常并及时提醒',
+  'metric-mgmt': '告诉我指标，让我帮你解释口径、校验数据和核算公式',
+  'business-insight': '请给我业务数据，让我帮你提炼机会点、改进建议和增长策略',
+}
+
+const HERO_SKILL_TAG_PROMPTS = {
+  'data-explore': [
+    '帮我查一下上个月华东区的总销售额，以及环比上月的增长率。',
+    '列出本季度销售额排名前 10 的产品，包含销量、单价和毛利率。',
+    '截至昨天，库存周转天数超过 60 天的商品有哪些？按周转天数倒序排列。',
+  ],
+  'deep-analysis': [
+    '对比线上和线下两个渠道，从客单价、复购率、转化率三个维度分析各自的优劣势。',
+    '分析过去 6 个月毛利率的波动，拆解出价格、成本、产品结构各自的影响。',
+    '哪些门店属于"高流量低转化"？帮我定位出来并分析可能的原因。',
+  ],
+  attribution: [
+    '本月销售额比上月下降了 15%，帮我找出主要原因，定位到具体区域和产品。',
+    '对比预算和实际，找出本季度费用超支最严重的几个科目，并解释偏差来源。',
+    '这个月活跃用户数没达标，帮我做漏斗诊断，看是拉新、留存还是召回环节的问题。',
+  ],
+  'trend-forecast': [
+    '基于过去 24 个月的销售数据，预测下个季度各区域的销售额，并给出置信区间。',
+    '如果把 A 产品的价格上调 5%，对销量和总利润的预计影响是多少？',
+    '照当前趋势，预计这个月底能不能完成销售目标？还差多少？',
+  ],
+  'analysis-report': [
+    '帮我生成一份本月销售经营分析报告，包含整体概览、区域表现、品类表现、问题与建议四部分。',
+    '写一份本周运营周报，重点突出关键指标的变化、异常波动和需要关注的事项。',
+    '帮我做一份面向管理层的经营简报，控制在一页，只放最关键的 5 个结论。',
+  ],
+  slides: [
+    '把本月销售分析做成一份 PPT，大概 8 页，包含封面、核心结论、分区域明细和下月计划。',
+    '帮我做一份季度经营汇报的幻灯片，风格简洁商务，每页一个核心观点配一张图。',
+    '做一份给销售团队的复盘演示，前面讲整体表现，后面分门店点评。',
+  ],
+  'data-viz': [
+    '帮我建一个实时监控看板，盯住今天的订单量、GMV 和退款率三个指标。',
+    '用合适的图表展示用户从访问到下单的转化漏斗，标出每一步的流失率。',
+    '做一张地图可视化，展示各省份的销售密度。',
+  ],
+  'monitor-alert': [
+    '当任意门店的日销售额低于 1 万元时，自动提醒我，并附上该门店的近期趋势。',
+    '每周一早上 9 点，把上周经营周报自动推送到运营群。',
+    '监控退货率，一旦单日超过 5% 就立即通知质量团队。',
+  ],
+  'metric-mgmt': [
+    '我们公司的"活跃用户"是怎么定义的？口径是什么？帮我说清楚。',
+    '检查销售明细表里有没有重复订单、空值或异常金额。',
+    '"毛利率"和"净利率"在我们的报表里分别怎么算？举个例子说明。',
+  ],
+  'business-insight': [
+    '基于本季度的销售表现，给我 3 条最值得优先投入资源的建议，并说明依据。',
+    '看看哪些门店有提升空间，分别给出针对性的改进方向。',
+    '综合用户、产品、渠道三方面，给我一份下季度增长策略的核心建议。',
+  ],
+}
+
+const PRACTICE_CARDS = [
+  { id: 'supply-chain-income-expense', title: '供应链收支分析师', desc: '供应链收支分析师', cover: bestPracticeSupplyChainImage },
+  { id: 'sales-funnel-diagnosis-ppt', title: '季度销售漏斗诊断报告', desc: '季度销售漏斗诊断报告', cover: bestPracticeSalesFunnelPptImage },
+  { id: 'sales-funnel-diagnosis', title: '季度销售漏斗诊断报告', desc: '季度销售漏斗诊断报告', cover: bestPracticeSalesFunnelImage },
+  { id: 'customer-health-tiered-operation', title: '客户健康度与分层运营策略报告', desc: '客户健康度与分层运营策略报告', cover: bestPracticeCustomerHealthImage },
+  { id: 'inventory-health-diagnosis', title: '库存健康度诊断报告', desc: '库存健康度诊断报告', cover: bestPracticeInventoryHealthImage },
+  { id: 'store-operation-report', title: '门店经营报告', desc: '门店经营报告', cover: bestPracticeStoreReportImage },
+  { id: 'benefit-card-generation', title: '生成权益卡片', desc: '生成权益卡片', cover: bestPracticeBenefitCardImage },
+  { id: 'monthly-finance-brief', title: '月度财务经营分析简报', desc: '月度财务经营分析简报', cover: bestPracticeFinanceBriefImage },
+  { id: 'monthly-store-benchmark', title: '月度门店经营对标分析报告', desc: '月度门店经营对标分析报告', cover: bestPracticeStoreBenchmarkImage },
+]
+
+const PRACTICE_DECK_SLOTS = ['left', 'center', 'right']
 
 const HEATMAP_BASE_COLS = 13
 const HEATMAP_BASE_ROWS = 9
@@ -196,8 +299,8 @@ const SENDER_MENTION_FALLBACK_UPLOADS = [
 ]
 
 const SENDER_MENTION_FALLBACK_OUTPUTS = [
-  { id: 'fallback-output-1', label: 'chat_main_01.pdf', icon: uploadPdfImage, sessionFileId: 'html-1' },
-  { id: 'fallback-output-2', label: '经营分析结果_01.pptx', icon: uploadPptImage, sessionFileId: 'md-1' },
+  { id: 'fallback-output-1', label: 'chat_main_01.pdf', icon: outputFilePdfImage, sessionFileId: 'html-1' },
+  { id: 'fallback-output-2', label: '经营分析结果_01.pptx', icon: outputFilePptImage, sessionFileId: 'md-1' },
 ]
 
 const DEFAULT_COMPOSER_SEGMENTS = [{ type: 'text', value: '' }]
@@ -1079,9 +1182,14 @@ const highlightSearchText = (text, keyword) => {
 
 const LIBRARY_FILTER_OPTIONS = [
   { value: 'all', label: '全部类型' },
+  { value: 'xls', label: 'Excel' },
   { value: 'html', label: 'HTML' },
   { value: 'md', label: 'Markdown' },
   { value: 'ppt', label: 'PPT' },
+  { value: 'pdf', label: 'PDF' },
+  { value: 'doc', label: 'Word' },
+  { value: 'txt', label: 'TXT' },
+  { value: 'image', label: '图片' },
 ]
 
 const SESSION_FILES_FILTER_OPTIONS = [
@@ -1200,24 +1308,24 @@ const SESSION_FILES_SOURCE_SECTIONS = [
     files: [
       {
         id: 'src-c1-1',
-        title: '连接器输出报告.md',
+        title: '连接器输出报告',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: getAttachmentFileIcon('连接器输出报告.md'),
+        icon: connectorBiAnalysisStandardImage,
         sessionFileId: 'md-1',
         scopes: ['session', 'existing'],
       },
       {
         id: 'src-c1-2',
-        title: '销售明细.xlsx',
+        title: '销售明细',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: getAttachmentFileIcon('销售明细.xlsx'),
+        icon: connectorExcelExtractImage,
         scopes: ['session'],
       },
       {
         id: 'src-c1-3',
-        title: '连接器归档.zip',
+        title: '连接器归档',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: getAttachmentFileIcon('连接器归档.zip'),
+        icon: connectorBiCatalogImage,
         scopes: ['session', 'existing'],
       },
     ],
@@ -1229,17 +1337,60 @@ const SESSION_FILES_SOURCE_SECTIONS = [
     files: [
       {
         id: 'src-c2-1',
-        title: '连接器快照.png',
+        title: '连接器快照',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: getAttachmentFileIcon('连接器快照.png'),
+        icon: connectorBiAnalysisSelfServiceImage,
         scopes: ['session', 'existing'],
       },
       {
         id: 'src-c2-2',
-        title: '素材包.ppt',
+        title: '素材包',
         size: SESSION_FILES_SOURCE_FILE_SIZE,
-        icon: getAttachmentFileIcon('素材包.ppt'),
+        icon: connectorBusinessModelExtractImage,
         scopes: ['existing'],
+      },
+    ],
+  },
+  {
+    id: 'agent-builtin',
+    title: 'Agent 内置数据',
+    variant: 'builtin',
+    files: [
+      {
+        id: 'builtin-1',
+        title: '分析主题-来源BI我的分析',
+        icon: builtinAnalysisThemeImage,
+        scopes: ['session'],
+      },
+      {
+        id: 'builtin-2',
+        title: '分析主题-来源BI我的分析111',
+        icon: builtinAnalysisThemeImage,
+        scopes: ['session'],
+      },
+      {
+        id: 'builtin-3',
+        title: '仪表板-来源BI目录',
+        icon: builtinDashboardCatalogImage,
+        scopes: ['session'],
+      },
+      {
+        id: 'builtin-4',
+        title: '数据集_来源BI数据目录',
+        icon: builtinDatasetCatalogImage,
+        scopes: ['session'],
+      },
+      {
+        id: 'builtin-5',
+        title: '模型指标集_来源BI数据集',
+        icon: builtinModelMetricsImage,
+        scopes: ['session'],
+      },
+      {
+        id: 'builtin-6',
+        title: 'Excel文件',
+        icon: builtinExcelFileImage,
+        scopes: ['session'],
       },
     ],
   },
@@ -1297,35 +1448,32 @@ const SESSION_FILES_OUTPUT_ITEMS = [
     type: 'skill',
     title: '这是生成的*****技能名称',
     desc: '这里是描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述描述',
-    icon: agentDefaultAvatarImage,
+    icon: outputSkillImage,
   },
   {
     id: 'html-1',
     type: 'html',
     title: '这是一篇报告的名称.html',
     desc: '这里是描述描述描述描述描述描述',
-    icon: libraryHtmlImage,
+    icon: outputFileHtmlImage,
   },
   {
     id: 'ppt-1',
     type: 'ppt',
     title: '这是ppt文档.ppt',
     desc: '12.45 KB',
-    icon: libraryPptImage,
+    icon: outputFilePptImage,
   },
   {
     id: 'md-1',
     type: 'md',
     title: '国内金融行业商业智能软件市场调研报告.md',
     desc: '12.45 KB',
-    icon: libraryMdImage,
+    icon: outputFileMdImage,
   },
 ]
 
 const LIBRARY_ASSETS = {
-  html: libraryHtmlImage,
-  md: libraryMdImage,
-  ppt: libraryPptImage,
   ownerPrimary: libraryOwnerPrimaryImage,
   ownerSecondary: libraryOwnerSecondaryImage,
   cover87: libraryCover87Image,
@@ -1339,6 +1487,47 @@ const LIBRARY_ASSETS = {
   cover94: libraryCover94Image,
   cover95: libraryCover95Image,
 }
+
+const OUTPUT_FILE_ASSETS = {
+  skill: outputSkillImage,
+  doc: outputFileDocImage,
+  docx: outputFileDocImage,
+  xls: outputFileExcelImage,
+  xlsx: outputFileExcelImage,
+  csv: outputFileExcelImage,
+  html: outputFileHtmlImage,
+  htm: outputFileHtmlImage,
+  image: outputFileImageImage,
+  png: outputFileImageImage,
+  jpg: outputFileImageImage,
+  jpeg: outputFileImageImage,
+  gif: outputFileImageImage,
+  webp: outputFileImageImage,
+  svg: outputFileImageImage,
+  bmp: outputFileImageImage,
+  md: outputFileMdImage,
+  markdown: outputFileMdImage,
+  pdf: outputFilePdfImage,
+  ppt: outputFilePptImage,
+  pptx: outputFilePptImage,
+  zip: outputFileZipImage,
+  rar: outputFileZipImage,
+  '7z': outputFileZipImage,
+  tar: outputFileZipImage,
+  gz: outputFileZipImage,
+  txt: outputFileOtherImage,
+  json: outputFileOtherImage,
+  js: outputFileOtherImage,
+  ts: outputFileOtherImage,
+  jsx: outputFileOtherImage,
+  tsx: outputFileOtherImage,
+  xml: outputFileOtherImage,
+  yaml: outputFileOtherImage,
+  yml: outputFileOtherImage,
+  other: outputFileOtherImage,
+}
+
+const getLibraryFileIcon = (type) => OUTPUT_FILE_ASSETS[type] ?? outputFileUnknownImage
 
 const buildLibrarySourceOwner = (agentTitle, conversationTitle) => `${agentTitle}：${conversationTitle}`
 
@@ -1354,6 +1543,7 @@ const createLibraryItem = ({
 }) => ({
   title,
   owner: buildLibrarySourceOwner(sourceAgentTitle, sourceConversationTitle),
+  subtitle: buildLibrarySourceOwner(sourceAgentTitle, sourceConversationTitle),
   type,
   ownerIcon,
   cover,
@@ -1365,8 +1555,8 @@ const createLibraryItem = ({
 
 const LIBRARY_ITEMS = [
   createLibraryItem({
-    title: '销售预测系统.html',
-    type: 'html',
+    title: '销售预测系统.xls',
+    type: 'xls',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover86,
     sourceHistoryId: 'library-source-history-1',
@@ -1375,7 +1565,7 @@ const LIBRARY_ITEMS = [
     sourceConversationTitle: '销售预测系统解读',
   }),
   createLibraryItem({
-    title: '国内金融行业商业智能软件市场调研报告.md',
+    title: '华润集团销售拓客速读.md',
     type: 'md',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover90,
@@ -1385,8 +1575,8 @@ const LIBRARY_ITEMS = [
     sourceConversationTitle: '华润集团销售情况解读',
   }),
   createLibraryItem({
-    title: '风险营销系统.html',
-    type: 'html',
+    title: '华润集团销售拓客速读.pptx',
+    type: 'ppt',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover91,
     sourceHistoryId: 'library-source-history-3',
@@ -1395,8 +1585,8 @@ const LIBRARY_ITEMS = [
     sourceConversationTitle: '风险营销系统复盘',
   }),
   createLibraryItem({
-    title: '销售预测系统.html',
-    type: 'html',
+    title: '华润集团销售拓客速读.pdf',
+    type: 'pdf',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover92,
     sourceHistoryId: 'library-source-history-4',
@@ -1405,8 +1595,8 @@ const LIBRARY_ITEMS = [
     sourceConversationTitle: '销售预测系统经营预测',
   }),
   createLibraryItem({
-    title: '华润集团销售拓客速读.md',
-    type: 'md',
+    title: '华润集团销售拓客速读.doc',
+    type: 'doc',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover93,
     sourceHistoryId: 'library-source-history-5',
@@ -1415,8 +1605,8 @@ const LIBRARY_ITEMS = [
     sourceConversationTitle: '华润集团销售拓客速读',
   }),
   createLibraryItem({
-    title: '产品架构说明.html',
-    type: 'html',
+    title: '华润集团销售拓客速读.txt',
+    type: 'txt',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover94,
     sourceHistoryId: 'library-source-history-6',
@@ -1425,8 +1615,8 @@ const LIBRARY_ITEMS = [
     sourceConversationTitle: '产品架构说明',
   }),
   createLibraryItem({
-    title: '产品架构说明.html',
-    type: 'ppt',
+    title: '华润集团销售拓客速读.html',
+    type: 'html',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover93,
     sourceHistoryId: 'library-source-history-7',
@@ -1435,8 +1625,8 @@ const LIBRARY_ITEMS = [
     sourceConversationTitle: '产品架构说明',
   }),
   createLibraryItem({
-    title: '风险营销系统.html',
-    type: 'html',
+    title: '华润集团销售拓客速读.png',
+    type: 'image',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover95,
     sourceHistoryId: 'library-source-history-8',
@@ -1445,7 +1635,7 @@ const LIBRARY_ITEMS = [
     sourceConversationTitle: '风险营销系统分析',
   }),
   createLibraryItem({
-    title: '产品架构说明.html',
+    title: '销售预测系统.html',
     type: 'html',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover94,
@@ -1455,7 +1645,7 @@ const LIBRARY_ITEMS = [
     sourceConversationTitle: '产品架构说明',
   }),
   createLibraryItem({
-    title: '产品架构说明.html',
+    title: '产品架构说明.pptx',
     type: 'ppt',
     ownerIcon: LIBRARY_ASSETS.ownerSecondary,
     cover: LIBRARY_ASSETS.cover93,
@@ -1475,8 +1665,8 @@ const LIBRARY_ITEMS = [
     sourceConversationTitle: '风险营销系统洞察',
   }),
   createLibraryItem({
-    title: '产品架构说明.html',
-    type: 'html',
+    title: '国内金融行业商业智能软件市场调研报告.md',
+    type: 'md',
     ownerIcon: LIBRARY_ASSETS.ownerPrimary,
     cover: LIBRARY_ASSETS.cover94,
     sourceHistoryId: 'library-source-history-12',
@@ -1579,11 +1769,39 @@ const EXPERT_FILTER_OPTIONS = [
   { value: 'strategy', label: '策略' },
 ]
 
+const EXPERT_BUSINESS_TABS = [
+  { value: 'all', label: '全部' },
+  { value: '财务', label: '财务' },
+  { value: '销售', label: '销售' },
+  { value: '运营', label: '运营' },
+  { value: '市场', label: '市场' },
+  { value: '人力', label: '人力' },
+  { value: '供应链', label: '供应链' },
+  { value: '客户', label: '客户' },
+  { value: '产品', label: '产品' },
+  { value: '风控', label: '风控' },
+]
+
+const EXPERT_SIDE_IMAGES = [
+  avatarImage,
+  agentDefaultAvatarImage,
+  libraryOwnerSecondaryImage,
+  activeExpertsImage,
+  libraryOwnerPrimaryImage,
+  uploadJsonImage,
+  uploadMdImage,
+  doraUploadedImage,
+  activeLibraryImage,
+]
+
+const getExpertIconByIndex = (index = 0) => EXPERT_SIDE_IMAGES[index % EXPERT_SIDE_IMAGES.length]
+
 const EXPERT_CARDS = [
   {
     title: '智能报告',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'report',
+    filterTags: ['财务', '运营', '产品'],
     editedAt: '2026/02/12',
     alertCount: 0,
   },
@@ -1591,6 +1809,7 @@ const EXPERT_CARDS = [
     title: '智能agent 121',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'analysis',
+    filterTags: ['销售', '客户', '产品'],
     editedAt: '2026/02/12',
     alertCount: 2,
   },
@@ -1598,6 +1817,7 @@ const EXPERT_CARDS = [
     title: '智能agent 121 121',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'analysis',
+    filterTags: ['运营', '产品', '财务'],
     editedAt: '2026/02/12',
     alertCount: 0,
   },
@@ -1605,6 +1825,7 @@ const EXPERT_CARDS = [
     title: '智能agent 121 121',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'analysis',
+    filterTags: ['市场', '销售', '客户'],
     editedAt: '2026/02/12',
     alertCount: 0,
   },
@@ -1612,6 +1833,7 @@ const EXPERT_CARDS = [
     title: '智能问数',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'strategy',
+    filterTags: ['产品', '运营', '财务'],
     editedAt: '2026/02/12',
     alertCount: 0,
   },
@@ -1619,6 +1841,7 @@ const EXPERT_CARDS = [
     title: '智能报告',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'report',
+    filterTags: ['供应链', '运营', '财务'],
     editedAt: '2026/02/12',
     alertCount: 0,
   },
@@ -1626,6 +1849,7 @@ const EXPERT_CARDS = [
     title: '智能agent 213123',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'analysis',
+    filterTags: ['客户', '销售', '市场'],
     editedAt: '2026/02/12',
     alertCount: 0,
   },
@@ -1633,6 +1857,7 @@ const EXPERT_CARDS = [
     title: 'Agent的名称很长很长很长很长很长很长很长...',
     desc: '这里是agent相关描述信息',
     category: 'strategy',
+    filterTags: ['人力', '运营', '产品'],
     editedAt: '2026/02/12',
     alertCount: 0,
   },
@@ -1640,6 +1865,7 @@ const EXPERT_CARDS = [
     title: '智能agent 213123',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'analysis',
+    filterTags: ['风控', '财务', '客户'],
     editedAt: '2026/02/12',
     alertCount: 0,
   },
@@ -1647,6 +1873,7 @@ const EXPERT_CARDS = [
     title: '智能agent 121 121',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'analysis',
+    filterTags: ['销售', '客户', '产品'],
     editedAt: '2026/02/12',
     alertCount: 0,
   },
@@ -1654,6 +1881,7 @@ const EXPERT_CARDS = [
     title: '智能agent12121',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'strategy',
+    filterTags: ['产品', '市场', '运营'],
     editedAt: '2026/02/12',
     alertCount: 0,
   },
@@ -1661,6 +1889,7 @@ const EXPERT_CARDS = [
     title: '销售洞察助手',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'report',
+    filterTags: ['销售', '客户', '运营'],
     editedAt: '2026/02/11',
     alertCount: 0,
   },
@@ -1668,6 +1897,7 @@ const EXPERT_CARDS = [
     title: '财务分析 Agent',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'analysis',
+    filterTags: ['财务', '风控', '运营'],
     editedAt: '2026/02/10',
     alertCount: 5,
   },
@@ -1675,6 +1905,7 @@ const EXPERT_CARDS = [
     title: '市场策略顾问',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'strategy',
+    filterTags: ['市场', '销售', '产品'],
     editedAt: '2026/02/09',
     alertCount: 0,
   },
@@ -1682,6 +1913,7 @@ const EXPERT_CARDS = [
     title: '智能周报生成',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'report',
+    filterTags: ['运营', '财务', '销售'],
     editedAt: '2026/02/08',
     alertCount: 0,
   },
@@ -1689,6 +1921,7 @@ const EXPERT_CARDS = [
     title: '客户画像分析',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'analysis',
+    filterTags: ['客户', '市场', '销售'],
     editedAt: '2026/02/07',
     alertCount: 0,
   },
@@ -1696,6 +1929,7 @@ const EXPERT_CARDS = [
     title: '竞品监测 Agent',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'strategy',
+    filterTags: ['市场', '风控', '产品'],
     editedAt: '2026/02/06',
     alertCount: 1,
   },
@@ -1703,6 +1937,7 @@ const EXPERT_CARDS = [
     title: '经营月报助手',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'report',
+    filterTags: ['运营', '财务', '供应链'],
     editedAt: '2026/02/05',
     alertCount: 0,
   },
@@ -1710,6 +1945,7 @@ const EXPERT_CARDS = [
     title: '数据异常检测',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'analysis',
+    filterTags: ['风控', '财务', '运营'],
     editedAt: '2026/02/04',
     alertCount: 0,
   },
@@ -1717,6 +1953,7 @@ const EXPERT_CARDS = [
     title: '增长策略推演',
     desc: '这里是agent相关描述信息这里是agent相关描述信息这里是agent相关描述信息',
     category: 'strategy',
+    filterTags: ['产品', '市场', '销售'],
     editedAt: '2026/02/03',
     alertCount: 0,
   },
@@ -1727,6 +1964,7 @@ const LIBRARY_SOURCE_EXPERT_CARDS = {
     title: '财务小助手',
     desc: '聚焦财报、经营指标与利润结构分析。',
     category: 'analysis',
+    businessCategory: 'finance',
     editedAt: '2026/06/03',
     alertCount: 0,
   },
@@ -1734,6 +1972,7 @@ const LIBRARY_SOURCE_EXPERT_CARDS = {
     title: '产品小助手',
     desc: '聚焦产品资料、方案解读与业务价值提炼。',
     category: 'report',
+    businessCategory: 'product',
     editedAt: '2026/06/03',
     alertCount: 0,
   },
@@ -1750,8 +1989,10 @@ const EXPERT_CATEGORY_TAGS = {
 const normalizeExpertCard = (card, index = 0) => ({
   ...card,
   id: card.id ?? `expert-${index + 1}`,
+  icon: card.icon ?? getExpertIconByIndex(index),
   creator: card.creator ?? 'Admin',
-  tags: card.tags ?? EXPERT_CATEGORY_TAGS[card.category] ?? ['标签1', '标签22', '标签33'],
+  filterTags: card.filterTags ?? [],
+  tags: card.tags ?? card.filterTags?.slice(0, 3) ?? EXPERT_CATEGORY_TAGS[card.category] ?? ['标签1', '标签22', '标签33'],
   usage: card.usage ?? `${(7.9 + (index % 5) * 0.18).toFixed(2)}k 次使用`,
 })
 
@@ -1865,11 +2106,6 @@ const parseLibrarySourceAgentName = (owner) => {
   return owner.trim()
 }
 
-const getLibrarySourceAgentIcon = (owner) => {
-  const agentName = parseLibrarySourceAgentName(owner)
-  return LIBRARY_SOURCE_AGENT_ICONS[agentName] ?? agentDefaultAvatarImage
-}
-
 const getLibrarySourceExpertCard = (agentTitle) =>
   EXPERT_CARDS.find((card) => card.title === agentTitle) ??
   LIBRARY_SOURCE_EXPERT_CARDS[agentTitle] ?? {
@@ -1888,7 +2124,7 @@ const createSessionOutputItemFromLibraryItem = (item) => {
     type: item.type,
     title: item.title,
     desc: '当前会话产出文件',
-    icon: LIBRARY_ASSETS[item.type] ?? libraryMdImage,
+    icon: getLibraryFileIcon(item.type),
     sourceLibraryKey: getLibraryItemKey(item),
   }
 }
@@ -2338,12 +2574,16 @@ export default function QuestionPage() {
   const [expertFavoriteKeys, setExpertFavoriteKeys] = useState([])
   const [activeLibraryItem, setActiveLibraryItem] = useState(null)
   const [libraryRecentItems, setLibraryRecentItems] = useState([])
+  const [libraryRecentHasOverflow, setLibraryRecentHasOverflow] = useState(false)
+  const [libraryRecentCanScrollPrev, setLibraryRecentCanScrollPrev] = useState(false)
+  const [libraryRecentCanScrollNext, setLibraryRecentCanScrollNext] = useState(false)
   const [libraryChatCollapsed, setLibraryChatCollapsed] = useState(false)
   const [libraryChatSessionMenuOpen, setLibraryChatSessionMenuOpen] = useState(false)
   const [libraryChatSessionMenuPos, setLibraryChatSessionMenuPos] = useState({ top: 0, left: 0 })
   const [libraryChatSessionsByKey, setLibraryChatSessionsByKey] = useState({})
   const [libraryChatSessionSearch, setLibraryChatSessionSearch] = useState('')
   const [expertFilter, setExpertFilter] = useState('all')
+  const [expertBusinessFilter, setExpertBusinessFilter] = useState('all')
   const [expertSearch, setExpertSearch] = useState('')
   const [libraryFilter, setLibraryFilter] = useState('all')
   const [librarySearch, setLibrarySearch] = useState('')
@@ -2352,11 +2592,20 @@ export default function QuestionPage() {
   const [expertsAlertsDismissedSnapshot, setExpertsAlertsDismissedSnapshot] = useState(null)
   const [expertsPageScrolled, setExpertsPageScrolled] = useState(false)
   const [hintIndex, setHintIndex] = useState(0)
+  const [practiceDeckIndex, setPracticeDeckIndex] = useState(0)
   const [displayedHint, setDisplayedHint] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   const [doraIntroPhase, setDoraIntroPhase] = useState('idle')
-  const [doraVisualScheme, setDoraVisualScheme] = useState('scheme5')
+  const doraVisualScheme = 'scheme7'
   const [heroSparkleReplayKey, setHeroSparkleReplayKey] = useState(0)
+  const [activeHeroSkillTagId, setActiveHeroSkillTagId] = useState(null)
+  const [slotPromptTagId, setSlotPromptTagId] = useState(null)
+  const [skillSlotAnimate, setSkillSlotAnimate] = useState(false)
+  const [tagsAnimKey, setTagsAnimKey] = useState(0)
+  const [heroSkillTagsHasOverflow, setHeroSkillTagsHasOverflow] = useState(false)
+  const [heroSkillTagsCanScrollPrev, setHeroSkillTagsCanScrollPrev] = useState(false)
+  const [heroSkillTagsCanScrollNext, setHeroSkillTagsCanScrollNext] = useState(false)
+  const heroSkillTagWasSelectedRef = useRef(false)
   const [heatmapGrid, setHeatmapGrid] = useState({
     rows: HEATMAP_BASE_ROWS,
     cols: HEATMAP_BASE_COLS,
@@ -2390,6 +2639,9 @@ export default function QuestionPage() {
   const [sessionSplitEntered, setSessionSplitEntered] = useState(false)
   const [activeSessionFileId, setActiveSessionFileId] = useState(null)
   const [hoveredComposerFileId, setHoveredComposerFileId] = useState(null)
+  const [doraAvatars, setDoraAvatars] = useState(() => INTERNAL_AVATARS)
+  const [doraNavPopoverOpen, setDoraNavPopoverOpen] = useState(false)
+  const [doraNavPopoverPos, setDoraNavPopoverPos] = useState({ top: 0, left: 0 })
   const [historyMenuOpenId, setHistoryMenuOpenId] = useState(null)
   const [historyMenuPos, setHistoryMenuPos] = useState({ top: 0, left: 0 })
   const [historyRenamingId, setHistoryRenamingId] = useState(null)
@@ -2405,14 +2657,16 @@ export default function QuestionPage() {
   const heatmapAutoPhaseRef = useRef(0)
   const heatmapAutoOffsetRef = useRef({ r: 0, c: HEATMAP_AUTO_MOTION.phaseOffset })
   const contentColumnRef = useRef(null)
-  const practicesScrollUpRef = useRef(0)
-  const practicesScrollResetRef = useRef(null)
   const mainBodyRef = useRef(null)
   const sessionSplitDividerRef = useRef(null)
   const sessionFilesPanelRef = useRef(null)
   const sessionFilesFullscreenRestoreRef = useRef({ innerSidebarOpen: false })
-  const expertsPageBodyRef = useRef(null)
+  const expertsPageMainRef = useRef(null)
   const expertTabListRef = useRef(null)
+  const doraNavRef = useRef(null)
+  const doraNavPopoverRef = useRef(null)
+  const doraNavPopoverHoverRef = useRef(false)
+  const doraNavLeaveTimerRef = useRef(null)
   const expertsNavRef = useRef(null)
   const expertsNavPopoverRef = useRef(null)
   const expertsNavPopoverHoverRef = useRef(false)
@@ -2421,10 +2675,12 @@ export default function QuestionPage() {
   const agentTitleRef = useRef(null)
   const agentMenuPanelRef = useRef(null)
   const attachMenuRef = useRef(null)
+  const heroSkillTagsScrollerRef = useRef(null)
   const historyMenuAnchorRef = useRef(null)
   const historyMenuPanelRef = useRef(null)
   const libraryChatSessionTriggerRef = useRef(null)
   const libraryChatSessionPanelRef = useRef(null)
+  const libraryRecentScrollerRef = useRef(null)
   const historyRenameInputRef = useRef(null)
   const historyRenameSkipBlurRef = useRef(false)
   const avatarBtnRef = useRef(null)
@@ -2446,6 +2702,15 @@ export default function QuestionPage() {
     start: 0,
     activeIndex: 0,
   })
+
+  const practiceDeckCards = useMemo(() => {
+    const total = PRACTICE_CARDS.length
+    const slotOffsets = [-1, 0, 1]
+    return PRACTICE_DECK_SLOTS.map((slot, slotIndex) => ({
+      slot,
+      card: PRACTICE_CARDS[(practiceDeckIndex + slotOffsets[slotIndex] + total) % total],
+    }))
+  }, [practiceDeckIndex])
 
   const heatmapCells = useMemo(
     () =>
@@ -2475,10 +2740,12 @@ export default function QuestionPage() {
 
     return expertCards.filter((card) => {
       const matchesFilter = expertFilter === 'all' || card.category === expertFilter
+      const matchesBusinessFilter =
+        expertBusinessFilter === 'all' || card.filterTags.includes(expertBusinessFilter)
       const matchesKeyword = !keyword || `${card.title} ${card.desc} ${card.creator}`.toLowerCase().includes(keyword)
-      return matchesFilter && matchesKeyword
+      return matchesFilter && matchesBusinessFilter && matchesKeyword
     })
-  }, [expertCards, expertFilter, expertSearch])
+  }, [expertBusinessFilter, expertCards, expertFilter, expertSearch])
 
   const filteredLibraryItems = useMemo(() => {
     const keyword = librarySearch.trim().toLowerCase()
@@ -2520,9 +2787,10 @@ export default function QuestionPage() {
   )
   const doraAlertCount = useMemo(() => {
     const historyCount = sumMessageBadgeCounts(sessionStates.dora.historyItems)
-    const avatarCount = sumMessageBadgeCounts(INTERNAL_AVATARS)
+    const avatarCount = sumMessageBadgeCounts(doraAvatars)
     return historyCount + avatarCount
-  }, [sessionStates.dora.historyItems])
+  }, [doraAvatars, sessionStates.dora.historyItems])
+  const showDoraAlerts = doraAlertCount > 0 && activeNav !== 'dora'
   const activeExpertDetailConfig = useMemo(
     () => getExpertDetailConfig(activeExpertCard),
     [activeExpertCard],
@@ -2546,10 +2814,61 @@ export default function QuestionPage() {
     () => pickRandomExpertPrompts(activeExpertTabs[activeExpertTab]),
     [activeExpertCard, activeExpertTab, activeExpertTabs],
   )
+  const updateLibraryRecentScrollState = useCallback(() => {
+    const scroller = libraryRecentScrollerRef.current
+    if (!scroller) {
+      setLibraryRecentHasOverflow(false)
+      setLibraryRecentCanScrollPrev(false)
+      setLibraryRecentCanScrollNext(false)
+      return
+    }
+
+    const maxScrollLeft = Math.max(0, scroller.scrollWidth - scroller.clientWidth)
+    setLibraryRecentHasOverflow(maxScrollLeft > 1)
+    setLibraryRecentCanScrollPrev(scroller.scrollLeft > 1)
+    setLibraryRecentCanScrollNext(scroller.scrollLeft < maxScrollLeft - 1)
+  }, [])
+
+  const scrollLibraryRecentBackward = useCallback(() => {
+    const scroller = libraryRecentScrollerRef.current
+    if (!scroller) return
+
+    const firstCard = scroller.querySelector('.library-recent-card')
+    const gap = Number.parseFloat(window.getComputedStyle(scroller).gap || '16') || 16
+    const cardWidth = firstCard?.getBoundingClientRect().width ?? 170
+    scroller.scrollBy({
+      left: -(cardWidth + gap) * 3,
+      behavior: 'smooth',
+    })
+  }, [])
+
+  const scrollLibraryRecentForward = useCallback(() => {
+    const scroller = libraryRecentScrollerRef.current
+    if (!scroller) return
+
+    const firstCard = scroller.querySelector('.library-recent-card')
+    const gap = Number.parseFloat(window.getComputedStyle(scroller).gap || '16') || 16
+    const cardWidth = firstCard?.getBoundingClientRect().width ?? 170
+    scroller.scrollBy({
+      left: (cardWidth + gap) * 3,
+      behavior: 'smooth',
+    })
+  }, [])
+
+  useEffect(() => {
+    updateLibraryRecentScrollState()
+  }, [activeLibraryItem, activeNav, libraryRecentItems, updateLibraryRecentScrollState])
+
+  useEffect(() => {
+    const handleResize = () => updateLibraryRecentScrollState()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [updateLibraryRecentScrollState])
+
   const openExpertCard = (card) => {
     setExpertRecentCards((prev) => {
       const key = getExpertCardKey(card)
-      return [card, ...prev.filter((entry) => getExpertCardKey(entry) !== key)].slice(0, 7)
+      return [card, ...prev.filter((entry) => getExpertCardKey(entry) !== key)].slice(0, 9)
     })
     setActiveExpertCard(card)
     setInternalSidebarOpen(true)
@@ -2683,7 +3002,77 @@ export default function QuestionPage() {
     })
   }, [derivedSessionOutputFiles, mentionPanel.open, mentionPanel.scope, mentionPanel.query, mentionScopeComposerFiles])
   const senderMentionFlatItems = useMemo(() => flattenSenderMentionGroups(senderMentionGroups), [senderMentionGroups])
-  const senderPlaceholder = '在此输入任何您想查询或分析的问题，输入 @ 引用会话文件'
+  const activeHeroSkillTag = useMemo(
+    () => HERO_SKILL_TAGS.find((tag) => tag.id === activeHeroSkillTagId) ?? null,
+    [activeHeroSkillTagId],
+  )
+  const showHeroSkillSenderUi = !isQuestionMode && Boolean(activeHeroSkillTag)
+  const senderPlaceholder = activeHeroSkillTag
+    ? (HERO_SKILL_TAG_PLACEHOLDERS[activeHeroSkillTag.id] ?? '输入任何您想查询或分析的问题')
+    : '输入任何您想查询或分析的问题'
+  const [displayedSenderPlaceholder, setDisplayedSenderPlaceholder] = useState('')
+  const displayedSenderPlaceholderRef = useRef('')
+
+  useEffect(() => {
+    displayedSenderPlaceholderRef.current = displayedSenderPlaceholder
+  }, [displayedSenderPlaceholder])
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reducedMotion) {
+      setDisplayedSenderPlaceholder(senderPlaceholder)
+      displayedSenderPlaceholderRef.current = senderPlaceholder
+      return undefined
+    }
+
+    let cancelled = false
+    let timer = null
+    const TYPE_MS = 38
+    const START_MS = 90
+
+    displayedSenderPlaceholderRef.current = ''
+    setDisplayedSenderPlaceholder('')
+
+    const step = () => {
+      if (cancelled) return
+
+      const current = displayedSenderPlaceholderRef.current
+      const goal = senderPlaceholder
+
+      if (current.length >= goal.length) return
+
+      const next = goal.slice(0, current.length + 1)
+      displayedSenderPlaceholderRef.current = next
+      setDisplayedSenderPlaceholder(next)
+      timer = window.setTimeout(step, TYPE_MS)
+    }
+
+    timer = window.setTimeout(step, START_MS)
+
+    return () => {
+      cancelled = true
+      if (timer) window.clearTimeout(timer)
+    }
+  }, [senderPlaceholder])
+
+  useEffect(() => {
+    if (activeHeroSkillTagId) {
+      setSlotPromptTagId(activeHeroSkillTagId)
+      heroSkillTagWasSelectedRef.current = true
+      setSkillSlotAnimate(true)
+      return undefined
+    }
+
+    const slotTimer = window.setTimeout(() => setSlotPromptTagId(null), 500)
+
+    if (heroSkillTagWasSelectedRef.current) {
+      setTagsAnimKey((key) => key + 1)
+    }
+
+    return () => {
+      window.clearTimeout(slotTimer)
+    }
+  }, [activeHeroSkillTagId])
   const activeLibraryTitle = activeLibraryItem ? activeLibraryItem.title : ''
   const activeLibraryMarkdown = activeLibraryItem?.type === 'md' ? financialBiMdContent : ''
   const activeLibraryHtml = useMemo(() => {
@@ -3277,7 +3666,7 @@ export default function QuestionPage() {
         suppressContentEditableWarning
         role="textbox"
         aria-multiline="true"
-        data-placeholder={senderPlaceholder}
+        data-placeholder={displayedSenderPlaceholder}
         onCompositionStart={() => {
           composerComposingRef.current = true
         }}
@@ -3960,13 +4349,15 @@ export default function QuestionPage() {
         <div className="attach-btn-wrap attach-btn-wrap--bi attach-btn-wrap--menu">
           <IconButton
             type="button"
-            className="attach-btn attach-btn--mode attach-btn--bi"
+            className="attach-btn attach-btn--plus attach-btn--bi"
             tip={undefined}
             aria-label="FineBI 连接"
             onClick={() => openAttachConnectModal(BI_ATTACH_MENU_ITEMS[0].label)}
           >
             <span className="attach-btn__visual">
-              <img className="attach-btn__img" src={connectorImage} alt="连接器" />
+              <span className="dora-icon icon-16 attach-btn__plus-icon" aria-hidden="true">
+                {ICONS.frbiConnector}
+              </span>
             </span>
           </IconButton>
           <div className="attach-menu" role="menu" aria-label="FineBI 连接列表">
@@ -3989,7 +4380,7 @@ export default function QuestionPage() {
       ) : (
         <IconButton
           type="button"
-          className="attach-btn attach-btn--mode attach-btn--bi"
+          className="attach-btn attach-btn--plus attach-btn--bi"
           tip={doraVisualScheme === 'scheme5' ? undefined : doraVisualScheme === 'scheme4' ? '连接「***_01」' : '添加 FineBI 资产'}
           aria-label={doraVisualScheme === 'scheme4' ? '连接「***_01」' : '添加 FineBI 资产'}
           onClick={() =>
@@ -3997,29 +4388,12 @@ export default function QuestionPage() {
           }
         >
           <span className="attach-btn__visual">
-            <img
-              className="attach-btn__img"
-              src={doraVisualScheme === 'scheme4' ? connectorBiImage : btnBiImage}
-              alt={doraVisualScheme === 'scheme4' ? '连接器 BI' : 'BI'}
-            />
+            <span className="dora-icon icon-16 attach-btn__plus-icon" aria-hidden="true">
+              {ICONS.frbiConnector}
+            </span>
           </span>
         </IconButton>
       )}
-      {doraVisualScheme !== 'scheme5' ? (
-        <IconButton
-          type="button"
-          className="attach-btn attach-btn--mode attach-btn--fr"
-          tip={doraVisualScheme === 'scheme5' ? undefined : doraVisualScheme === 'scheme4' ? '连接「***_02」' : '添加 FineReport 资产'}
-          aria-label={doraVisualScheme === 'scheme4' ? '连接「***_02」' : '添加 FineReport 资产'}
-          onClick={() =>
-            openAttachConnectModal(doraVisualScheme === 'scheme4' ? '连接「***_02」' : '添加 FineReport 资产')
-          }
-        >
-          <span className="attach-btn__visual">
-            <img className="attach-btn__img" src={btnFrImage} alt="FR" />
-          </span>
-        </IconButton>
-      ) : null}
     </div>
   )
 
@@ -4115,50 +4489,10 @@ export default function QuestionPage() {
       </section>
     ))
 
-  const renderHomeHeaderNav = () => (
-    <div className="dora-visual-switch" role="tablist" aria-label="首页动效方案切换">
-      <button
-        type="button"
-        className={`dora-visual-switch__btn ${doraVisualScheme === 'scheme5' ? 'active' : ''}`}
-        onClick={() => setDoraVisualScheme('scheme5')}
-      >
-        流动网格背景
-      </button>
-      <button
-        type="button"
-        className={`dora-visual-switch__btn ${doraVisualScheme === 'scheme7' ? 'active' : ''}`}
-        onClick={() => setDoraVisualScheme('scheme7')}
-      >
-        动态光球背景
-      </button>
-      <button
-        type="button"
-        className={`dora-visual-switch__btn ${doraVisualScheme === 'scheme9' ? 'active' : ''}`}
-        onClick={() => setDoraVisualScheme('scheme9')}
-      >
-        流光线条背景
-      </button>
-    </div>
-  )
+  const renderHomeHeaderNav = () => null
 
   const renderOrbBackgroundBanner = () => (
     <div className="scheme-orb-banner" aria-hidden="true">
-    </div>
-  )
-
-  const renderFlowLinesBanner = () => (
-    <div className="scheme-flowlines-banner" aria-hidden="true">
-      <div className="scheme-flowlines-banner__halo" />
-      <div className="scheme-flowlines-banner__network">
-        <FlowLinesBackground
-          className="scheme-flowlines-banner__svg"
-          anchorSelector=".dora-stage__sender .sender-editor"
-          rightAnchorSelector=".dora-stage__sender .send-btn"
-          addAnchorSelector=".dora-stage__sender .attach-btn--plus"
-          bottomAnchorSelector=".dora-stage__practices .practice-card h3[data-practice-title='增长拆解']"
-        />
-      </div>
-      <div className="scheme-flowlines-banner__fade" />
     </div>
   )
 
@@ -4181,7 +4515,7 @@ export default function QuestionPage() {
         aria-label={`打开资料来源：${activeSessionSourceLibraryItem.title}`}
       >
         <img
-          src={LIBRARY_ASSETS[activeSessionSourceLibraryItem.type]}
+          src={getLibraryFileIcon(activeSessionSourceLibraryItem.type)}
           alt=""
           className="main-header__session-source-icon"
         />
@@ -4292,7 +4626,20 @@ export default function QuestionPage() {
     )
   }
 
-  const renderSessionExistingItemActions = (item) => renderSessionCiteAction(item)
+  const renderSessionDownloadAction = (className = 'session-files-panel__action-btn') => (
+    <IconButton tip="下载" className={className} aria-label="下载">
+      <span className="dora-icon icon-16" aria-hidden="true">
+        {ICONS.download}
+      </span>
+    </IconButton>
+  )
+
+  const renderSessionExistingItemActions = (item) => (
+    <>
+      {renderSessionCiteAction(item)}
+      {renderSessionDownloadAction()}
+    </>
+  )
 
   const renderSessionExistingDataTab = () => {
     const hasVisibleBlocks = filteredSessionExistingData.some((block) => block.groups.length > 0)
@@ -4364,56 +4711,34 @@ export default function QuestionPage() {
     return (
       <>
         {renderSessionCiteAction(file)}
-        <IconButton
-          tip="删除"
-          className="session-files-panel__action-btn session-files-panel__action-btn--danger"
-          onClick={() => removeSessionSourceFile(file.id)}
-        >
-          <span className="dora-icon icon-16" aria-hidden="true">
-            {ICONS.delete}
-          </span>
-        </IconButton>
+        {renderSessionDownloadAction()}
       </>
     )
   }
 
   const renderSessionFilesMaterialsTab = () => {
-    const isExistingScope = sessionFilesSourceScope === 'existing'
     const hasVisibleSessionSections = filteredSessionSourceSections.some((section) => section.files.length > 0)
-    const hasVisibleContent = isExistingScope
-      ? filteredSessionExistingData.some((block) => block.groups.length > 0)
-      : hasVisibleSessionSections
 
     return (
       <div className="session-files-panel__source">
         <div className="session-files-panel__source-toolbar">
-          <SessionFilesToolbarRow
-            rowClassName="session-files-panel__source-toolbar-row"
-            filtersAriaLabel="来源范围"
-            searchValue={sessionFilesSourceSearch}
-            onSearchChange={setSessionFilesSourceSearch}
-            searchIcon={ICONS.search}
-            collapseSearch
-          >
-            {SESSION_FILES_SOURCE_SCOPE_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                role="tab"
-                aria-selected={sessionFilesSourceScope === option.value}
-                className={`session-files-panel__filter${sessionFilesSourceScope === option.value ? ' active' : ''}`}
-                onClick={() => setSessionFilesSourceScope(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </SessionFilesToolbarRow>
+          <label className="session-files-panel__search session-files-panel__search--stretch">
+            <span className="dora-icon session-files-panel__search-icon" aria-hidden="true">
+              {ICONS.search}
+            </span>
+            <input
+              value={sessionFilesSourceSearch}
+              onChange={(event) => setSessionFilesSourceSearch(event.target.value)}
+              type="search"
+              className="session-files-panel__search-input"
+              placeholder="搜索名称"
+              aria-label="搜索名称"
+            />
+          </label>
         </div>
 
         <div className="session-files-panel__source-scroll">
-          {isExistingScope ? (
-            renderSessionExistingDataTab()
-          ) : hasVisibleSessionSections ? (
+          {hasVisibleSessionSections ? (
             filteredSessionSourceSections.map((section) => {
               const isCollapsed = Boolean(sessionFilesSourceCollapsed[section.id])
 
@@ -4431,40 +4756,59 @@ export default function QuestionPage() {
                       </span>
                       <span className="session-files-panel__source-group-title">{section.title}</span>
                     </button>
-                    {section.addable ? (
-                      <IconButton tip="添加" className="icon-btn session-files-panel__source-add" aria-label="添加文件">
-                        <span className="dora-icon icon-16" aria-hidden="true">
-                          {ICONS.create}
-                        </span>
-                      </IconButton>
-                    ) : null}
                   </div>
 
                   {!isCollapsed && section.files.length ? (
-                    <div className="session-files-panel__source-grid">
-                      {section.files.map((file) => (
-                        <article
-                          key={file.id}
-                          className="session-files-panel__source-card"
-                          onMouseLeave={blurSessionFileCardFocus}
-                        >
-                          <img src={file.icon} alt="" className="session-files-panel__source-icon" />
-                          <div className="session-files-panel__source-text">
-                            <p className="session-files-panel__source-name" title={file.title}>
-                              {highlightSearchText(file.title, sessionFilesSourceSearch)}
-                            </p>
-                            <p className="session-files-panel__source-size">{file.size}</p>
-                          </div>
-                          <div
-                            className="session-files-panel__actions session-files-panel__source-actions"
-                            onClick={(e) => e.stopPropagation()}
-                            onKeyDown={(e) => e.stopPropagation()}
+                    section.variant === 'builtin' ? (
+                      <div className="session-files-panel__builtin-list">
+                        {section.files.map((file) => (
+                          <article
+                            key={file.id}
+                            className="session-files-panel__builtin-item"
+                            onMouseLeave={blurSessionFileCardFocus}
                           >
-                            {renderSessionSourceFileActions(file)}
-                          </div>
-                        </article>
-                      ))}
-                    </div>
+                            <img src={file.icon} alt="" className="session-files-panel__builtin-icon" />
+                            <div className="session-files-panel__builtin-text">
+                              <p className="session-files-panel__builtin-name" title={file.title}>
+                                {highlightSearchText(file.title, sessionFilesSourceSearch)}
+                              </p>
+                            </div>
+                            <div
+                              className="session-files-panel__actions session-files-panel__builtin-actions"
+                              onClick={(e) => e.stopPropagation()}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            >
+                              {renderSessionCiteAction(file)}
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="session-files-panel__source-grid">
+                        {section.files.map((file) => (
+                          <article
+                            key={file.id}
+                            className="session-files-panel__source-card"
+                            onMouseLeave={blurSessionFileCardFocus}
+                          >
+                            <img src={file.icon} alt="" className="session-files-panel__source-icon" />
+                            <div className="session-files-panel__source-text">
+                              <p className="session-files-panel__source-name" title={file.title}>
+                                {highlightSearchText(file.title, sessionFilesSourceSearch)}
+                              </p>
+                              <p className="session-files-panel__source-size">{file.size}</p>
+                            </div>
+                            <div
+                              className="session-files-panel__actions session-files-panel__source-actions"
+                              onClick={(e) => e.stopPropagation()}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            >
+                              {renderSessionSourceFileActions(file)}
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    )
                   ) : null}
 
                   {!isCollapsed && !section.files.length ? (
@@ -4475,11 +4819,11 @@ export default function QuestionPage() {
                 </section>
               )
             })
-          ) : !hasVisibleContent ? (
+          ) : (
             <div className="session-files-panel__empty session-files-panel__empty--tab">
               {sessionFilesSourceSearch.trim() ? '暂无匹配数据' : '暂无内容'}
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     )
@@ -4552,19 +4896,6 @@ export default function QuestionPage() {
             </div>
           </div>
           <div className="session-files-panel__header-actions">
-            {!isModal ? (
-              <IconButton
-                tip={sessionFilesPanelFullscreen ? '缩小' : '放大'}
-                className="icon-btn session-files-panel__expand"
-                aria-label={sessionFilesPanelFullscreen ? '缩小会话文件' : '放大会话文件'}
-                aria-pressed={sessionFilesPanelFullscreen}
-                onClick={toggleSessionFilesPanelFullscreen}
-              >
-                <span className="dora-icon icon-16" aria-hidden="true">
-                  {sessionFilesPanelFullscreen ? ICONS.shrink : ICONS.expand}
-                </span>
-              </IconButton>
-            ) : null}
             <IconButton
               tip="关闭"
               className="icon-btn session-files-panel__close"
@@ -4709,7 +5040,7 @@ export default function QuestionPage() {
   const renderLibrarySessionFilesModal = () => renderSessionFilesModal(() => setLibrarySessionFilesModalOpen(false))
 
   const sessionAssistantName = isExpertDetailView ? activeExpertCard?.title ?? 'Agent' : 'Dora'
-  const sessionAssistantAvatar = isExpertDetailView ? agentDefaultAvatarImage : doraUploadedImage
+  const sessionAssistantAvatar = isExpertDetailView ? activeExpertCard?.icon ?? agentDefaultAvatarImage : doraUploadedImage
 
   const renderPracticesBackButton = () => (
     <button type="button" className="practices-back practices-back--header" onClick={() => setPracticesPageOpen(false)}>
@@ -4718,6 +5049,34 @@ export default function QuestionPage() {
         {ICONS.moreUp}
       </span>
     </button>
+  )
+
+  const renderPracticePreviewDeck = () => (
+    <div className="practices-panel" aria-label="最佳实践轮播预览">
+      <div className="cards-track">
+        {practiceDeckCards.map(({ slot, card }) => (
+          <article
+            key={`practice-deck-${slot}-${card.id}`}
+            className={`practice-browser-card practice-deck-card practice-deck-card--${slot}`}
+          >
+            <div className="practice-browser-card__cover" aria-hidden="true">
+              <img src={card.cover} alt="" className="practice-browser-card__cover-image" />
+            </div>
+            <div className="practice-browser-card__body">
+              <h3 data-practice-title={card.title}>{card.title}</h3>
+            </div>
+            <div className="practice-browser-card__hover">
+              <button type="button" className="practice-browser-card__action practice-browser-card__action--negative">
+                做同款
+              </button>
+              <button type="button" className="practice-browser-card__action practice-browser-card__action--primary">
+                去查看
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
   )
 
   const renderSessionThread = () => (
@@ -4833,37 +5192,7 @@ export default function QuestionPage() {
         handleHeatmapPointerLeave()
       }}
     >
-      {!isQuestionMode && !isExpertDetailView && doraVisualScheme === 'scheme3' ? (
-        <div className="scheme3-banner" aria-hidden="true">
-          <div className="scheme3-banner__glow"></div>
-        </div>
-      ) : null}
-      {!isQuestionMode && !isExpertDetailView && doraVisualScheme === 'scheme7' ? renderOrbBackgroundBanner() : null}
-      {!isQuestionMode && !isExpertDetailView && doraVisualScheme === 'scheme9' ? renderFlowLinesBanner() : null}
-      {!isQuestionMode && !isExpertDetailView && (doraVisualScheme === 'scheme4' || doraVisualScheme === 'scheme5') ? (
-        <div className="scheme-heatmap-banner" aria-hidden="true">
-          <div className="scheme-heatmap-stage" ref={heatmapStageRef}>
-            <div
-              className="scheme-heatmap-grid"
-              style={{
-                '--cols': heatmapGrid.cols,
-                '--rows': heatmapGrid.rows,
-                '--cell-w': `${heatmapGrid.cellWidth}px`,
-                '--cell-h': `${heatmapGrid.cellHeight}px`,
-              }}
-            >
-              {heatmapCells.map((cell) => (
-                <div className={`scheme-heatmap-cell ${cell.isFocus ? 'is-focus' : ''}`} key={cell.id} style={cell.style}>
-                  <span className="scheme-heatmap-dot scheme-heatmap-dot--tl"></span>
-                  <span className="scheme-heatmap-dot scheme-heatmap-dot--tr"></span>
-                  <span className="scheme-heatmap-dot scheme-heatmap-dot--br"></span>
-                  <span className="scheme-heatmap-dot scheme-heatmap-dot--bl"></span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {!isQuestionMode && !isExpertDetailView ? renderOrbBackgroundBanner() : null}
       <header
         className={`main-header dora-stage__header ${practicesPageOpen ? 'dora-stage__header--practices' : ''} ${
           isQuestionMode || (!practicesPageOpen && (activeNav === 'dora' || isExpertDetailView))
@@ -4907,15 +5236,28 @@ export default function QuestionPage() {
         <section className="practices-browser dora-stage__practices-browser">
           <div className="practices-grid">
             {PRACTICE_CARDS.map((card) => (
-              <article key={`browser-${card.title}`} className="practice-browser-card">
-                <h3 data-practice-title={card.title}>{card.title}</h3>
-                <p>{card.desc}</p>
+              <article key={`browser-${card.id}`} className="practice-browser-card">
+                <div className="practice-browser-card__cover" aria-hidden="true">
+                  <img src={card.cover} alt="" className="practice-browser-card__cover-image" />
+                </div>
+                <div className="practice-browser-card__body">
+                  <h3 data-practice-title={card.title}>{card.title}</h3>
+                </div>
+                <div className="practice-browser-card__hover">
+                  <button type="button" className="practice-browser-card__action practice-browser-card__action--negative">
+                    做同款
+                  </button>
+                  <button type="button" className="practice-browser-card__action practice-browser-card__action--primary">
+                    去查看
+                  </button>
+                </div>
               </article>
             ))}
           </div>
         </section>
       ) : (
-        <section className={`hero dora-stage__hero ${isQuestionMode ? 'hero--session' : ''}`}>
+        <>
+          <section className={`hero dora-stage__hero ${isQuestionMode ? 'hero--session' : ''}`}>
             {isQuestionMode ? (
               <div className="session-generating dora-stage__session">{renderSessionThread()}</div>
             ) : (
@@ -4950,58 +5292,58 @@ export default function QuestionPage() {
                     )}
                   </h1>
                 </div>
-                <div className="subtitle-row">
-                  <span className="subtitle-prefix">我可以帮你</span>
-                  <button type="button" className="capability-badge" onClick={applyHintToInput}>
-                    {displayedHint}
-                    <span className="cursor">_</span>
-                  </button>
-                </div>
               </div>
             )}
 
             <div className={`sender-wrap dora-stage__sender ${isQuestionMode ? 'sender-wrap--session' : ''}`}>
-              <div
-                className={`sender ${inputFocused ? 'focused' : ''} ${canSend ? 'has-value' : ''} ${isSessionBusy ? 'is-sending' : ''} ${
-                  !isQuestionMode &&
-                  (doraVisualScheme === 'scheme4' ||
-                    doraVisualScheme === 'scheme5' ||
-                    doraVisualScheme === 'scheme7' ||
-                    doraVisualScheme === 'scheme9')
-                    ? 'dora-sender--ring'
-                    : ''
-                }`}
-              >
-                <div className="sender-inner">
-                  {renderSenderInnerContent(activeSessionScope)}
-                  <div className="sender-toolbar">
-                    {renderAttachActions()}
-                    <button
-                      type="button"
-                      className="send-btn"
-                      aria-label={isSessionBusy ? '停止生成' : '发送'}
-                      disabled={!canSend && !isSessionBusy}
-                      onClick={isSessionBusy ? handleStopGeneration : handleSend}
-                    >
-                      {isSessionBusy ? (
-                        <span className="send-stop-icon" aria-hidden="true"></span>
-                      ) : (
-                        <span className="dora-icon send-icon" aria-hidden="true">
-                          {ICONS.send}
-                        </span>
-                      )}
-                    </button>
+              <div className="sender-combo">
+                <div
+                  className={`sender ${inputFocused ? 'focused' : ''} ${canSend ? 'has-value' : ''} ${isSessionBusy ? 'is-sending' : ''} ${
+                    !isQuestionMode &&
+                    (doraVisualScheme === 'scheme4' ||
+                      doraVisualScheme === 'scheme5' ||
+                      doraVisualScheme === 'scheme7' ||
+                      doraVisualScheme === 'scheme9')
+                      ? 'dora-sender--ring'
+                      : ''
+                  }`}
+                >
+                  <div className="sender-inner">
+                    {renderSenderInnerContent(activeSessionScope)}
+                    {renderSenderToolbarBlock({ showStop: isSessionBusy })}
                   </div>
                 </div>
               </div>
             </div>
+            {renderHeroSkillSlot()}
             {isQuestionMode ? (
               <p className="sender-wrap__tip dora-stage__sender-tip">内容均由AI生成, 仅供参考</p>
             ) : null}
           </section>
+          {!isQuestionMode && !isExpertDetailView ? (
+            <footer className="practices dora-stage__practices">
+              <button type="button" className="practices-toggle" onClick={() => setPracticesPageOpen(true)}>
+                <span>探索最佳实践</span>
+                <span className="dora-icon icon-16 practices-toggle__more-up" aria-hidden="true">
+                  {ICONS.moreUp}
+                </span>
+              </button>
+
+              {renderPracticePreviewDeck()}
+            </footer>
+          ) : null}
+        </>
       )}
     </div>
   )
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setPracticeDeckIndex((current) => (current - 1 + PRACTICE_CARDS.length) % PRACTICE_CARDS.length)
+    }, 3200)
+
+    return () => window.clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     const full = CAPABILITY_HINTS[hintIndex]
@@ -5035,8 +5377,6 @@ export default function QuestionPage() {
     }
   }, [displayedHint, hintIndex, isDeleting])
 
-  useEffect(() => {  }, [doraVisualScheme])
-
   useEffect(() => {
     if (activeNav !== 'dora' || !practicesPageOpen) return
 
@@ -5050,118 +5390,6 @@ export default function QuestionPage() {
       }
     })
   }, [activeNav, practicesPageOpen])
-
-  useEffect(() => {
-      const canHandlePracticesScroll =
-        activeNav === 'dora' &&
-        !isSessionBusy &&
-        !activeSessionPrompt &&
-      (doraVisualScheme === 'scheme4' ||
-        doraVisualScheme === 'scheme5' ||
-        doraVisualScheme === 'scheme7' ||
-        doraVisualScheme === 'scheme9')
-
-    if (!canHandlePracticesScroll) return undefined
-
-    const container = contentColumnRef.current
-    if (!container) return undefined
-
-    const openThreshold = 80
-    const touchSwipeThreshold = 48
-    let practicesTouchStartY = null
-
-    const resetAccumulator = () => {
-      practicesScrollUpRef.current = 0
-      if (practicesScrollResetRef.current) {
-        clearTimeout(practicesScrollResetRef.current)
-        practicesScrollResetRef.current = null
-      }
-    }
-
-    const isPracticesFooterTarget = (target) =>
-      target instanceof Element && Boolean(target.closest('.dora-stage__practices'))
-
-    const accumulateOpenGesture = (deltaY) => {
-      practicesScrollUpRef.current += Math.abs(deltaY)
-      if (practicesScrollResetRef.current) {
-        clearTimeout(practicesScrollResetRef.current)
-      }
-      practicesScrollResetRef.current = window.setTimeout(resetAccumulator, 300)
-
-      if (practicesScrollUpRef.current >= openThreshold) {
-        resetAccumulator()
-        setPracticesPageOpen(true)
-      }
-    }
-
-    const onWheel = (event) => {
-      if (practicesPageOpen) {
-        const practicesBrowser = container.querySelector('.practices-browser')
-        if (practicesBrowser instanceof HTMLElement && practicesBrowser.scrollTop > 0) {
-          return
-        }
-
-        if (event.deltaY >= 0) {
-          practicesScrollUpRef.current = Math.max(0, practicesScrollUpRef.current - event.deltaY)
-          return
-        }
-
-        event.preventDefault()
-        practicesScrollUpRef.current += Math.abs(event.deltaY)
-        if (practicesScrollResetRef.current) {
-          clearTimeout(practicesScrollResetRef.current)
-        }
-        practicesScrollResetRef.current = window.setTimeout(resetAccumulator, 300)
-
-        if (practicesScrollUpRef.current >= openThreshold) {
-          resetAccumulator()
-          setPracticesPageOpen(false)
-        }
-        return
-      }
-
-      // 首页仅在底部「最佳实践」模块内响应上滑；其它区域（含下滑）不拦截滚轮，避免页面抖动
-      if (!isPracticesFooterTarget(event.target) || event.deltaY >= 0) {
-        return
-      }
-
-      event.preventDefault()
-      accumulateOpenGesture(event.deltaY)
-    }
-
-    const onTouchStart = (event) => {
-      if (practicesPageOpen || event.touches.length !== 1) return
-      if (!isPracticesFooterTarget(event.target)) return
-      practicesTouchStartY = event.touches[0].clientY
-    }
-
-    const onTouchEnd = (event) => {
-      if (practicesPageOpen || practicesTouchStartY === null || event.changedTouches.length !== 1) return
-      if (!isPracticesFooterTarget(event.target)) {
-        practicesTouchStartY = null
-        return
-      }
-
-      const deltaY = event.changedTouches[0].clientY - practicesTouchStartY
-      practicesTouchStartY = null
-
-      if (deltaY >= -touchSwipeThreshold) return
-
-      resetAccumulator()
-      setPracticesPageOpen(true)
-    }
-
-    container.addEventListener('wheel', onWheel, { passive: false })
-    container.addEventListener('touchstart', onTouchStart, { passive: true })
-    container.addEventListener('touchend', onTouchEnd, { passive: true })
-    return () => {
-      container.removeEventListener('wheel', onWheel)
-      container.removeEventListener('touchstart', onTouchStart)
-      container.removeEventListener('touchend', onTouchEnd)
-      practicesTouchStartY = null
-      resetAccumulator()
-    }
-  }, [activeNav, practicesPageOpen, isSessionBusy, activeSessionPrompt, doraVisualScheme])
 
   useEffect(() => {
     if (composerUpdateSourceRef.current === 'editor') {
@@ -5484,6 +5712,19 @@ export default function QuestionPage() {
   }, [expertsNavPopoverOpen])
 
   useEffect(() => {
+    if (!doraNavPopoverOpen) return undefined
+
+    const handleReposition = () => updateDoraNavPopoverPosition()
+
+    window.addEventListener('resize', handleReposition)
+    window.addEventListener('scroll', handleReposition, true)
+    return () => {
+      window.removeEventListener('resize', handleReposition)
+      window.removeEventListener('scroll', handleReposition, true)
+    }
+  }, [doraNavPopoverOpen])
+
+  useEffect(() => {
     if (expertAlertCount === 0) {
       setExpertsAlertsDismissedSnapshot(null)
     }
@@ -5496,7 +5737,16 @@ export default function QuestionPage() {
   }, [showExpertsAlerts, activeNav])
 
   useEffect(() => {
+    if (!showDoraAlerts) {
+      setDoraNavPopoverOpen(false)
+    }
+  }, [showDoraAlerts])
+
+  useEffect(() => {
     return () => {
+      if (doraNavLeaveTimerRef.current) {
+        clearTimeout(doraNavLeaveTimerRef.current)
+      }
       if (expertsNavLeaveTimerRef.current) {
         clearTimeout(expertsNavLeaveTimerRef.current)
       }
@@ -5504,19 +5754,19 @@ export default function QuestionPage() {
   }, [])
 
   useEffect(() => {
-    const bodyEl = expertsPageBodyRef.current
-    if (!bodyEl || activeNav !== 'experts' || activeExpertCard) {
+    const mainEl = expertsPageMainRef.current
+    if (!mainEl || activeNav !== 'experts' || activeExpertCard) {
       setExpertsPageScrolled(false)
       return undefined
     }
 
     const handleScroll = () => {
-      setExpertsPageScrolled(bodyEl.scrollTop > 0)
+      setExpertsPageScrolled(mainEl.scrollTop > 0)
     }
 
     handleScroll()
-    bodyEl.addEventListener('scroll', handleScroll, { passive: true })
-    return () => bodyEl.removeEventListener('scroll', handleScroll)
+    mainEl.addEventListener('scroll', handleScroll, { passive: true })
+    return () => mainEl.removeEventListener('scroll', handleScroll)
   }, [activeNav, activeExpertCard])
 
   useEffect(() => {
@@ -5555,12 +5805,6 @@ export default function QuestionPage() {
   useEffect(() => {
     setHeatmapTokenColors(getHeatmapTokenColors())
   }, [])
-
-  useEffect(() => {
-    if (doraVisualScheme === 'scheme6') {
-      setDoraVisualScheme('scheme5')
-    }
-  }, [doraVisualScheme])
 
   useEffect(() => {
     if (doraVisualScheme !== 'scheme4' && doraVisualScheme !== 'scheme5') return undefined
@@ -5667,6 +5911,60 @@ export default function QuestionPage() {
     setExpertsNavPopoverPos({ top: rect.top, left: rect.right + 4 })
   }
 
+  const updateDoraNavPopoverPosition = () => {
+    const rect = doraNavRef.current?.getBoundingClientRect()
+    if (!rect) return
+    setDoraNavPopoverPos({ top: rect.top, left: rect.right + 4 })
+  }
+
+  const openDoraNavPopover = () => {
+    if (!showDoraAlerts) return
+    updateDoraNavPopoverPosition()
+    setDoraNavPopoverOpen(true)
+  }
+
+  const closeDoraNavPopover = () => {
+    setDoraNavPopoverOpen(false)
+  }
+
+  const handleDoraNavEnter = () => {
+    if (doraNavLeaveTimerRef.current) {
+      clearTimeout(doraNavLeaveTimerRef.current)
+      doraNavLeaveTimerRef.current = null
+    }
+    openDoraNavPopover()
+  }
+
+  const handleDoraNavLeave = () => {
+    doraNavLeaveTimerRef.current = setTimeout(() => {
+      if (!doraNavPopoverHoverRef.current) {
+        closeDoraNavPopover()
+      }
+    }, 120)
+  }
+
+  const handleDoraNavPopoverEnter = () => {
+    doraNavPopoverHoverRef.current = true
+    if (doraNavLeaveTimerRef.current) {
+      clearTimeout(doraNavLeaveTimerRef.current)
+      doraNavLeaveTimerRef.current = null
+    }
+  }
+
+  const handleDoraNavPopoverLeave = () => {
+    doraNavPopoverHoverRef.current = false
+    closeDoraNavPopover()
+  }
+
+  const dismissDoraAlerts = () => {
+    setDoraAvatars((prev) => prev.map((item) => (item.badge ? { ...item, badge: '' } : item)))
+    updateSessionScopeState('dora', (prev) => ({
+      ...prev,
+      historyItems: prev.historyItems.map((item) => (item.badge ? { ...item, badge: '' } : item)),
+    }))
+    closeDoraNavPopover()
+  }
+
   const openExpertsNavPopover = () => {
     if (!showExpertsAlerts || activeNav === 'experts') return
     updateExpertsNavPopoverPosition()
@@ -5723,7 +6021,7 @@ export default function QuestionPage() {
       setLibraryRecentItems((prev) => {
         const key = getLibraryItemKey(item)
         const next = [item, ...prev.filter((entry) => getLibraryItemKey(entry) !== key)]
-        return next.slice(0, 3)
+        return next.slice(0, 12)
       })
     }
     setActiveLibraryItem(item)
@@ -5738,6 +6036,220 @@ export default function QuestionPage() {
       composerSegments: [{ type: 'text', value: hint }],
     }))
   }
+
+  const applyHeroSkillTag = (tag) => {
+    setActiveHeroSkillTagId((prev) => (prev === tag.id ? null : tag.id))
+  }
+
+  const clearHeroSkillTag = () => {
+    setActiveHeroSkillTagId(null)
+  }
+
+  const applyHeroSkillPrompt = (prompt) => {
+    updateSessionScopeState('dora', (prev) => ({
+      ...prev,
+      inputText: prompt,
+      composerSegments: [{ type: 'text', value: prompt }],
+    }))
+    requestAnimationFrame(() => {
+      senderEditorRef.current?.focus()
+    })
+  }
+
+  const updateHeroSkillTagsScrollState = useCallback(() => {
+    const scroller = heroSkillTagsScrollerRef.current
+    if (!scroller) {
+      setHeroSkillTagsHasOverflow(false)
+      setHeroSkillTagsCanScrollPrev(false)
+      setHeroSkillTagsCanScrollNext(false)
+      return
+    }
+
+    const maxScrollLeft = Math.max(0, scroller.scrollWidth - scroller.clientWidth)
+    setHeroSkillTagsHasOverflow(maxScrollLeft > 1)
+    setHeroSkillTagsCanScrollPrev(scroller.scrollLeft > 1)
+    setHeroSkillTagsCanScrollNext(scroller.scrollLeft < maxScrollLeft - 1)
+  }, [])
+
+  const scrollHeroSkillTags = (direction = 1) => {
+    const scroller = heroSkillTagsScrollerRef.current
+    if (!scroller) return
+    scroller.scrollBy({ left: direction * Math.max(160, scroller.clientWidth * 0.55), behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    updateHeroSkillTagsScrollState()
+  }, [tagsAnimKey, updateHeroSkillTagsScrollState])
+
+  useEffect(() => {
+    const scroller = heroSkillTagsScrollerRef.current
+    if (!scroller) return undefined
+
+    const resizeObserver = new ResizeObserver(() => updateHeroSkillTagsScrollState())
+    resizeObserver.observe(scroller)
+    window.addEventListener('resize', updateHeroSkillTagsScrollState)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', updateHeroSkillTagsScrollState)
+    }
+  }, [tagsAnimKey, updateHeroSkillTagsScrollState])
+
+  const renderSenderSkillPrompts = (tagId = activeHeroSkillTagId) => {
+    const tag = HERO_SKILL_TAGS.find((item) => item.id === tagId) ?? null
+    if (!tag) return null
+    const prompts = HERO_SKILL_TAG_PROMPTS[tag.id] ?? []
+    if (!prompts.length) return null
+
+    return (
+      <div className="sender-skill-prompts" key={tag.id} role="listbox" aria-label={`${tag.label}推荐问题`}>
+        {prompts.map((prompt, index) => (
+          <Fragment key={prompt}>
+            {index > 0 ? (
+              <div
+                className="sender-skill-prompt__divider"
+                style={{ '--hero-prompt-index': index }}
+                aria-hidden="true"
+              />
+            ) : null}
+            <button
+              type="button"
+              className="sender-skill-prompt"
+              role="option"
+              style={{ '--hero-prompt-index': index }}
+              onClick={() => applyHeroSkillPrompt(prompt)}
+            >
+              {prompt}
+            </button>
+          </Fragment>
+        ))}
+      </div>
+    )
+  }
+
+  const renderHeroSkillSlot = () => {
+    if (isQuestionMode) return null
+
+    return (
+      <div
+        className={`hero-skill-slot dora-stage__skill-tags${
+          showHeroSkillSenderUi ? ' hero-skill-slot--prompts' : ' hero-skill-slot--tags'
+        }${skillSlotAnimate ? ' hero-skill-slot--animate' : ''}`}
+      >
+        <div className="hero-skill-slot__panel hero-skill-slot__panel--tags">
+          {renderHeroSkillTags()}
+        </div>
+        <div
+          className="hero-skill-slot__panel hero-skill-slot__panel--prompts"
+          aria-hidden={!showHeroSkillSenderUi && !slotPromptTagId}
+        >
+          {slotPromptTagId ? renderSenderSkillPrompts(slotPromptTagId) : null}
+        </div>
+      </div>
+    )
+  }
+
+  const renderSenderToolbarBlock = ({ showStop = false } = {}) => (
+    <div className="sender-toolbar">
+      <div className="sender-toolbar__left">
+        {renderAttachActions()}
+        {showHeroSkillSenderUi ? (
+          <span className="sender-skill-tag" aria-label={`已选技能：${activeHeroSkillTag.label}`}>
+            <span className="dora-icon icon-16 sender-skill-tag__icon" aria-hidden="true">
+              {activeHeroSkillTag.icon}
+            </span>
+            <button
+              type="button"
+              className="sender-skill-tag__remove"
+              aria-label={`取消${activeHeroSkillTag.label}`}
+              onClick={clearHeroSkillTag}
+            >
+              <span className="dora-icon icon-16 sender-skill-tag__remove-icon" aria-hidden="true">
+                {ICONS.close}
+              </span>
+            </button>
+            <span className="sender-skill-tag__label">{activeHeroSkillTag.label}</span>
+          </span>
+        ) : null}
+      </div>
+      <button
+        type="button"
+        className="send-btn"
+        aria-label={showStop ? '停止生成' : '发送'}
+        disabled={!showStop && !canSend}
+        onClick={showStop ? handleStopGeneration : handleSend}
+      >
+        {showStop ? (
+          <span className="send-stop-icon" aria-hidden="true"></span>
+        ) : (
+          <span className="dora-icon send-icon" aria-hidden="true">
+            {ICONS.send}
+          </span>
+        )}
+      </button>
+    </div>
+  )
+
+  const renderHeroSkillTags = () => (
+    <div
+      className={[
+        'hero-skill-tags',
+        heroSkillTagsHasOverflow ? 'has-overflow' : '',
+        heroSkillTagsCanScrollPrev ? 'can-scroll-prev' : '',
+        heroSkillTagsCanScrollNext ? 'can-scroll-next' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      aria-label="快捷技能"
+    >
+      <div
+        className="hero-skill-tags__scroller"
+        ref={heroSkillTagsScrollerRef}
+        key={`tags-${tagsAnimKey}`}
+        onScroll={updateHeroSkillTagsScrollState}
+      >
+        {HERO_SKILL_TAGS.map((tag, index) => (
+          <button
+            key={tag.id}
+            type="button"
+            className={`hero-skill-tag${activeHeroSkillTagId === tag.id ? ' is-active' : ''}`}
+            aria-pressed={activeHeroSkillTagId === tag.id}
+            style={{ '--hero-tag-index': index }}
+            onClick={() => applyHeroSkillTag(tag)}
+          >
+            <span className="dora-icon icon-16 hero-skill-tag__icon" aria-hidden="true">
+              {tag.icon}
+            </span>
+            <span className="hero-skill-tag__label">{tag.label}</span>
+          </button>
+        ))}
+      </div>
+      {heroSkillTagsCanScrollPrev ? (
+        <button
+          type="button"
+          className="hero-skill-tags__nav hero-skill-tags__nav--prev"
+          aria-label="查看前面的技能"
+          onClick={() => scrollHeroSkillTags(-1)}
+        >
+          <span className="dora-icon icon-16" aria-hidden="true">
+            {ICONS.arrowRight}
+          </span>
+        </button>
+      ) : null}
+      {heroSkillTagsCanScrollNext ? (
+        <button
+          type="button"
+          className="hero-skill-tags__nav hero-skill-tags__nav--next"
+          aria-label="查看更多技能"
+          onClick={() => scrollHeroSkillTags(1)}
+        >
+          <span className="dora-icon icon-16" aria-hidden="true">
+            {ICONS.arrowRight}
+          </span>
+        </button>
+      ) : null}
+    </div>
+  )
 
   const handleStopGeneration = () => {
     clearSessionTransitionTimer(activeSessionScope)
@@ -5865,7 +6377,7 @@ export default function QuestionPage() {
 
     if (scope === 'experts') {
       setActiveNav('experts')
-      setActiveExpertCard(getLibrarySourceExpertCard(agentTitle))
+      setActiveExpertCard(normalizeExpertCard(getLibrarySourceExpertCard(agentTitle)))
       updateSessionScopeState('experts', (prev) => {
         clearScopeComposerUploadTimers(prev.composerFiles)
         const nextHistoryItems = prepareHistoryItemsForSession(prev.historyItems, nextHistoryItem)
@@ -5960,19 +6472,6 @@ export default function QuestionPage() {
       }
     })
     setPracticesPageOpen(false)
-  }
-
-  const openLibrarySourceHistory = () => {
-    const sourceHistoryId = activeLibraryItem?.sourceHistoryId
-    const sourceConversationTitle = activeLibraryItem?.sourceConversationTitle
-    if (!sourceHistoryId || !sourceConversationTitle) return
-
-    openScopedHistorySession({
-      scope: activeLibraryItem?.sourceScope ?? 'dora',
-      id: sourceHistoryId,
-      label: sourceConversationTitle,
-      agentTitle: activeLibraryItem?.sourceAgentTitle ?? parseLibrarySourceAgentName(activeLibraryItem?.owner),
-    })
   }
 
   const openCompletedHistorySession = (scope, item, userFiles = []) => {
@@ -6215,15 +6714,15 @@ export default function QuestionPage() {
             return (
               <button
                 key={item.id}
-                ref={isExpertsNav ? expertsNavRef : undefined}
+                ref={isDoraNav ? doraNavRef : isExpertsNav ? expertsNavRef : undefined}
                 type="button"
                 data-nav-id={item.id}
                 className={`nav-item ${activeNav === item.id ? 'active' : ''}`}
                 onClick={() => selectNav(item.id)}
-                onMouseEnter={isExpertsNav && activeNav !== 'experts' ? handleExpertsNavEnter : undefined}
-                onMouseLeave={isExpertsNav && activeNav !== 'experts' ? handleExpertsNavLeave : undefined}
-                onFocus={isExpertsNav && activeNav !== 'experts' ? handleExpertsNavEnter : undefined}
-                onBlur={isExpertsNav && activeNav !== 'experts' ? handleExpertsNavLeave : undefined}
+                onMouseEnter={isDoraNav && showDoraAlerts ? handleDoraNavEnter : isExpertsNav && activeNav !== 'experts' ? handleExpertsNavEnter : undefined}
+                onMouseLeave={isDoraNav && showDoraAlerts ? handleDoraNavLeave : isExpertsNav && activeNav !== 'experts' ? handleExpertsNavLeave : undefined}
+                onFocus={isDoraNav && showDoraAlerts ? handleDoraNavEnter : isExpertsNav && activeNav !== 'experts' ? handleExpertsNavEnter : undefined}
+                onBlur={isDoraNav && showDoraAlerts ? handleDoraNavLeave : isExpertsNav && activeNav !== 'experts' ? handleExpertsNavLeave : undefined}
                 style={{
                   '--nav-active-offset-y': item.activeOffsetY,
                   '--nav-inactive-offset-y': item.inactiveOffsetY ?? '0px',
@@ -6247,6 +6746,31 @@ export default function QuestionPage() {
             )
           })}
         </nav>
+
+        {doraNavPopoverOpen && showDoraAlerts
+          ? createPortal(
+              <div
+                ref={doraNavPopoverRef}
+                className="dora-nav-popover"
+                style={{ top: doraNavPopoverPos.top, left: doraNavPopoverPos.left }}
+                onMouseEnter={handleDoraNavPopoverEnter}
+                onMouseLeave={handleDoraNavPopoverLeave}
+              >
+                <span className="dora-nav-popover__sparkle" aria-hidden="true">
+                  ✨
+                </span>
+                <span className="dora-nav-popover__label">Dora有新消息</span>
+                <button
+                  type="button"
+                  className="dora-nav-popover__read"
+                  onClick={dismissDoraAlerts}
+                >
+                  一键已读
+                </button>
+              </div>,
+              document.body,
+            )
+          : null}
 
         {expertsNavPopoverOpen && showExpertsAlerts
           ? createPortal(
@@ -6276,7 +6800,7 @@ export default function QuestionPage() {
                       onClick={() => openExpertFromNavPopover(card)}
                     >
                       <span className="experts-nav-popover__avatar-wrap">
-                        <img src={agentDefaultAvatarImage} alt="" className="experts-nav-popover__avatar" />
+                        <img src={card.icon} alt="" className="experts-nav-popover__avatar" />
                       </span>
                       <span className="experts-nav-popover__label">{card.title}</span>
                       <span className="inner-badge">
@@ -6291,9 +6815,9 @@ export default function QuestionPage() {
           : null}
 
         <div className="sidebar-footer">
-          <IconButton tip="设置" tipPlacement="right">
+          <IconButton tip="管理后台" tipPlacement="right">
             <span className="dora-icon icon-16" aria-hidden="true">
-              {ICONS.settings}
+              {ICONS.adminPanel}
             </span>
           </IconButton>
           <button
@@ -6346,7 +6870,7 @@ export default function QuestionPage() {
                           aria-expanded={innerAgentMenuOpen}
                           onClick={toggleAgentMenu}
                         >
-                          <img src={agentDefaultAvatarImage} alt="" className="inner-sidebar__agent-avatar" />
+                          <img src={activeExpertCard?.icon ?? agentDefaultAvatarImage} alt="" className="inner-sidebar__agent-avatar" />
                           <span className="inner-sidebar__agent-name">{activeExpertCard?.title ?? ''}</span>
                           <span className={`dora-icon inner-sidebar__agent-caret ${innerAgentMenuOpen ? 'is-open' : ''}`} aria-hidden="true">
                             {ICONS.arrowDown}
@@ -6373,7 +6897,7 @@ export default function QuestionPage() {
                                       setInnerAgentMenuOpen(false)
                                     }}
                                   >
-                                    <img src={agentDefaultAvatarImage} alt="" className="inner-sidebar__agent-option-avatar" />
+                                    <img src={card.icon} alt="" className="inner-sidebar__agent-option-avatar" />
                                     <span className="inner-sidebar__agent-option-name">{card.title}</span>
                                   </button>
                                 ))}
@@ -6417,7 +6941,7 @@ export default function QuestionPage() {
 
                     <div className="inner-group">
                       <div className="inner-group__title">分身</div>
-                      {INTERNAL_AVATARS.map((item) => (
+                      {doraAvatars.map((item) => (
                         <button key={item.id} type="button" className="inner-item inner-item--list">
                           <img src={item.icon} alt="" className="inner-avatar" />
                           <span className="inner-item__label">{item.label}</span>
@@ -6439,63 +6963,58 @@ export default function QuestionPage() {
                 !activeExpertCard ? (
                   <section className="experts-page">
                     <header className="experts-page__header">专家团</header>
-                    <div
-                      ref={expertsPageBodyRef}
-                      className={`experts-page__body ${expertsPageScrolled ? 'experts-page__body--scrolled' : ''}`}
-                    >
+                    <div className={`experts-page__body ${expertsPageScrolled ? 'experts-page__body--scrolled' : ''}`}>
                       <div className={`experts-page__layout ${showExpertSidePanel ? 'has-side-panel' : ''}`}>
-                        <div className="experts-page__main">
-                          <div className="experts-toolbar">
-                            <div className="experts-toolbar__filters">
-                              <label className="experts-search">
-                                <span className="dora-icon experts-search__icon" aria-hidden="true">
-                                  {ICONS.search}
-                                </span>
-                                <input
-                                  value={expertSearch}
-                                  onChange={(e) => setExpertSearch(e.target.value)}
-                                  type="text"
-                                  className="experts-search__input"
-                                  placeholder="搜索名称/描述"
-                                />
-                              </label>
+                        <div className="experts-page__main" ref={expertsPageMainRef}>
+                          <div className="experts-main-sticky">
+                            <div className="experts-toolbar">
+                              <div className="experts-toolbar__filters">
+                                <label className="experts-search">
+                                  <span className="dora-icon experts-search__icon" aria-hidden="true">
+                                    {ICONS.search}
+                                  </span>
+                                  <input
+                                    value={expertSearch}
+                                    onChange={(e) => setExpertSearch(e.target.value)}
+                                    type="text"
+                                    className="experts-search__input"
+                                    placeholder="搜索名称/描述"
+                                  />
+                                </label>
 
-                              <FieldSelect
-                                classPrefix="experts"
-                                value={expertFilter}
-                                options={EXPERT_FILTER_OPTIONS}
-                                onChange={setExpertFilter}
-                                ariaLabel="筛选类型"
-                                minWidth={150}
-                              />
+                                <FieldSelect
+                                  classPrefix="experts"
+                                  value={expertFilter}
+                                  options={EXPERT_FILTER_OPTIONS}
+                                  onChange={setExpertFilter}
+                                  ariaLabel="筛选类型"
+                                  minWidth={150}
+                                />
+                              </div>
+
+                              <button type="button" className="experts-create-btn">
+                                <span className="dora-icon icon-16" aria-hidden="true">
+                                  {ICONS.create}
+                                </span>
+                                <span>去创建</span>
+                              </button>
                             </div>
 
-                            <button type="button" className="experts-create-btn">
-                              <span className="dora-icon icon-16" aria-hidden="true">
-                                {ICONS.create}
-                              </span>
-                              <span>去创建</span>
-                            </button>
-                          </div>
-
-                          <div className="session-files-panel__tabs-shell experts-tabs" aria-label="专家分类">
-                            <div className="session-files-panel__tabs experts-tabs__list" role="tablist" aria-label="专家分类">
-                              {['全部', '财务', '销售', '运营', '市场', '人力', '供应链', '客户', '产品', '风控'].map((tab, index) => (
-                                <button
-                                  key={tab}
-                                  type="button"
-                                  role="tab"
-                                  aria-selected={index === 0}
-                                  className={`session-files-panel__tab experts-tab ${index === 0 ? 'active' : ''}`}
-                                >
-                                  {tab}
-                                </button>
-                              ))}
-                              <button type="button" className="experts-tabs__more" aria-label="更多分类">
-                                <span className="dora-icon" aria-hidden="true">
-                                  {ICONS.more}
-                                </span>
-                              </button>
+                            <div className="session-files-panel__tabs-shell experts-tabs" aria-label="专家分类">
+                              <div className="session-files-panel__tabs experts-tabs__list" role="tablist" aria-label="专家分类">
+                                {EXPERT_BUSINESS_TABS.map((tab) => (
+                                  <button
+                                    key={tab.value}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={expertBusinessFilter === tab.value}
+                                    className={`session-files-panel__tab experts-tab ${expertBusinessFilter === tab.value ? 'active' : ''}`}
+                                    onClick={() => setExpertBusinessFilter(tab.value)}
+                                  >
+                                    {tab.label}
+                                  </button>
+                                ))}
+                              </div>
                             </div>
                           </div>
 
@@ -6517,7 +7036,7 @@ export default function QuestionPage() {
                                     <div className="expert-card__content">
                                       <div className="expert-card__head">
                                         <div className="expert-card__avatar-wrap">
-                                          <img src={agentDefaultAvatarImage} alt="" className="expert-card__avatar" />
+                                          <img src={card.icon} alt="" className="expert-card__avatar" />
                                           {card.alertCount > 0 ? <span className="expert-card__alert"></span> : null}
                                         </div>
 
@@ -6536,7 +7055,7 @@ export default function QuestionPage() {
                                           }}
                                         >
                                           <span className="dora-icon" aria-hidden="true">
-                                            {ICONS.star}
+                                            {isFavorite ? ICONS.favoriteActive : ICONS.favorite}
                                           </span>
                                         </button>
                                       </div>
@@ -6585,16 +7104,16 @@ export default function QuestionPage() {
                                   <span>最近使用</span>
                                 </div>
                                 <div className="experts-side-grid">
-                                  {expertRecentCards.map((card, index) => (
-                                    <button
+                                  {expertRecentCards.slice(0, 9).map((card) => (
+                                    <IconButton
                                       key={`recent-${getExpertCardKey(card)}`}
-                                      type="button"
-                                      className={`experts-side-avatar ${index === 4 ? 'is-featured' : ''}`}
+                                      className="experts-side-avatar"
+                                      tip={card.title}
+                                      tipPlacement="top"
                                       onClick={() => openExpertCard(card)}
-                                      title={card.title}
                                     >
-                                      <img src={agentDefaultAvatarImage} alt="" />
-                                    </button>
+                                      <img src={card.icon} alt="" />
+                                    </IconButton>
                                   ))}
                                 </div>
                               </section>
@@ -6608,15 +7127,15 @@ export default function QuestionPage() {
                                 </div>
                                 <div className="experts-side-grid">
                                   {expertFavoriteCards.map((card) => (
-                                    <button
+                                    <IconButton
                                       key={`favorite-${getExpertCardKey(card)}`}
-                                      type="button"
                                       className="experts-side-avatar"
+                                      tip={card.title}
+                                      tipPlacement="top"
                                       onClick={() => openExpertCard(card)}
-                                      title={card.title}
                                     >
-                                      <img src={agentDefaultAvatarImage} alt="" />
-                                    </button>
+                                      <img src={card.icon} alt="" />
+                                    </IconButton>
                                   ))}
                                 </div>
                               </section>
@@ -6647,7 +7166,7 @@ export default function QuestionPage() {
                     <div className="expert-detail-page__body">
                       <div className="expert-detail-page__panel-wrap">
                         <div className="expert-detail-page__title-wrap expert-detail-page__panel-title">
-                          <img src={agentDefaultAvatarImage} alt="" className="expert-detail-page__avatar" />
+                          <img src={activeExpertCard?.icon ?? agentDefaultAvatarImage} alt="" className="expert-detail-page__avatar" />
                           <span className="expert-detail-page__title">{activeExpertCard?.title ?? ''}</span>
                         </div>
 
@@ -6743,39 +7262,70 @@ export default function QuestionPage() {
 
                     <div className="library-page__body">
                       {libraryRecentItems.length ? (
-                        <section className="library-section">
+                        <section className="library-section library-section--recent">
                           <div className="library-section__title">
                             <span className="library-section__accent library-section__accent--purple"></span>
-                            <span>最近常用</span>
+                            <span>最近使用</span>
                           </div>
 
-                          <div className="library-recent-grid">
-                            {libraryRecentItems.map((item) => (
-                              <article
-                                key={`recent-${getLibraryItemKey(item)}`}
-                                className="library-card library-card--recent"
-                                role="button"
-                                tabIndex={0}
-                                onClick={() => openLibraryItem(item)}
-                                onKeyDown={(e) => onEnterKey(e, () => openLibraryItem(item))}
-                              >
-                                <div className="library-card__meta">
-                                  <img src={LIBRARY_ASSETS[item.type]} alt="" className="library-card__type-icon" />
-
-                                  <div className="library-card__text">
-                                    <h3>{highlightSearchText(item.title, librarySearch)}</h3>
-                                    <div className="library-card__owner">
-                                      <img src={item.ownerIcon} alt="" className="library-card__owner-icon" />
-                                      <span>{highlightSearchText(item.owner, librarySearch)}</span>
-                                    </div>
+                          <div
+                            className={[
+                              'library-recent-strip',
+                              libraryRecentHasOverflow ? 'has-overflow' : '',
+                              libraryRecentCanScrollPrev ? 'can-scroll-prev' : '',
+                              libraryRecentCanScrollNext ? 'can-scroll-next' : '',
+                            ]
+                              .filter(Boolean)
+                              .join(' ')}
+                          >
+                            <div
+                              ref={libraryRecentScrollerRef}
+                              className="library-recent-scroller"
+                              onScroll={updateLibraryRecentScrollState}
+                            >
+                              {libraryRecentItems.map((item) => (
+                                <article
+                                  key={`recent-${getLibraryItemKey(item)}`}
+                                  className="library-recent-card"
+                                  role="button"
+                                  tabIndex={0}
+                                  onClick={() => openLibraryItem(item, { trackRecent: true })}
+                                  onKeyDown={(e) => onEnterKey(e, () => openLibraryItem(item, { trackRecent: true }))}
+                                >
+                                  <div className="library-recent-card__cover-wrap">
+                                    <img src={item.cover} alt="" className="library-recent-card__cover" />
                                   </div>
-                                </div>
 
-                                <div className="library-card__cover-wrap">
-                                  <img src={item.cover} alt="" className="library-card__cover" />
-                                </div>
-                              </article>
-                            ))}
+                                  <div className="library-recent-card__title">{item.title}</div>
+                                </article>
+                              ))}
+                            </div>
+
+                            {libraryRecentCanScrollPrev ? (
+                              <button
+                                type="button"
+                                className="library-recent-nav-btn library-recent-nav-btn--prev"
+                                aria-label="查看前面的最近使用"
+                                onClick={scrollLibraryRecentBackward}
+                              >
+                                <span className="dora-icon" aria-hidden="true">
+                                  {ICONS.arrowRight}
+                                </span>
+                              </button>
+                            ) : null}
+
+                            {libraryRecentCanScrollNext ? (
+                              <button
+                                type="button"
+                                className="library-recent-nav-btn library-recent-nav-btn--next"
+                                aria-label="查看更多最近使用"
+                                onClick={scrollLibraryRecentForward}
+                              >
+                                <span className="dora-icon" aria-hidden="true">
+                                  {ICONS.arrowRight}
+                                </span>
+                              </button>
+                            ) : null}
                           </div>
                         </section>
                       ) : null}
@@ -6823,14 +7373,11 @@ export default function QuestionPage() {
                               onKeyDown={(e) => onEnterKey(e, () => openLibraryItem(item, { trackRecent: true }))}
                             >
                               <div className="library-card__meta">
-                                <img src={LIBRARY_ASSETS[item.type]} alt="" className="library-card__type-icon" />
+                                <img src={getLibraryFileIcon(item.type)} alt="" className="library-card__type-icon" />
 
                                 <div className="library-card__text">
                                   <h3>{highlightSearchText(item.title, librarySearch)}</h3>
-                                  <div className="library-card__owner">
-                                    <img src={item.ownerIcon} alt="" className="library-card__owner-icon" />
-                                    <span>{highlightSearchText(item.owner, librarySearch)}</span>
-                                  </div>
+                                  <p>{highlightSearchText(item.subtitle, librarySearch)}</p>
                                 </div>
                               </div>
 
@@ -6857,12 +7404,8 @@ export default function QuestionPage() {
                           </span>
                         </IconButton>
                         <LibraryDetailMainMeta
-                          fileIconSrc={activeLibraryItem ? LIBRARY_ASSETS[activeLibraryItem.type] : null}
+                          fileIconSrc={activeLibraryItem ? getLibraryFileIcon(activeLibraryItem.type) : null}
                           fileTitle={activeLibraryTitle}
-                          sourceOwner={activeLibraryItem?.owner}
-                          sourceOwnerIcon={getLibrarySourceAgentIcon(activeLibraryItem?.owner)}
-                          sourceHistoryId={activeLibraryItem?.sourceHistoryId}
-                          onOpenSourceHistory={openLibrarySourceHistory}
                         />
                         <div className="library-detail-main__tools">
                           <IconButton tip="分享">
@@ -7030,45 +7573,9 @@ export default function QuestionPage() {
                     handleHeatmapPointerLeave()
                   }}
                 >
-                  {doraVisualScheme === 'scheme3' ? (
-                    <div className="scheme3-banner" aria-hidden="true">
-                      <div className="scheme3-banner__glow"></div>
-                    </div>
-                  ) : null}
-                  {doraVisualScheme === 'scheme7' ? renderOrbBackgroundBanner() : null}
-                  {doraVisualScheme === 'scheme9' ? renderFlowLinesBanner() : null}
-                  {doraVisualScheme === 'scheme4' || doraVisualScheme === 'scheme5' ? (
-                    <div className="scheme-heatmap-banner" aria-hidden="true">
-                      <div className="scheme-heatmap-stage" ref={heatmapStageRef}>
-                        <div
-                          className="scheme-heatmap-grid"
-                          style={{
-                            '--cols': heatmapGrid.cols,
-                            '--rows': heatmapGrid.rows,
-                            '--cell-w': `${heatmapGrid.cellWidth}px`,
-                            '--cell-h': `${heatmapGrid.cellHeight}px`,
-                          }}
-                        >
-                          {heatmapCells.map((cell) => (
-                            <div
-                              className={`scheme-heatmap-cell ${cell.isFocus ? 'is-focus' : ''}`}
-                              key={cell.id}
-                              style={cell.style}
-                            >
-                              <span className="scheme-heatmap-dot scheme-heatmap-dot--tl"></span>
-                              <span className="scheme-heatmap-dot scheme-heatmap-dot--tr"></span>
-                              <span className="scheme-heatmap-dot scheme-heatmap-dot--br"></span>
-                              <span className="scheme-heatmap-dot scheme-heatmap-dot--bl"></span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
+                  {renderOrbBackgroundBanner()}
                   <header
-                    className={`main-header dora-stage__header ${practicesPageOpen ? 'dora-stage__header--practices' : ''} ${
-                      !practicesPageOpen ? 'dora-stage__header--session' : ''
-                    }`}
+                    className={`main-header dora-stage__header ${practicesPageOpen ? 'dora-stage__header--practices' : 'dora-stage__header--session'}`}
                   >
                     {practicesPageOpen ? (
                       renderPracticesBackButton()
@@ -7093,9 +7600,21 @@ export default function QuestionPage() {
                     <section className="practices-browser dora-stage__practices-browser">
                       <div className="practices-grid">
                         {PRACTICE_CARDS.map((card) => (
-                          <article key={`browser-${card.title}`} className="practice-browser-card">
-                            <h3 data-practice-title={card.title}>{card.title}</h3>
-                            <p>{card.desc}</p>
+                          <article key={`browser-${card.id}`} className="practice-browser-card">
+                            <div className="practice-browser-card__cover" aria-hidden="true">
+                              <img src={card.cover} alt="" className="practice-browser-card__cover-image" />
+                            </div>
+                            <div className="practice-browser-card__body">
+                              <h3 data-practice-title={card.title}>{card.title}</h3>
+                            </div>
+                            <div className="practice-browser-card__hover">
+                              <button type="button" className="practice-browser-card__action practice-browser-card__action--negative">
+                                做同款
+                              </button>
+                              <button type="button" className="practice-browser-card__action practice-browser-card__action--primary">
+                                去查看
+                              </button>
+                            </div>
                           </article>
                         ))}
                       </div>
@@ -7134,41 +7653,29 @@ export default function QuestionPage() {
                               )}
                             </h1>
                           </div>
-                          <div className="subtitle-row">
-                            <span className="subtitle-prefix">我可以帮你</span>
-                            <button type="button" className="capability-badge" onClick={applyHintToInput}>
-                              {displayedHint}
-                              <span className="cursor">_</span>
-                            </button>
-                          </div>
                         </div>
 
                         <div className="sender-wrap dora-stage__sender">
-                          <div
-                            className={`sender ${inputFocused ? 'focused' : ''} ${canSend ? 'has-value' : ''} ${
-                              doraVisualScheme === 'scheme4' ||
-                              doraVisualScheme === 'scheme5' ||
-                              doraVisualScheme === 'scheme7' ||
-                              doraVisualScheme === 'scheme9'
-                                ? 'dora-sender--ring'
-                                : ''
-                            }`}
-                          >
-                            <div className="sender-inner">
-                              {renderSenderInnerContent(activeSessionScope)}
-                              <div className="sender-toolbar">
-                                {renderAttachActions()}
-                                <button type="button" className="send-btn" aria-label="发送" disabled={!canSend} onClick={handleSend}>
-                                  <span className="dora-icon send-icon" aria-hidden="true">
-                                    {ICONS.send}
-                                  </span>
-                                </button>
+                          <div className="sender-combo">
+                            <div
+                              className={`sender ${inputFocused ? 'focused' : ''} ${canSend ? 'has-value' : ''} ${
+                                doraVisualScheme === 'scheme4' ||
+                                doraVisualScheme === 'scheme5' ||
+                                doraVisualScheme === 'scheme7' ||
+                                doraVisualScheme === 'scheme9'
+                                  ? 'dora-sender--ring'
+                                  : ''
+                              }`}
+                            >
+                              <div className="sender-inner">
+                                {renderSenderInnerContent(activeSessionScope)}
+                                {renderSenderToolbarBlock()}
                               </div>
                             </div>
                           </div>
                         </div>
+                        {renderHeroSkillSlot()}
                       </section>
-
                       <footer className="practices dora-stage__practices">
                         <button type="button" className="practices-toggle" onClick={() => setPracticesPageOpen(true)}>
                           <span>探索最佳实践</span>
@@ -7177,16 +7684,7 @@ export default function QuestionPage() {
                           </span>
                         </button>
 
-                        <div className="practices-panel">
-                          <div className="cards-track">
-                            {PRACTICE_PREVIEW_CARDS.map((card) => (
-                              <article key={card.title} className="practice-card">
-                                <h3 data-practice-title={card.title}>{card.title}</h3>
-                                <p>{card.desc}</p>
-                              </article>
-                            ))}
-                          </div>
-                        </div>
+                        {renderPracticePreviewDeck()}
                       </footer>
                     </>
                   )}

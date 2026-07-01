@@ -4,9 +4,9 @@ import uploadMdImage from '../assets/images/upload_md_new.png'
 import uploadHtmlImage from '../assets/images/upload_html.png'
 import uploadPptImage from '../assets/images/upload_ppt.png'
 import uploadJsonImage from '../assets/images/upload_json.png'
-import libraryMdImage from '../assets/images/lib_md.png'
-import libraryHtmlImage from '../assets/images/lib_html.png'
-import libraryPptImage from '../assets/images/lib_ppt.png'
+import outputFileHtmlImage from '../assets/images/output_file_html.png'
+import outputFileMdImage from '../assets/images/output_file_md.png'
+import outputFilePptImage from '../assets/images/output_file_ppt.png'
 import FourPointStarLoader from './FourPointStarLoader'
 
 const ICONS = {
@@ -135,11 +135,11 @@ const deriveOutputBaseName = (prompt = '') => {
 
 const buildOutputRefs = (baseName, { includePpt = true } = {}) => {
   const outputs = [
-    { name: `${baseName}.md`, icon: libraryMdImage },
-    { name: `${baseName}.html`, icon: libraryHtmlImage },
+    { name: `${baseName}.md`, icon: outputFileMdImage },
+    { name: `${baseName}.html`, icon: outputFileHtmlImage },
   ]
   if (includePpt) {
-    outputs.push({ name: `${baseName}.ppt`, icon: libraryPptImage })
+    outputs.push({ name: `${baseName}.ppt`, icon: outputFilePptImage })
   }
   return outputs
 }

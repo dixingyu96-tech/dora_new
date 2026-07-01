@@ -6,6 +6,104 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "47964298",
+      "name": "分析报告",
+      "font_class": "fenxibaogao",
+      "unicode": "e826",
+      "unicode_decimal": 59430
+    },
+    {
+      "icon_id": "47964299",
+      "name": "幻灯片",
+      "font_class": "huandengpian",
+      "unicode": "e827",
+      "unicode_decimal": 59431
+    },
+    {
+      "icon_id": "47964300",
+      "name": "监控预警",
+      "font_class": "jiankongyujing",
+      "unicode": "e828",
+      "unicode_decimal": 59432
+    },
+    {
+      "icon_id": "47964301",
+      "name": "数据可视化",
+      "font_class": "shujukeshihua",
+      "unicode": "e829",
+      "unicode_decimal": 59433
+    },
+    {
+      "icon_id": "47964302",
+      "name": "归因诊断",
+      "font_class": "guiyinzhenduan",
+      "unicode": "e82a",
+      "unicode_decimal": 59434
+    },
+    {
+      "icon_id": "47964303",
+      "name": "深度分析",
+      "font_class": "shendufenxi",
+      "unicode": "e82b",
+      "unicode_decimal": 59435
+    },
+    {
+      "icon_id": "47964304",
+      "name": "趋势预测",
+      "font_class": "qushiyuce",
+      "unicode": "e82c",
+      "unicode_decimal": 59436
+    },
+    {
+      "icon_id": "47964305",
+      "name": "数据探索",
+      "font_class": "shujutansuo",
+      "unicode": "e82d",
+      "unicode_decimal": 59437
+    },
+    {
+      "icon_id": "47964306",
+      "name": "业务洞察",
+      "font_class": "yewudongcha",
+      "unicode": "e82e",
+      "unicode_decimal": 59438
+    },
+    {
+      "icon_id": "47964307",
+      "name": "指标管理",
+      "font_class": "zhibiaoguanli",
+      "unicode": "e82f",
+      "unicode_decimal": 59439
+    },
+    {
+      "icon_id": "47904413",
+      "name": "数据更新",
+      "font_class": "shujugengxin",
+      "unicode": "e825",
+      "unicode_decimal": 59429
+    },
+    {
+      "icon_id": "47897842",
+      "name": "FRBI连接器",
+      "font_class": "FRBIlianjieqi",
+      "unicode": "e823",
+      "unicode_decimal": 59427
+    },
+    {
+      "icon_id": "47897841",
+      "name": "FRBI连接器_选中",
+      "font_class": "FRBIlianjieqi_xuanzhong",
+      "unicode": "e824",
+      "unicode_decimal": 59428
+    },
+    {
+      "icon_id": "47862794",
+      "name": "创建者可见",
+      "font_class": "chuangjianzhekejian",
+      "unicode": "e822",
+      "unicode_decimal": 59426
+    },
+    {
       "icon_id": "47845851",
       "name": "已收藏",
       "font_class": "yishoucang",

@@ -24,6 +24,10 @@ export default function IconButton({
       setTipPos({ top: rect.top + rect.height / 2, left: rect.right + 6 })
       return
     }
+    if (tipPlacement === 'top') {
+      setTipPos({ top: rect.top - 6, left: rect.left + rect.width / 2 })
+      return
+    }
     setTipPos({ top: rect.bottom + 6, left: rect.left + rect.width / 2 })
   }, [tipPlacement])
 
@@ -53,7 +57,11 @@ export default function IconButton({
   }, [tipVisible, tip, updateTipPosition])
 
   const tipClassName =
-    tipPlacement === 'right' ? 'icon-tip icon-tip--right icon-tip--portal' : 'icon-tip icon-tip--portal'
+    tipPlacement === 'right'
+      ? 'icon-tip icon-tip--right icon-tip--portal'
+      : tipPlacement === 'top'
+        ? 'icon-tip icon-tip--top icon-tip--portal'
+        : 'icon-tip icon-tip--portal'
 
   return (
     <>

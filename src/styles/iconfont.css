@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'DoraIconfont';
   src:
-    url('../../iconfont/iconfont.woff2?v=20260601') format('woff2'),
-    url('../../iconfont/iconfont.woff?v=20260601') format('woff'),
-    url('../../iconfont/iconfont.ttf?v=20260601') format('truetype');
+    url('../../iconfont/iconfont.woff2?v=20260630') format('woff2'),
+    url('../../iconfont/iconfont.woff?v=20260630') format('woff'),
+    url('../../iconfont/iconfont.ttf?v=20260630') format('truetype');
   font-display: block;
 }
 
@@ -20,9 +20,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* @引用 e804、取消引用 e807 — iconfont/iconfont.json */
+/* @引用 e804、取消引用 e807、FRBI连接器 e823 — iconfont/iconfont.json */
 .dora-icon.icon-a-yinyong::before,
-.dora-icon.icon-quxiaoyinyong::before {
+.dora-icon.icon-quxiaoyinyong::before,
+.dora-icon.icon-frbi-connector::before {
   display: block;
   font-family: 'DoraIconfont' !important;
   font-size: inherit;
@@ -41,4 +42,8 @@
 
 .dora-icon.icon-thinking-step-done::before {
   content: '\e6de';
+}
+
+.dora-icon.icon-frbi-connector::before {
+  content: '\e823';
 }
