@@ -11,4 +11,38 @@
   --sidebar-width: 68px;
   --page-max-width: 1280px;
   --sender-max-width: 880px;
+
+  /* 基础 icon button 尺寸映射 */
+  --fd-button-icon-size-xs: var(--fd-control-height-xs);
+  --fd-button-icon-size-sm: var(--fd-control-height-sm);
+  --fd-button-icon-size-msm: var(--fd-control-height-msm);
+  --fd-button-icon-size-md: var(--fd-control-height);
+  --fd-button-icon-size-mlg: var(--fd-control-height-mlg);
+  --fd-button-icon-size-lg: var(--fd-control-height-lg);
+
+  --fd-button-icon-glyph-size-xs: var(--fd-icon-size-2sm);
+  --fd-button-icon-glyph-size-sm: var(--fd-icon-size-sm);
+  --fd-button-icon-glyph-size-msm: var(--fd-icon-size-sm);
+  --fd-button-icon-glyph-size-md: var(--fd-icon-size);
+  --fd-button-icon-glyph-size-mlg: var(--fd-icon-size);
+  --fd-button-icon-glyph-size-lg: var(--fd-icon-size-lg);
+
+  --fd-button-icon-padding-xs: var(--fd-padding-layout-3xs);
+  --fd-button-icon-padding-sm: var(--fd-padding-layout-2xs);
+  --fd-button-icon-padding-msm: var(--fd-padding-layout-2xs);
+  --fd-button-icon-padding-md: var(--fd-padding-layout-2xs);
+  --fd-button-icon-padding-mlg: var(--fd-padding-layout-xs);
+  --fd-button-icon-padding-lg: var(--fd-padding-layout-xs);
+
+  --fd-button-icon-radius-xs: var(--fd-border-radius-sm);
+  --fd-button-icon-radius-sm: var(--fd-border-radius);
+  --fd-button-icon-radius-msm: var(--fd-border-radius);
+  --fd-button-icon-radius-md: var(--fd-border-radius);
+  --fd-button-icon-radius-mlg: var(--fd-border-radius);
+  --fd-button-icon-radius-lg: var(--fd-border-radius-lg);
+
+  /* 前台统一响应式断点：媒体查询中使用对应的固定值 */
+  --bp-desktop-wide: 1280px;
+  --bp-layout-full: 840px;
+  --bp-layout-single: 600px;
 }

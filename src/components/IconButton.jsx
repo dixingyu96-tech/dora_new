@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 export default function IconButton({
   tip,
   tipPlacement = 'bottom',
+  size = 'md',
   className = 'icon-btn',
   children,
   type = 'button',
@@ -62,13 +63,15 @@ export default function IconButton({
       : tipPlacement === 'top'
         ? 'icon-tip icon-tip--top icon-tip--portal'
         : 'icon-tip icon-tip--portal'
+  const hasExplicitSizeClass = /\bicon-btn--(?:xs|sm|msm|md|mlg|lg)\b/.test(className)
+  const resolvedClassName = `${className}${size && !hasExplicitSizeClass ? ` icon-btn--${size}` : ''}`
 
   return (
     <>
       <button
         ref={buttonRef}
         type={type}
-        className={className}
+        className={resolvedClassName}
         aria-label={ariaLabel}
         onMouseEnter={showTip}
         onMouseLeave={hideTip}

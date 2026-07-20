@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import uploadExcelImage from '../assets/images/upload_excel.png'
 import uploadMdImage from '../assets/images/upload_md_new.png'
 import uploadHtmlImage from '../assets/images/upload_html.png'
@@ -12,6 +12,7 @@ import FourPointStarLoader from './FourPointStarLoader'
 const ICONS = {
   expand: '\ue7aa',
   shrink: '\ue7ad',
+  arrowDown: '\ue797',
 }
 
 const STEP_PAUSE_MS = 220
@@ -21,6 +22,12 @@ const AUTO_COLLAPSE_DELAY_MS = 960
 const MANUAL_COLLAPSE_TRANSITION_MS = 260
 const TRANSITION_MESSAGE_SWITCH_MS = 520
 const THINKING_WAIT_ROTATE_MS = 5000
+const SENDER_FILE_GAP = 8
+const SENDER_FILE_MAX_COLS = 4
+const SENDER_FILE_MAX_CARD_WIDTH = 320
+const SENDER_FILE_MIN_CARD_WIDTH = 140
+const SENDER_FILE_MAX_VISIBLE_SLOTS = 8
+const SENDER_FILE_MAX_VISIBLE_FILES_WHEN_COLLAPSED = 7
 const PUNCTUATION_CHARS = new Set('。，、；：？！…,.;:!?')
 const ASCII_WORD_RE = /^[A-Za-z0-9_./%:()#-]+/
 const THINKING_WAIT_MESSAGES = [
@@ -142,6 +149,59 @@ const buildOutputRefs = (baseName, { includePpt = true } = {}) => {
     outputs.push({ name: `${baseName}.ppt`, icon: outputFilePptImage })
   }
   return outputs
+}
+
+const computeSenderFileLayout = (files = [], containerWidth = 0, expanded = false) => {
+  if (!files.length) {
+    return { columns: [], cardWidth: SENDER_FILE_MAX_CARD_WIDTH, hiddenCount: 0 }
+  }
+
+  const hiddenCount =
+    !expanded && files.length > SENDER_FILE_MAX_VISIBLE_SLOTS
+      ? files.length - SENDER_FILE_MAX_VISIBLE_FILES_WHEN_COLLAPSED
+      : 0
+  const visibleFiles =
+    hiddenCount > 0 ? files.slice(0, SENDER_FILE_MAX_VISIBLE_FILES_WHEN_COLLAPSED) : files
+  const visibleItems = hiddenCount > 0 ? [...visibleFiles, { type: 'expand', count: hiddenCount }] : visibleFiles
+  const slotCount = Math.max(1, visibleItems.length)
+
+  let cols = Math.min(SENDER_FILE_MAX_COLS, slotCount)
+
+  if (containerWidth > 0) {
+    const getWidthForCols = (count) =>
+      Math.floor((containerWidth - SENDER_FILE_GAP * (count - 1)) / count)
+
+    while (cols > 1 && getWidthForCols(cols) < SENDER_FILE_MIN_CARD_WIDTH) {
+      cols -= 1
+    }
+  }
+
+  const rawCardWidth =
+    containerWidth > 0
+      ? Math.floor((containerWidth - SENDER_FILE_GAP * (cols - 1)) / cols)
+      : SENDER_FILE_MAX_CARD_WIDTH
+  const cardWidth =
+    containerWidth > 0
+      ? cols === 1
+        ? Math.min(SENDER_FILE_MAX_CARD_WIDTH, Math.max(0, rawCardWidth))
+        : Math.min(SENDER_FILE_MAX_CARD_WIDTH, Math.max(SENDER_FILE_MIN_CARD_WIDTH, rawCardWidth))
+      : SENDER_FILE_MAX_CARD_WIDTH
+
+  const rows = Math.ceil(visibleItems.length / cols)
+  const tallerColumnCount = visibleItems.length % cols
+  const baseColumnHeight = Math.max(1, Math.floor(visibleItems.length / cols))
+  const columnHeights = Array.from({ length: cols }, (_, index) =>
+    rows <= 1 ? 1 : baseColumnHeight + (tallerColumnCount > 0 && index >= cols - tallerColumnCount ? 1 : 0),
+  )
+
+  const columns = []
+  let cursor = 0
+  columnHeights.forEach((height) => {
+    columns.push(visibleItems.slice(cursor, cursor + height))
+    cursor += height
+  })
+
+  return { columns, cardWidth, hiddenCount }
 }
 
 const inferPromptContext = (userPrompt = '', userFiles = []) => {
@@ -1059,6 +1119,8 @@ function useThinkingStream({ isGenerating, userFiles, streamKey, steps }) {
 }
 
 export default function SessionThread({
+  turns = [],
+  resetExpandKey = '',
   userPrompt,
   userFiles = [],
   userSentAt,
@@ -1076,35 +1138,57 @@ export default function SessionThread({
   const [frozenSummaryStatus, setFrozenSummaryStatus] = useState('')
   const [copyLabel, setCopyLabel] = useState('复制')
   const [isCopySuccess, setIsCopySuccess] = useState(false)
+  const [expandedTurnIds, setExpandedTurnIds] = useState({})
+  const [senderFilesWidth, setSenderFilesWidth] = useState(0)
   const bodyRef = useRef(null)
+  const threadRef = useRef(null)
   const autoCollapsedKeyRef = useRef('')
   const completionNotifiedKeyRef = useRef('')
   const collapseTimerRef = useRef(null)
   const copyResetTimerRef = useRef(null)
-  const streamKey = `${userPrompt}:${userFiles.map((file) => file.id ?? file.name).join('|')}`
+  const sessionTurns = useMemo(() => {
+    if (turns.length) return turns
+    if (!userPrompt && !userFiles.length) return []
+    return [
+      {
+        id: 'session-turn-current',
+        prompt: userPrompt,
+        userFiles,
+        sentAt: userSentAt,
+        completedSessionMeta,
+      },
+    ]
+  }, [completedSessionMeta, turns, userFiles, userPrompt, userSentAt])
+  const currentTurn = sessionTurns[sessionTurns.length - 1] ?? null
+  const historicalTurns = sessionTurns.slice(0, -1)
+  const currentPrompt = currentTurn?.prompt ?? userPrompt
+  const currentUserFiles = currentTurn?.userFiles ?? userFiles
+  const currentUserSentAt = currentTurn?.sentAt ?? userSentAt
+  const currentCompletedMeta = currentTurn?.completedSessionMeta ?? completedSessionMeta
+  const streamKey = `${currentPrompt}:${currentUserFiles.map((file) => file.id ?? file.name).join('|')}`
   const userMessageCopyText = useMemo(() => {
-    const fileNames = userFiles.map((file) => file.name).filter(Boolean)
-    if (userPrompt && fileNames.length) return `${userPrompt}\n${fileNames.join('\n')}`
-    if (userPrompt) return userPrompt
+    const fileNames = currentUserFiles.map((file) => file.name).filter(Boolean)
+    if (currentPrompt && fileNames.length) return `${currentPrompt}\n${fileNames.join('\n')}`
+    if (currentPrompt) return currentPrompt
     return fileNames.join('\n')
-  }, [userFiles, userPrompt])
-  const formattedUserSentAt = useMemo(() => formatUserSentAt(userSentAt), [userSentAt])
+  }, [currentPrompt, currentUserFiles])
+  const formattedUserSentAt = useMemo(() => formatUserSentAt(currentUserSentAt), [currentUserSentAt])
   const thinkingSteps = useMemo(
-    () => createThinkingSteps({ userPrompt, userFiles }),
-    [userFiles, userPrompt],
+    () => createThinkingSteps({ userPrompt: currentPrompt, userFiles: currentUserFiles }),
+    [currentPrompt, currentUserFiles],
   )
 
   const stream = useThinkingStream({
     isGenerating,
-    userFiles,
+    userFiles: currentUserFiles,
     streamKey,
     steps: thinkingSteps,
   })
   const completionRunKey = `${streamKey}:${stream.startedAt}`
-  const isStaticCompletedView = Boolean(completedSessionMeta) && !isGenerating && !isTransitioning
+  const isStaticCompletedView = Boolean(currentCompletedMeta) && !isGenerating && !isTransitioning
   const staticCompletedSummary =
-    completedSessionMeta?.summaryStatus ||
-    formatThinkingSummary(thinkingSteps.length, Math.max(8000, (thinkingSteps.length + userFiles.length) * 1600))
+    currentCompletedMeta?.summaryStatus ||
+    formatThinkingSummary(thinkingSteps.length, Math.max(8000, (thinkingSteps.length + currentUserFiles.length) * 1600))
 
   const visibleSteps = useMemo(() => {
     if (isStaticCompletedView) {
@@ -1162,7 +1246,7 @@ export default function SessionThread({
       ? staticCompletedSummary
       : stream.phase === 'stopped'
       ? '已停止生成'
-      : stream.headerStatus || (userFiles.length ? '正在接收文件...' : '正在工作...')
+      : stream.headerStatus || (currentUserFiles.length ? '正在接收文件...' : '正在工作...')
 
   const showStatusShimmer = isGenerating && stream.phase !== 'done' && stream.phase !== 'stopped'
   const displayStatus = thinkingCollapsed && stream.phase === 'done' ? frozenSummaryStatus : headerStatus
@@ -1291,6 +1375,27 @@ export default function SessionThread({
   )
 
   useEffect(() => {
+    const element = threadRef.current
+    if (!element) {
+      setSenderFilesWidth(0)
+      return undefined
+    }
+
+    const updateWidth = () => {
+      setSenderFilesWidth(element.getBoundingClientRect().width)
+    }
+
+    updateWidth()
+    const resizeObserver = new ResizeObserver(updateWidth)
+    resizeObserver.observe(element)
+    return () => resizeObserver.disconnect()
+  }, [sessionTurns.length])
+
+  useEffect(() => {
+    setExpandedTurnIds({})
+  }, [resetExpandKey])
+
+  useEffect(() => {
     const body = bodyRef.current
     if (!body || thinkingExpanded || thinkingCollapsed || !isGenerating) return
     body.scrollTop = body.scrollHeight
@@ -1343,25 +1448,69 @@ export default function SessionThread({
     setThinkingExpanded(true)
   }
 
-  return (
-    <div className="session-thread">
+  const getTurnKey = (turn) => turn?.id ?? `${turn?.prompt ?? ''}-${turn?.sentAt ?? 'turn'}`
+
+  const getTurnFileLayout = (turn) =>
+    computeSenderFileLayout(turn?.userFiles ?? [], senderFilesWidth, Boolean(expandedTurnIds[getTurnKey(turn)]))
+
+  const renderUserTurn = (turn, { showMeta = false } = {}) => {
+    const turnFiles = turn?.userFiles ?? []
+    const turnPrompt = turn?.prompt ?? ''
+    const turnSentAt = showMeta ? formattedUserSentAt : ''
+    const turnKey = getTurnKey(turn)
+    const fileLayout = getTurnFileLayout(turn)
+
+    return (
       <div className="session-thread__user-col">
-        {userFiles.map((file) => (
-          <div key={file.id ?? file.name} className="session-thread__user-file">
-            <img src={file.icon} alt="" className="session-thread__user-file-icon" />
-            <div className="session-thread__user-file-text">
-              <span className="session-thread__user-file-name">{file.name}</span>
-              {file.size ? <span className="session-thread__user-file-size">{file.size}</span> : null}
-            </div>
+        {turnFiles.length ? (
+          <div className="session-thread__user-files">
+            {fileLayout.columns.map((column, columnIndex) => (
+              <div
+                key={`${turnKey}-sender-file-column-${columnIndex}`}
+                className="session-thread__user-file-column"
+                style={{ width: `${fileLayout.cardWidth}px` }}
+              >
+                {column.map((item, itemIndex) =>
+                  item.type === 'expand' ? (
+                    <button
+                      key={`${turnKey}-sender-file-expand-${columnIndex}-${itemIndex}`}
+                      type="button"
+                      className="session-thread__user-file session-thread__user-file--expand"
+                      onClick={() =>
+                        setExpandedTurnIds((prev) => ({
+                          ...prev,
+                          [turnKey]: true,
+                        }))
+                      }
+                    >
+                      <span className="session-thread__user-file-expand-count">+{item.count} 个文件</span>
+                      <span className="dora-icon session-thread__user-file-expand-icon" aria-hidden="true">
+                        {ICONS.arrowDown}
+                      </span>
+                    </button>
+                  ) : (
+                    <div key={item.id ?? item.name} className="session-thread__user-file">
+                      <img src={item.icon} alt="" className="session-thread__user-file-icon" />
+                      <div className="session-thread__user-file-text">
+                        <span className="session-thread__user-file-name" title={item.name}>
+                          {item.name}
+                        </span>
+                        {item.size ? <span className="session-thread__user-file-size">{item.size}</span> : null}
+                      </div>
+                    </div>
+                  ),
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-        {userPrompt || formattedUserSentAt || userMessageCopyText ? (
+        ) : null}
+        {turnPrompt || turnSentAt || (showMeta && userMessageCopyText) ? (
           <div className="session-thread__user-entry">
-            {userPrompt ? <div className="session-thread__user">{userPrompt}</div> : null}
-            {formattedUserSentAt || userMessageCopyText ? (
+            {turnPrompt ? <div className="session-thread__user">{turnPrompt}</div> : null}
+            {turnSentAt || (showMeta && userMessageCopyText) ? (
               <div className="session-thread__user-meta">
-                {formattedUserSentAt ? <span className="session-thread__user-time">{formattedUserSentAt}</span> : null}
-                {userMessageCopyText ? (
+                {turnSentAt ? <span className="session-thread__user-time">{turnSentAt}</span> : null}
+                {showMeta && userMessageCopyText ? (
                   <button
                     type="button"
                     className="session-thread__user-copy"
@@ -1377,8 +1526,43 @@ export default function SessionThread({
           </div>
         ) : null}
       </div>
+    )
+  }
 
-      {showAssistantThinking ? (
+  const renderHistoricalAssistant = (turn) => {
+    const summary =
+      turn?.completedSessionMeta?.summaryStatus ||
+      formatThinkingSummary(turn?.completedSessionMeta?.completedCount ?? 0, turn?.completedSessionMeta?.durationMs ?? 0)
+
+    return (
+      <div className="session-thread__assistant">
+        <div className="session-thread__assistant-head">
+          <img src={assistantAvatar} alt="" className="session-thread__assistant-avatar" />
+          <span>{assistantName}</span>
+        </div>
+        <div className="session-thinking is-collapsed is-stopped session-thinking--history">
+          <div className="session-thinking__card">
+            <div className="session-thinking__header">
+              <ThinkingStatus text={summary} />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="session-thread" ref={threadRef}>
+      {historicalTurns.map((turn) => (
+        <Fragment key={turn.id ?? `${turn.prompt}-${turn.sentAt ?? 'history'}`}>
+          {renderUserTurn(turn)}
+          {renderHistoricalAssistant(turn)}
+        </Fragment>
+      ))}
+
+      {currentTurn ? renderUserTurn(currentTurn, { showMeta: true }) : null}
+
+      {currentTurn && showAssistantThinking ? (
         <div className="session-thread__assistant">
           <div className="session-thread__assistant-head">
             <img src={assistantAvatar} alt="" className="session-thread__assistant-avatar" />
