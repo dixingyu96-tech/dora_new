@@ -78,6 +78,17 @@ import bestPracticeSalesFunnelImage from '../assets/images/best-practices/季度
 import bestPracticeCustomerHealthImage from '../assets/images/best-practices/客户健康度与分层运营策略报告.png'
 import bestPracticeInventoryHealthImage from '../assets/images/best-practices/库存健康度诊断报告.png'
 import bestPracticeStoreReportImage from '../assets/images/best-practices/门店经营报告.png'
+
+const mobileAttachCameraIcon = 'http://localhost:3845/assets/16c2db42f8cb7ee8e8d4f22e14a7c07ebe165af2.svg'
+const mobileAttachImageIcon = 'http://localhost:3845/assets/187133bb461f073d960b958d7f511a40dfddd1d3.svg'
+const mobileAttachFileIcon = 'http://localhost:3845/assets/5beddcc48238d9c89fcc94df4a1b3939e039d95d.svg'
+const mobileBiAssetIcons = {
+  'analysis-theme': 'http://localhost:3845/assets/77dceb4e97762384cabb1a9e13b55b38cebabb0a.png',
+  dashboard: 'http://localhost:3845/assets/94b92e4a3ba2759fa0131e51180f450fd665035c.png',
+  'model-metric-set': 'http://localhost:3845/assets/5e40e270134f384da355d30e8ea662e758567905.png',
+  dataset: 'http://localhost:3845/assets/5997ea5f477c21fd90c3453003b6f3ecc37a4303.png',
+}
+const mobileProfileDrawerIcon = 'http://localhost:3845/assets/b5912a893581c43cbfd18783a388250b806bddb6.svg'
 import bestPracticeBenefitCardImage from '../assets/images/best-practices/生成权益卡片.png'
 import bestPracticeFinanceBriefImage from '../assets/images/best-practices/月度财务经营分析简报.png'
 import bestPracticeStoreBenchmarkImage from '../assets/images/best-practices/月度门店经营对标分析报告.png'
@@ -3412,6 +3423,8 @@ export default function QuestionPage() {
   const [mobileCatalogSearchOpen, setMobileCatalogSearchOpen] = useState(false)
   const [mobileCatalogSearch, setMobileCatalogSearch] = useState('')
   const [mobileNewChatPageOpen, setMobileNewChatPageOpen] = useState(false)
+  const [mobileAttachmentDrawerOpen, setMobileAttachmentDrawerOpen] = useState(false)
+  const [mobileBiDrawerOpen, setMobileBiDrawerOpen] = useState(false)
   const [activeInnerAction, setActiveInnerAction] = useState('new-chat')
   const [practicesPageOpen, setPracticesPageOpen] = useState(false)
   const [innerAgentMenuOpen, setInnerAgentMenuOpen] = useState(false)
@@ -3588,6 +3601,8 @@ export default function QuestionPage() {
   const languageMenuAnchorRef = useRef(null)
   const languageMenuPanelRef = useRef(null)
   const fileInputRef = useRef(null)
+  const cameraInputRef = useRef(null)
+  const imageInputRef = useRef(null)
   const uploadTimersRef = useRef(new Map())
   const sessionTransitionTimersRef = useRef(new Map())
   const historyGenerationTimersRef = useRef(new Map())
@@ -4410,7 +4425,29 @@ export default function QuestionPage() {
   }
 
   const openAttachmentPicker = () => {
+    if (window.matchMedia('(max-width: 599px)').matches) {
+      setMobileAttachmentDrawerOpen(true)
+      return
+    }
     fileInputRef.current?.click()
+  }
+
+  const openMobileAttachmentInput = (inputRef) => {
+    inputRef.current?.click()
+    setMobileAttachmentDrawerOpen(false)
+  }
+
+  const openBiAssetPicker = (assetType = BI_ATTACH_MENU_ITEMS[0].id) => {
+    if (window.matchMedia('(max-width: 599px)').matches) {
+      setMobileBiDrawerOpen(true)
+      return
+    }
+    openAttachConnectModal({ title: getAttachConnectModalTitle(assetType), assetType })
+  }
+
+  const selectMobileBiAsset = (assetType) => {
+    setMobileBiDrawerOpen(false)
+    openAttachConnectModal({ title: getAttachConnectModalTitle(assetType), assetType })
   }
 
   const clearComposerUploadTimer = (fileId) => {
@@ -5725,12 +5762,7 @@ export default function QuestionPage() {
             type="button"
             className="attach-btn attach-btn--plus attach-btn--bi attach-btn--bi-entry"
             aria-label="添加 FineBI 资产"
-            onClick={() =>
-              openAttachConnectModal({
-                title: getAttachConnectModalTitle(BI_ATTACH_MENU_ITEMS[0].id),
-                assetType: BI_ATTACH_MENU_ITEMS[0].id,
-              })
-            }
+            onClick={() => openBiAssetPicker(BI_ATTACH_MENU_ITEMS[0].id)}
           >
             <span className="attach-btn__visual attach-btn__visual--bi-entry">
               <span
@@ -5772,12 +5804,13 @@ export default function QuestionPage() {
             type="button"
             className="attach-btn attach-btn--plus attach-btn--bi attach-btn--connector"
             aria-label="Fine BI连接器"
+            onClick={() => openBiAssetPicker()}
           >
             <span className="attach-btn__visual attach-btn__visual--connector">
               <span className="dora-icon icon-16 attach-btn__plus-icon" aria-hidden="true">
                 {ICONS.frbiConnector}
               </span>
-              <span className="attach-btn__connector-label">Fine BI连接器</span>
+              <span className="attach-btn__connector-label">Fine BI</span>
             </span>
           </button>
           <span className={`attach-tip${isQuestionMode ? '' : ' attach-tip--above'}`} role="tooltip">
@@ -5812,6 +5845,80 @@ export default function QuestionPage() {
       )}
     </div>
   )
+
+  const renderMobileAttachmentDrawer = () => {
+    if (!mobileAttachmentDrawerOpen) return null
+
+    const actions = [
+      { label: '拍照', icon: mobileAttachCameraIcon, inputRef: cameraInputRef },
+      { label: '图片', icon: mobileAttachImageIcon, inputRef: imageInputRef },
+      { label: '文件', icon: mobileAttachFileIcon, inputRef: fileInputRef },
+    ]
+
+    return createPortal(
+      <div className="mobile-attachment-layer" role="presentation">
+        <button
+          type="button"
+          className="mobile-attachment-backdrop"
+          aria-label="关闭上传选项"
+          onClick={() => setMobileAttachmentDrawerOpen(false)}
+        />
+        <section className="mobile-attachment-drawer" role="dialog" aria-modal="true" aria-label="选择上传方式">
+          <span className="mobile-attachment-drawer__grabber" aria-hidden="true" />
+          <div className="mobile-attachment-drawer__actions">
+            {actions.map((action) => (
+              <button
+                key={action.label}
+                type="button"
+                className="mobile-attachment-drawer__action"
+                onClick={() => openMobileAttachmentInput(action.inputRef)}
+              >
+                <img src={action.icon} alt="" />
+                <span>{action.label}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>,
+      document.body,
+    )
+  }
+
+  const renderMobileBiDrawer = () => {
+    if (!mobileBiDrawerOpen) return null
+
+    const groups = [
+      { label: '我的分析', items: BI_ATTACH_MENU_ITEMS.slice(0, 1) },
+      { label: '目录', items: BI_ATTACH_MENU_ITEMS.slice(1, 2) },
+      { label: '数据目录', items: BI_ATTACH_MENU_ITEMS.slice(2) },
+    ]
+
+    return createPortal(
+      <div className="mobile-bi-drawer-layer" role="presentation">
+        <button type="button" className="mobile-bi-drawer-backdrop" aria-label="关闭 Fine BI 连接器" onClick={() => setMobileBiDrawerOpen(false)} />
+        <section className="mobile-bi-drawer" role="dialog" aria-modal="true" aria-label="Fine BI 连接器">
+          <span className="mobile-bi-drawer__grabber" aria-hidden="true" />
+          {groups.map((group) => (
+            <div key={group.label} className="mobile-bi-drawer__group">
+              <h2>{group.label}</h2>
+              <div className="mobile-bi-drawer__items">
+                {group.items.map((item, index) => (
+                  <Fragment key={item.id}>
+                    {index > 0 ? <span className="mobile-bi-drawer__divider" aria-hidden="true" /> : null}
+                    <button type="button" className="mobile-bi-drawer__item" onClick={() => selectMobileBiAsset(item.id)}>
+                      <img src={mobileBiAssetIcons[item.id]} alt="" />
+                      <span>{item.label}</span>
+                    </button>
+                  </Fragment>
+                ))}
+              </div>
+            </div>
+          ))}
+        </section>
+      </div>,
+      document.body,
+    )
+  }
 
   const renderHistorySessionItem = (item) => {
     const isActive = activeHistoryItemId === item.id
@@ -6028,7 +6135,7 @@ export default function QuestionPage() {
                       <button
                         key={`mobile-catalog-item-${item.id}`}
                         type="button"
-                        className="mobile-catalog-history__item"
+                        className={`mobile-catalog-history__item${item.id === activeHistoryItemId ? ' is-active' : ''}`}
                         onClick={() => { openHistorySession(item); closeMobileCatalog() }}
                       >
                         {item.label}
@@ -6068,25 +6175,26 @@ export default function QuestionPage() {
         <section className="mobile-avatar-menu" role="dialog" aria-modal="true" aria-label="用户菜单">
           <div className="mobile-avatar-menu__profile">
             <span className="mobile-avatar-menu__avatar-wrap">
-              <img src={mobileProfileAvatarImage} alt="" />
+              <img src={mobileProfileDrawerIcon} alt="" />
             </span>
             <div className="mobile-avatar-menu__identity">
               <strong>这是用户的名称很长很长很长</strong>
               <span>Admin user 111</span>
             </div>
           </div>
-          <div className="mobile-avatar-menu__divider" />
-          <button type="button" className="mobile-avatar-menu__item">
-            <span>语言</span>
-            <span className="mobile-avatar-menu__meta">
-              <span>{selectedLanguageOption.shortLabel ?? selectedLanguageOption.label}</span>
-              <span className="dora-icon" aria-hidden="true">{ICONS.arrowRight}</span>
-            </span>
-          </button>
-          <div className="mobile-avatar-menu__divider" />
-          <button type="button" className="mobile-avatar-menu__item" onClick={() => setMobileAvatarMenuOpen(false)}>
-            <span>退出</span>
-          </button>
+          <div className="mobile-avatar-menu__settings">
+            <button type="button" className="mobile-avatar-menu__item">
+              <span>语言</span>
+              <span className="mobile-avatar-menu__meta">
+                <span>{selectedLanguageOption.shortLabel ?? selectedLanguageOption.label}</span>
+                <span className="dora-icon" aria-hidden="true">{ICONS.arrowRight}</span>
+              </span>
+            </button>
+            <div className="mobile-avatar-menu__divider" />
+            <button type="button" className="mobile-avatar-menu__item" onClick={() => setMobileAvatarMenuOpen(false)}>
+              <span>退出</span>
+            </button>
+          </div>
         </section>
       </div>,
       document.body,
@@ -6096,9 +6204,12 @@ export default function QuestionPage() {
   const renderHomeHeaderNav = () => (
     <div className="mobile-home-nav" aria-label="首页快捷导航">
       {mobileNewChatPageOpen ? (
-        <button type="button" className="mobile-home-nav__action" aria-label="返回首页" onClick={() => setMobileNewChatPageOpen(false)}>
-          <span className="dora-icon" aria-hidden="true">{ICONS.mobileBack}</span>
-        </button>
+        <div className="mobile-home-nav__title-group">
+          <button type="button" className="mobile-home-nav__action" aria-label="返回首页" onClick={() => setMobileNewChatPageOpen(false)}>
+            <span className="dora-icon" aria-hidden="true">{ICONS.mobileBack}</span>
+          </button>
+          <h2>新聊天</h2>
+        </div>
       ) : (
         <button
           type="button"
@@ -8788,15 +8899,6 @@ export default function QuestionPage() {
             </button>
             <h1>定时任务</h1>
           </div>
-          <button
-            type="button"
-            className="mobile-schedule-page__action mobile-schedule-page__catalog-action"
-            aria-label="打开侧边栏"
-            aria-expanded={mobileCatalogOpen}
-            onClick={() => setMobileCatalogOpen(true)}
-          >
-            <span className="dora-icon" aria-hidden="true">{ICONS.sidebar}</span>
-          </button>
         </header>
         <div className="mobile-schedule-page__body" />
         {renderMobileCatalogDrawer()}
@@ -9546,6 +9648,24 @@ export default function QuestionPage() {
         multiple
         onChange={handleLocalFilesSelected}
       />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        className="file-picker-input"
+        accept="image/*"
+        capture="environment"
+        onChange={handleLocalFilesSelected}
+      />
+      <input
+        ref={imageInputRef}
+        type="file"
+        className="file-picker-input"
+        accept="image/*"
+        multiple
+        onChange={handleLocalFilesSelected}
+      />
+      {renderMobileAttachmentDrawer()}
+      {renderMobileBiDrawer()}
       <aside className="sidebar">
         <nav className="sidebar-nav">
           {NAV_ITEMS.map((item) => {
@@ -9913,7 +10033,8 @@ export default function QuestionPage() {
                                                 toggleExpertFavorite(card)
                                               }}
                                             >
-                                              <span className="dora-icon" aria-hidden="true">{isFavorite ? ICONS.favoriteActive : ICONS.favorite}</span>
+                                              {!isFavorite ? <span className="dora-icon" aria-hidden="true">{ICONS.favorite}</span> : null}
+                                              <span className="expert-card__favorite-label">{isFavorite ? '已收藏' : '收藏'}</span>
                                             </button>
                                           </div>
                                           <div className="expert-card__mobile-meta">
@@ -10033,25 +10154,27 @@ export default function QuestionPage() {
                           ) : null}
 
                           {filteredExpertCards.length ? (
-                            <section className="experts-mobile-all" aria-label="全部专家">
-                              <h2>全部专家</h2>
-                              <div className="session-files-panel__tabs-shell experts-tabs" aria-label="移动端专家分类">
-                                <div className="session-files-panel__tabs experts-tabs__list" role="tablist" aria-label="移动端专家分类">
-                                  {availableMobileExpertBusinessTabs.map((tab) => (
-                                    <button
-                                      key={`mobile-${tab.value}`}
-                                      type="button"
-                                      role="tab"
-                                      aria-selected={expertBusinessFilter === tab.value}
-                                      className={`session-files-panel__tab experts-tab ${expertBusinessFilter === tab.value ? 'active' : ''}`}
-                                      onClick={() => setExpertBusinessFilter(tab.value)}
-                                    >
-                                      {tab.label}
-                                    </button>
-                                  ))}
+                            <>
+                              <h2 className="experts-mobile-all__title">全部专家</h2>
+                              <section className="experts-mobile-all" aria-label="全部专家">
+                                <div className="session-files-panel__tabs-shell experts-tabs" aria-label="移动端专家分类">
+                                  <div className="session-files-panel__tabs experts-tabs__list" role="tablist" aria-label="移动端专家分类">
+                                    {availableMobileExpertBusinessTabs.map((tab) => (
+                                      <button
+                                        key={`mobile-${tab.value}`}
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={expertBusinessFilter === tab.value}
+                                        className={`session-files-panel__tab experts-tab ${expertBusinessFilter === tab.value ? 'active' : ''}`}
+                                        onClick={() => setExpertBusinessFilter(tab.value)}
+                                      >
+                                        {tab.label}
+                                      </button>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            </section>
+                              </section>
+                            </>
                           ) : null}
 
                           {filteredExpertCards.length ? (
@@ -10090,9 +10213,8 @@ export default function QuestionPage() {
                                               toggleExpertFavorite(card)
                                             }}
                                           >
-                                            <span className="dora-icon" aria-hidden="true">
-                                              {isFavorite ? ICONS.favoriteActive : ICONS.favorite}
-                                            </span>
+                                            {!isFavorite ? <span className="dora-icon" aria-hidden="true">{ICONS.favorite}</span> : null}
+                                            <span className="expert-card__favorite-label">{isFavorite ? '已收藏' : '收藏'}</span>
                                           </button>
                                         </div>
                                         <div className="expert-card__mobile-meta">
