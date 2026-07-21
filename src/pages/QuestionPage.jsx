@@ -7758,7 +7758,7 @@ export default function QuestionPage() {
                         hue={0}
                         forceHoverState={false}
                         backgroundColor="#ffffff"
-                        transparentBackground={true}
+                        transparentBackground={false}
                       />
                     </div>
                   ) : null}
@@ -10770,7 +10770,7 @@ export default function QuestionPage() {
                                   hue={0}
                                   forceHoverState={false}
                                   backgroundColor="#ffffff"
-                                  transparentBackground={true}
+                                  transparentBackground={false}
                                 />
                               </div>
                             ) : null}
@@ -10914,7 +10914,7 @@ export default function QuestionPage() {
                                   hue={0}
                                   forceHoverState={false}
                                   backgroundColor="#ffffff"
-                                  transparentBackground={true}
+                                  transparentBackground={false}
                                 />
                               </div>
                             ) : null}
