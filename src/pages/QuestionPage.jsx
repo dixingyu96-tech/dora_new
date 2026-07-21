@@ -8,6 +8,7 @@ import agentDefaultAvatarImage from '../assets/images/Agent默认头像.png'
 import doraTitleImage from '../assets/images/dora标题.png'
 import doraUploadedImage from '../assets/images/Dora_uploaded.png'
 import avatarImage from '../assets/images/avatar.png'
+import mobileProfileAvatarImage from '../assets/images/mobile-profile-avatar.png'
 import builtinAnalysisThemeImage from '../assets/images/agent-builtins/analysis_theme_bi.png'
 import builtinDashboardCatalogImage from '../assets/images/agent-builtins/dashboard_bi_catalog.png'
 import builtinDatasetCatalogImage from '../assets/images/agent-builtins/dataset_bi_catalog.png'
@@ -119,11 +120,6 @@ import { extractMarkdownHeadings, parseSessionMarkdownHtml } from '../utils/sess
 import LibraryDetailMainMeta from '../components/LibraryDetailMainMeta'
 import FourPointStarLoader from '../components/FourPointStarLoader'
 import './QuestionPage.css'
-
-const FIGMA_MOBILE_PROFILE_ASSETS = {
-  background: 'http://localhost:3845/assets/e134bb8de0f6abc8533db0655d4828139b2b7a9f.png',
-  icon: 'http://localhost:3845/assets/527938413193cfba94d3598646501bd826c791f8.svg',
-}
 
 function OverflowTooltipText({ text, className, tipPlacement = 'top', anchorSelector = null }) {
   const textRef = useRef(null)
@@ -385,17 +381,19 @@ const PRACTICE_CARDS = [
 
 const PRACTICE_DECK_OFFSETS = [-3, -2, -1, 0, 1, 2, 3]
 const PRACTICE_DECK_SWIPE_DISTANCE = 78
+const MOBILE_RECOMMENDATION_SWIPE_DISTANCE = 68
+const MOBILE_RECOMMENDATION_MAX_SWIPE_CARDS = 3
 const MOBILE_RECOMMENDATION_LIMIT = 10
 
 const PRACTICE_DECK_POSES = {
   recommendation: [
-    { x: -190, y: 14, scale: 1, rotate: -10, opacity: 0, brightness: 1 },
-    { x: -130, y: 10, scale: 1, rotate: -8, opacity: 1, brightness: 1 },
-    { x: -69, y: 5, scale: 1, rotate: -4, opacity: 1, brightness: 1 },
+    { x: -190, y: 24, scale: 1, rotate: -10, opacity: 0, brightness: 1 },
+    { x: -130, y: 20, scale: 1, rotate: -8, opacity: 1, brightness: 1 },
+    { x: -69, y: 10, scale: 1, rotate: -4, opacity: 1, brightness: 1 },
     { x: 0, y: 0, scale: 1, rotate: 0, opacity: 1, brightness: 1 },
-    { x: 68, y: 5, scale: 1, rotate: 4, opacity: 1, brightness: 1 },
-    { x: 128, y: 10, scale: 1, rotate: 8, opacity: 1, brightness: 1 },
-    { x: 190, y: 14, scale: 1, rotate: 10, opacity: 0, brightness: 1 },
+    { x: 68, y: 10, scale: 1, rotate: 4, opacity: 1, brightness: 1 },
+    { x: 128, y: 20, scale: 1, rotate: 8, opacity: 1, brightness: 1 },
+    { x: 190, y: 24, scale: 1, rotate: 10, opacity: 0, brightness: 1 },
   ],
   mobile: [
     { x: -184, y: 13, scale: 0.54, rotate: -9, opacity: 0, brightness: 0.86 },
@@ -439,11 +437,15 @@ function interpolatePracticeDeckPose(relativePosition, variant) {
 }
 
 function getPracticeDeckCardStyle(relative, variant, dragX = 0) {
-  const dragProgress = dragX / PRACTICE_DECK_SWIPE_DISTANCE
+  const swipeDistance = variant === 'recommendation' ? MOBILE_RECOMMENDATION_SWIPE_DISTANCE : PRACTICE_DECK_SWIPE_DISTANCE
+  const dragProgress = dragX / swipeDistance
   const pose = interpolatePracticeDeckPose(relative + dragProgress, variant)
 
   return {
-    '--practice-deck-x': `${pose.x}px`,
+    '--practice-deck-x':
+      variant === 'recommendation'
+        ? `calc(var(--mobile-recommendation-step) * ${pose.x / MOBILE_RECOMMENDATION_SWIPE_DISTANCE})`
+        : `${pose.x}px`,
     '--practice-deck-y': `${pose.y}px`,
     '--practice-deck-scale': pose.scale,
     '--practice-deck-rotation': `${pose.rotate}deg`,
@@ -2876,6 +2878,22 @@ const INITIAL_HISTORY_ITEMS = [
 ].map((item, index) => ({
   ...item,
   sentAt: createMockHistorySentAt(item.group, index),
+  ...(item.id === 'history-1'
+    ? {
+        sessionTurns: [
+          createSessionTurn({
+            id: 'history-1-turn-1',
+            prompt: '请帮我分析这份商品销售明细 Excel，找出广东省潜量最高的10个客户',
+            userFiles: [
+              { id: 'history-1-file-1', name: '商品销售明细表.xls', size: '161.17 KB', icon: uploadExcelImage },
+              { id: 'history-1-file-2', name: '商品销售明细表.xls', size: '161.17 KB', icon: uploadExcelImage },
+            ],
+            sentAt: createMockHistorySentAt(item.group, index),
+            completedSessionMeta: buildCompletedSessionMeta({ completedCount: 6, durationMs: 92000 }),
+          }),
+        ],
+      }
+    : {}),
 }))
 
 const upsertHistoryItem = (items, nextItem) => {
@@ -3399,6 +3417,10 @@ export default function QuestionPage() {
   })
   const [activeNav, setActiveNav] = useState('dora')
   const [internalSidebarOpen, setInternalSidebarOpen] = useState(false)
+  const [mobileCatalogOpen, setMobileCatalogOpen] = useState(false)
+  const [mobileCatalogSearchOpen, setMobileCatalogSearchOpen] = useState(false)
+  const [mobileCatalogSearch, setMobileCatalogSearch] = useState('')
+  const [mobileNewChatPageOpen, setMobileNewChatPageOpen] = useState(false)
   const [activeInnerAction, setActiveInnerAction] = useState('new-chat')
   const [practicesPageOpen, setPracticesPageOpen] = useState(false)
   const [innerAgentMenuOpen, setInnerAgentMenuOpen] = useState(false)
@@ -3429,6 +3451,9 @@ export default function QuestionPage() {
   const [expertSearch, setExpertSearch] = useState('')
   const [libraryFilter, setLibraryFilter] = useState('all')
   const [librarySearch, setLibrarySearch] = useState('')
+  const [libraryMobileSearchOpen, setLibraryMobileSearchOpen] = useState(false)
+  const [libraryMobileSearchFocused, setLibraryMobileSearchFocused] = useState(false)
+  const [libraryMobileSearchSubmitted, setLibraryMobileSearchSubmitted] = useState(false)
   const [expertsNavPopoverOpen, setExpertsNavPopoverOpen] = useState(false)
   const [expertsNavPopoverPos, setExpertsNavPopoverPos] = useState({ top: 0, left: 0 })
   const [expertsAlertsDismissedSnapshot, setExpertsAlertsDismissedSnapshot] = useState(null)
@@ -3515,6 +3540,7 @@ export default function QuestionPage() {
   const [historyRenamingId, setHistoryRenamingId] = useState(null)
   const [historyRenameDraft, setHistoryRenameDraft] = useState('')
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false)
+  const [mobileAvatarMenuOpen, setMobileAvatarMenuOpen] = useState(false)
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState('system')
   const [avatarMenuPos, setAvatarMenuPos] = useState({ top: 0, left: 0 })
@@ -3677,7 +3703,11 @@ export default function QuestionPage() {
     if (!pointer || pointer.pointerId !== event.pointerId) return
 
     const rawDragX = event.clientX - pointer.startX
-    const dragX = Math.max(-PRACTICE_DECK_SWIPE_DISTANCE, Math.min(PRACTICE_DECK_SWIPE_DISTANCE, rawDragX))
+    const maxDragDistance =
+      pointer.scope === 'recommendation'
+        ? MOBILE_RECOMMENDATION_SWIPE_DISTANCE * MOBILE_RECOMMENDATION_MAX_SWIPE_CARDS
+        : PRACTICE_DECK_SWIPE_DISTANCE
+    const dragX = Math.max(-maxDragDistance, Math.min(maxDragDistance, rawDragX))
     if (Math.abs(rawDragX) > 6) practiceDeckSuppressClickRef.current = true
     pointer.latestDragX = dragX
 
@@ -3702,8 +3732,14 @@ export default function QuestionPage() {
     pointer.target.classList.remove('is-dragging')
     if (shouldAdvance) {
       const direction = rawDragX < 0 ? 1 : -1
-      if (pointer.scope === 'recommendation') moveMobileRecommendationDeck(direction)
-      else movePracticeDeck(direction)
+      if (pointer.scope === 'recommendation') {
+        const projectedDistance = Math.abs(rawDragX) + Math.abs(velocity) * 120
+        const cardsToMove = Math.max(
+          1,
+          Math.min(MOBILE_RECOMMENDATION_MAX_SWIPE_CARDS, Math.round(projectedDistance / MOBILE_RECOMMENDATION_SWIPE_DISTANCE)),
+        )
+        moveMobileRecommendationDeck(direction * cardsToMove)
+      } else movePracticeDeck(direction)
     }
     practiceDeckPointerRef.current = null
 
@@ -3783,18 +3819,44 @@ export default function QuestionPage() {
     [expertBusinessFilter, expertCardsMatchingBaseFilters],
   )
 
-  const filteredLibraryItems = useMemo(() => {
+  const libraryItemsMatchingSearch = useMemo(() => {
     const keyword = librarySearch.trim().toLowerCase()
 
-    return LIBRARY_ITEMS.filter((item) => {
-      const matchesFilter =
-        libraryFilter === 'all' ||
-        item.type === libraryFilter ||
-        matchesSessionOutputFileFilter(item.type, libraryFilter)
-      const matchesKeyword = !keyword || `${item.title} ${item.owner}`.toLowerCase().includes(keyword)
-      return matchesFilter && matchesKeyword
-    })
-  }, [libraryFilter, librarySearch])
+    return LIBRARY_ITEMS.filter(
+      (item) => !keyword || `${item.title} ${item.owner}`.toLowerCase().includes(keyword),
+    )
+  }, [librarySearch])
+
+  const availableMobileLibraryFilterOptions = useMemo(
+    () =>
+      MOBILE_LIBRARY_FILTER_OPTIONS.filter(
+        (option) =>
+          option.value === 'all' ||
+          libraryItemsMatchingSearch.some((item) => matchesSessionOutputFileFilter(item.type, option.value)),
+      ),
+    [libraryItemsMatchingSearch],
+  )
+
+  useEffect(() => {
+    const usesMobileCategory = MOBILE_LIBRARY_FILTER_OPTIONS.some((option) => option.value === libraryFilter)
+    if (
+      usesMobileCategory &&
+      !availableMobileLibraryFilterOptions.some((option) => option.value === libraryFilter)
+    ) {
+      setLibraryFilter('all')
+    }
+  }, [availableMobileLibraryFilterOptions, libraryFilter])
+
+  const filteredLibraryItems = useMemo(
+    () =>
+      libraryItemsMatchingSearch.filter(
+        (item) =>
+          libraryFilter === 'all' ||
+          item.type === libraryFilter ||
+          matchesSessionOutputFileFilter(item.type, libraryFilter),
+      ),
+    [libraryFilter, libraryItemsMatchingSearch],
+  )
 
   const filteredSessionExistingData = useMemo(() => {
     const keyword = sessionFilesSourceSearch.trim().toLowerCase()
@@ -5710,17 +5772,17 @@ export default function QuestionPage() {
           <button
             type="button"
             className="attach-btn attach-btn--plus attach-btn--bi attach-btn--connector"
-            aria-label="用户自己添加的连接器名称"
+            aria-label="Fine BI连接器"
           >
             <span className="attach-btn__visual attach-btn__visual--connector">
               <span className="dora-icon icon-16 attach-btn__plus-icon" aria-hidden="true">
                 {ICONS.frbiConnector}
               </span>
-              <span className="attach-btn__connector-label">用户自己添加的连接器名称</span>
+              <span className="attach-btn__connector-label">Fine BI连接器</span>
             </span>
           </button>
           <span className={`attach-tip${isQuestionMode ? '' : ' attach-tip--above'}`} role="tooltip">
-            用户自己添加的连接器名称
+            Fine BI连接器
           </span>
           <div
             className={`attach-menu attach-menu--connector-assets ${
@@ -5859,23 +5921,197 @@ export default function QuestionPage() {
       )
     })
 
+  useEffect(() => {
+    if (!mobileCatalogOpen) return undefined
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setMobileCatalogOpen(false)
+    }
+    const shouldLockPage = window.matchMedia('(max-width: 599px)').matches
+    const previousOverflow = document.body.style.overflow
+    if (shouldLockPage) document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      if (shouldLockPage) document.body.style.overflow = previousOverflow
+    }
+  }, [mobileCatalogOpen])
+
+  const closeMobileCatalog = () => {
+    setMobileCatalogOpen(false)
+    setMobileCatalogSearchOpen(false)
+    setMobileCatalogSearch('')
+  }
+
+  const renderMobileCatalogDrawer = () => {
+    if (!mobileCatalogOpen) return null
+    const keyword = mobileCatalogSearch.trim().toLowerCase()
+
+    return createPortal(
+      <div className="mobile-catalog-layer" role="presentation">
+        <button type="button" className="mobile-catalog-backdrop" aria-label="关闭目录" onClick={closeMobileCatalog} />
+        <aside className={`mobile-catalog-drawer${mobileCatalogSearchOpen ? ' is-searching' : ''}`} role="dialog" aria-modal="true" aria-label={mobileCatalogSearchOpen ? '搜索会话' : '目录'}>
+          {mobileCatalogSearchOpen ? (
+            <header className="mobile-catalog-search-page__header">
+              <button
+                type="button"
+                className="mobile-catalog-search-page__back"
+                aria-label="返回目录"
+                onClick={() => {
+                  setMobileCatalogSearchOpen(false)
+                  setMobileCatalogSearch('')
+                }}
+              >
+                <span className="dora-icon" aria-hidden="true">{ICONS.arrowLeft}</span>
+              </button>
+              <label className="mobile-catalog-search-page__field">
+                <span className="dora-icon" aria-hidden="true">{ICONS.search}</span>
+                <input
+                  value={mobileCatalogSearch}
+                  onChange={(event) => setMobileCatalogSearch(event.target.value)}
+                  placeholder="搜索会话"
+                  aria-label="搜索会话"
+                  autoFocus
+                />
+                {mobileCatalogSearch ? (
+                  <button type="button" aria-label="清空搜索" onClick={() => setMobileCatalogSearch('')}>
+                    <span className="dora-icon" aria-hidden="true">{ICONS.close}</span>
+                  </button>
+                ) : null}
+              </label>
+            </header>
+          ) : (
+            <>
+              <header className="mobile-catalog-drawer__header">
+                <div className="mobile-catalog-drawer__brand" aria-label="Dora 超级智能体">
+                  <span className="mobile-catalog-drawer__logo">Dora</span>
+                  <strong>超级智能体</strong>
+                </div>
+              </header>
+
+              <nav className="mobile-catalog-actions" aria-label="快捷操作">
+                <button type="button" className={`mobile-catalog-action${isScheduleView ? '' : ' is-active'}`} onClick={() => { startNewAgentChat(); setMobileNewChatPageOpen(true); closeMobileCatalog() }}>
+                  <span className="dora-icon" aria-hidden="true">{ICONS.newChat}</span>
+                  <span>新聊天</span>
+                </button>
+                <button type="button" className={`mobile-catalog-action${isScheduleView ? ' is-active' : ''}`} onClick={() => { handleInnerActionClick('schedule'); closeMobileCatalog() }}>
+                  <span className="dora-icon" aria-hidden="true">{ICONS.schedule}</span>
+                  <span>定时任务</span>
+                </button>
+              </nav>
+
+              <div className="mobile-catalog-divider" />
+            </>
+          )}
+
+          <section className={`mobile-catalog-history${mobileCatalogSearchOpen ? ' mobile-catalog-history--search-page' : ''}`} aria-label={mobileCatalogSearchOpen ? '搜索结果' : '会话记录'}>
+            {!mobileCatalogSearchOpen ? (
+              <div className="mobile-catalog-history__header">
+                <span>会话记录</span>
+                <button type="button" className="mobile-catalog-history__search" aria-label="搜索会话" onClick={() => setMobileCatalogSearchOpen(true)}>
+                  <span className="dora-icon" aria-hidden="true">{ICONS.search}</span>
+                </button>
+              </div>
+            ) : null}
+
+            <div className="mobile-catalog-history__scroll">
+              {groupedHistoryItems.map((group) => {
+                const items = group.items.filter((item) => !keyword || item.label.toLowerCase().includes(keyword))
+                if (!items.length) return null
+                return (
+                  <section key={`mobile-catalog-${group.id}`} className="mobile-catalog-history__group" aria-label={group.label}>
+                    <h3>{group.label}</h3>
+                    {items.map((item) => (
+                      <button
+                        key={`mobile-catalog-item-${item.id}`}
+                        type="button"
+                        className="mobile-catalog-history__item"
+                        onClick={() => { openHistorySession(item); closeMobileCatalog() }}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </section>
+                )
+              })}
+              {keyword && !groupedHistoryItems.some((group) => group.items.some((item) => item.label.toLowerCase().includes(keyword))) ? (
+                <p className="mobile-catalog-search-page__empty">暂无匹配的会话</p>
+              ) : null}
+            </div>
+          </section>
+        </aside>
+      </div>,
+      document.body,
+    )
+  }
+
+  const renderMobileAvatarMenu = () => {
+    if (!mobileAvatarMenuOpen) return null
+
+    return createPortal(
+      <div className="mobile-avatar-menu-layer" role="presentation">
+        <button type="button" className="mobile-avatar-menu__backdrop" aria-label="关闭用户菜单" onClick={() => setMobileAvatarMenuOpen(false)} />
+        <section className="mobile-avatar-menu" role="dialog" aria-modal="true" aria-label="用户菜单">
+          <div className="mobile-avatar-menu__profile">
+            <span className="mobile-avatar-menu__avatar-wrap">
+              <img src={mobileProfileAvatarImage} alt="" />
+            </span>
+            <div className="mobile-avatar-menu__identity">
+              <strong>这是用户的名称很长很长很长</strong>
+              <span>Admin user 111</span>
+            </div>
+          </div>
+          <div className="mobile-avatar-menu__divider" />
+          <button type="button" className="mobile-avatar-menu__item">
+            <span>语言</span>
+            <span className="mobile-avatar-menu__meta">
+              <span>{selectedLanguageOption.shortLabel ?? selectedLanguageOption.label}</span>
+              <span className="dora-icon" aria-hidden="true">{ICONS.arrowRight}</span>
+            </span>
+          </button>
+          <div className="mobile-avatar-menu__divider" />
+          <button type="button" className="mobile-avatar-menu__item" onClick={() => setMobileAvatarMenuOpen(false)}>
+            <span>退出</span>
+          </button>
+        </section>
+      </div>,
+      document.body,
+    )
+  }
+
   const renderHomeHeaderNav = () => (
     <div className="mobile-home-nav" aria-label="首页快捷导航">
-      <button type="button" className="mobile-home-nav__profile" aria-label="个人中心">
-        <img src={FIGMA_MOBILE_PROFILE_ASSETS.background} alt="" className="mobile-home-nav__profile-bg" />
-        <img src={FIGMA_MOBILE_PROFILE_ASSETS.icon} alt="" className="mobile-home-nav__profile-icon" />
-      </button>
-      <div className="mobile-home-nav__actions">
-        <button type="button" className="mobile-home-nav__action" aria-label="新聊天" onClick={startNewAgentChat}>
-          <span className="dora-icon" aria-hidden="true">
-            {ICONS.newChat}
-          </span>
+      {mobileNewChatPageOpen ? (
+        <button type="button" className="mobile-home-nav__action" aria-label="返回首页" onClick={() => setMobileNewChatPageOpen(false)}>
+          <span className="dora-icon" aria-hidden="true">{ICONS.arrowLeft}</span>
         </button>
+      ) : (
+        <button
+          type="button"
+          className={`mobile-home-nav__profile${mobileAvatarMenuOpen ? ' is-open' : ''}`}
+          aria-label="个人中心"
+          aria-expanded={mobileAvatarMenuOpen}
+          onClick={() => setMobileAvatarMenuOpen((current) => !current)}
+        >
+          <img src={mobileProfileAvatarImage} alt="" className="mobile-home-nav__profile-bg" />
+        </button>
+      )}
+      <div className="mobile-home-nav__actions">
+        {!mobileNewChatPageOpen ? (
+          <button type="button" className="mobile-home-nav__action" aria-label="新聊天" onClick={() => { setMobileAvatarMenuOpen(false); startNewAgentChat(); setMobileNewChatPageOpen(true) }}>
+            <span className="dora-icon" aria-hidden="true">{ICONS.newChat}</span>
+          </button>
+        ) : null}
         <button
           type="button"
           className="mobile-home-nav__action"
           aria-label="目录"
-          onClick={() => setInternalSidebarOpen((prev) => !prev)}
+          aria-expanded={mobileCatalogOpen}
+          onClick={() => {
+            setMobileAvatarMenuOpen(false)
+            setMobileCatalogOpen(true)
+          }}
         >
           <span className="dora-icon" aria-hidden="true">
             {ICONS.catalog}
@@ -7387,6 +7623,48 @@ export default function QuestionPage() {
       >
         {practicesPageOpen ? (
           renderPracticesBackButton()
+        ) : isQuestionMode ? (
+          <>
+            <div className="mobile-session-header">
+              <div className="mobile-session-header__title-group">
+                <button
+                  type="button"
+                  className="mobile-session-header__action"
+                  aria-label="返回上一级"
+                  onClick={() => {
+                    startNewAgentChat()
+                    setMobileNewChatPageOpen(false)
+                    closeMobileCatalog()
+                  }}
+                >
+                  <span className="dora-icon" aria-hidden="true">{ICONS.arrowLeft}</span>
+                </button>
+                <h2 title={activeSessionHistoryItem?.label ?? activeSessionPrompt}>
+                  {activeSessionHistoryItem?.label ?? activeSessionPrompt}
+                </h2>
+              </div>
+              <div className="mobile-session-header__actions">
+                <button type="button" className="mobile-session-header__action" aria-label="会话文件" aria-pressed={sessionFilesPanelOpen} onClick={toggleSessionFilesPanel}>
+                  <span className="dora-icon" aria-hidden="true">{ICONS.sessionFile}</span>
+                </button>
+                <button type="button" className="mobile-session-header__action" aria-label="分享">
+                  <span className="dora-icon" aria-hidden="true">{ICONS.share}</span>
+                </button>
+                <button type="button" className="mobile-session-header__action" aria-label="目录" aria-expanded={mobileCatalogOpen} onClick={() => setMobileCatalogOpen(true)}>
+                  <span className="dora-icon" aria-hidden="true">{ICONS.catalog}</span>
+                </button>
+              </div>
+            </div>
+            <div className="desktop-session-header">
+              <IconButton tip={panelToggleTitle} className="icon-btn panel-toggle" onClick={() => setInternalSidebarOpen((prev) => !prev)}>
+                <span className="dora-icon icon-16" aria-hidden="true">{ICONS.sidebar}</span>
+              </IconButton>
+              <div className="main-header__session-meta">
+                <h2 className="main-header__session-title" title={activeSessionPrompt}>{activeSessionPrompt}</h2>
+              </div>
+              {renderSessionHeaderActions()}
+            </div>
+          </>
         ) : (
           <>
             <IconButton
@@ -7398,24 +7676,14 @@ export default function QuestionPage() {
                 {ICONS.sidebar}
               </span>
             </IconButton>
-            {isQuestionMode ? (
-              <>
-                <div className="main-header__session-meta">
-                  <h2 className="main-header__session-title" title={activeSessionPrompt}>
-                    {activeSessionPrompt}
-                  </h2>
-                </div>
-                {renderSessionHeaderActions()}
-              </>
-            ) : (
-              <>
-                {renderHomeHeaderNav()}
-                {renderSessionHeaderActions()}
-              </>
-            )}
+            {renderHomeHeaderNav()}
+            {renderSessionHeaderActions()}
           </>
         )}
       </header>
+
+      {renderMobileCatalogDrawer()}
+      {renderMobileAvatarMenu()}
 
       {practicesPageOpen ? (
         <section className="practices-browser dora-stage__practices-browser">
@@ -7460,6 +7728,7 @@ export default function QuestionPage() {
                         hue={0}
                         forceHoverState={false}
                         backgroundColor="#ffffff"
+                        transparentBackground={true}
                       />
                     </div>
                   ) : null}
@@ -8364,22 +8633,22 @@ export default function QuestionPage() {
       <div className="sender-toolbar__left">
         {renderAttachActions()}
         {showHeroSkillSenderUi ? (
-          <span className="sender-skill-tag" aria-label={`已选技能：${activeHeroSkillTag.label}`}>
+          <button
+            type="button"
+            className="sender-skill-tag"
+            aria-label={`取消已选技能：${activeHeroSkillTag.label}`}
+            onClick={clearHeroSkillTag}
+          >
             <span className="dora-icon icon-16 sender-skill-tag__icon" aria-hidden="true">
               {activeHeroSkillTag.icon}
             </span>
-            <button
-              type="button"
-              className="sender-skill-tag__remove"
-              aria-label={`取消${activeHeroSkillTag.label}`}
-              onClick={clearHeroSkillTag}
-            >
+            <span className="sender-skill-tag__remove" aria-hidden="true">
               <span className="dora-icon icon-16 sender-skill-tag__remove-icon" aria-hidden="true">
                 {ICONS.close}
               </span>
-            </button>
+            </span>
             <span className="sender-skill-tag__label">{activeHeroSkillTag.label}</span>
-          </span>
+          </button>
         ) : null}
       </div>
       <button
@@ -8489,7 +8758,38 @@ export default function QuestionPage() {
   }
 
   const renderSchedulePage = () => (
-    <section className="schedule-page">
+    <>
+      <section className="mobile-schedule-page">
+        <header className="mobile-schedule-page__header">
+          <div className="mobile-schedule-page__header-left">
+            <button
+              type="button"
+              className="mobile-schedule-page__action"
+              aria-label="返回"
+              onClick={() => {
+                handleInnerActionClick('new-chat')
+                setMobileNewChatPageOpen(false)
+              }}
+            >
+              <span className="dora-icon" aria-hidden="true">{ICONS.arrowLeft}</span>
+            </button>
+            <h1>定时任务</h1>
+          </div>
+          <button
+            type="button"
+            className="mobile-schedule-page__action"
+            aria-label="目录"
+            aria-expanded={mobileCatalogOpen}
+            onClick={() => setMobileCatalogOpen(true)}
+          >
+            <span className="dora-icon" aria-hidden="true">{ICONS.catalog}</span>
+          </button>
+        </header>
+        <div className="mobile-schedule-page__body" />
+        {renderMobileCatalogDrawer()}
+      </section>
+
+      <section className="schedule-page">
       <header className="schedule-page__header">
         <div className="schedule-page__header-left">
           <IconButton
@@ -8632,7 +8932,8 @@ export default function QuestionPage() {
           </div>
         </div>
       </div>
-    </section>
+      </section>
+    </>
   )
 
   const handleStopGeneration = () => {
@@ -9202,7 +9503,7 @@ export default function QuestionPage() {
 
   return (
     <div
-      className={`page${isDoraAskPage ? ' page--dora-ask' : ''}${
+      className={`page${isDoraAskPage ? ' page--dora-ask' : ''}${mobileNewChatPageOpen ? ' page--mobile-new-chat' : ''}${isScheduleView ? ' page--mobile-schedule' : ''}${isQuestionMode && !isLibraryDetailView ? ' page--mobile-session' : ''}${isExpertDetailView && !isQuestionMode && !isScheduleView ? ' page--mobile-expert-detail' : ''}${isLibraryDetailView ? ' page--mobile-library-detail' : ''}${
         sessionFilesPanelFullscreen && activeSessionPreviewFile ? ' page--session-file-preview-fullscreen' : ''
       }`}
       data-name="2-提问页"
@@ -9773,18 +10074,26 @@ export default function QuestionPage() {
                 ) : (
                   <section className="expert-detail-page expert-detail-page--enter">
                     <header className="expert-detail-page__header">
-                      <IconButton
-                        tip={panelToggleTitle}
-                        className="expert-detail-page__back"
-                        aria-label={panelToggleTitle}
-                        onClick={toggleInnerSidebar}
-                      >
-                        <span className="dora-icon icon-16" aria-hidden="true">
-                          {ICONS.sidebar}
-                        </span>
-                      </IconButton>
-                      {renderSessionHeaderActions()}
+                      <div className="expert-detail-page__desktop-header">
+                        <IconButton tip={panelToggleTitle} className="expert-detail-page__back" aria-label={panelToggleTitle} onClick={toggleInnerSidebar}>
+                          <span className="dora-icon icon-16" aria-hidden="true">{ICONS.sidebar}</span>
+                        </IconButton>
+                        {renderSessionHeaderActions()}
+                      </div>
+                      <div className="expert-detail-page__mobile-header">
+                        <div className="expert-detail-page__mobile-title">
+                          <button type="button" className="expert-detail-page__mobile-action" aria-label="返回专家团" onClick={() => setActiveExpertCard(null)}>
+                            <span className="dora-icon" aria-hidden="true">{ICONS.arrowLeft}</span>
+                          </button>
+                          <h1>新聊天</h1>
+                        </div>
+                        <button type="button" className="expert-detail-page__mobile-action" aria-label="目录" aria-expanded={mobileCatalogOpen} onClick={() => setMobileCatalogOpen(true)}>
+                          <span className="dora-icon" aria-hidden="true">{ICONS.catalog}</span>
+                        </button>
+                      </div>
                     </header>
+
+                    {renderMobileCatalogDrawer()}
 
                     <div className="expert-detail-page__body">
                       <div className="expert-detail-page__panel-wrap">
@@ -9875,43 +10184,88 @@ export default function QuestionPage() {
                           </div>
                         </div>
                       </div>
+                      <p className="expert-detail-page__tip">内容均由AI生成, 仅供参考</p>
                     </div>
                   </section>
                 )
               ) : activeNav === 'library' ? (
                 !activeLibraryItem ? (
-                  <section className="library-page">
+                  <section className={`library-page${libraryMobileSearchOpen ? ' is-mobile-searching' : ''}`}>
                     <header className="library-page__header">资料库</header>
+
+                    {libraryMobileSearchOpen ? (
+                      <section className="library-mobile-search-page" aria-label="搜索资料">
+                        <header className="library-mobile-search-page__header">
+                          <label className="library-mobile-search-page__field">
+                            <span className="dora-icon" aria-hidden="true">{ICONS.search}</span>
+                            <input
+                              value={librarySearch}
+                              onChange={(e) => setLibrarySearch(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault()
+                                  setLibraryMobileSearchSubmitted(Boolean(e.currentTarget.value.trim()))
+                                }
+                              }}
+                              onFocus={() => setLibraryMobileSearchFocused(true)}
+                              onBlur={() => setLibraryMobileSearchFocused(false)}
+                              type="search"
+                              placeholder="请输入"
+                              autoFocus
+                            />
+                            {librarySearch ? (
+                              <button type="button" aria-label="清空搜索" onMouseDown={(e) => e.preventDefault()} onClick={() => setLibrarySearch('')}>
+                                <span className="dora-icon" aria-hidden="true">{ICONS.close}</span>
+                              </button>
+                            ) : null}
+                          </label>
+                          {libraryMobileSearchFocused ? (
+                            <button
+                              type="button"
+                              className="library-mobile-search-page__cancel"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => { setLibraryMobileSearchOpen(false); setLibraryMobileSearchFocused(false); setLibraryMobileSearchSubmitted(false); setLibrarySearch('') }}
+                            >
+                              取消
+                            </button>
+                          ) : null}
+                        </header>
+
+                        {libraryMobileSearchSubmitted ? <div className="library-mobile-search-page__content">
+                          <div className="library-grid">
+                            {filteredLibraryItems.map((item) => (
+                              <article key={`mobile-search-${item.type}-${item.title}-${item.cover}`} className="library-card" data-library-type={item.type} role="button" tabIndex={0} onClick={() => openLibraryItem(item, { trackRecent: true })} onKeyDown={(e) => onEnterKey(e, () => openLibraryItem(item, { trackRecent: true }))}>
+                                <div className="library-card__meta">
+                                  <img src={getLibraryFileIcon(item.type)} alt="" className="library-card__type-icon" />
+                                  <div className="library-card__text">
+                                    <h3>{highlightSearchText(item.title, librarySearch)}</h3>
+                                    <p>{highlightSearchText(item.subtitle, librarySearch)}</p>
+                                  </div>
+                                </div>
+                                <div className="library-card__cover-wrap"><img src={item.cover} alt="" className="library-card__cover" /></div>
+                              </article>
+                            ))}
+                            {!filteredLibraryItems.length ? <div className="library-empty">暂无匹配资源</div> : null}
+                          </div>
+                        </div> : null}
+                      </section>
+                    ) : null}
 
                     <div className="library-page__body">
                       <div className="library-mobile-controls">
-                        <label className="library-search library-mobile-search">
+                        <label className="library-search library-mobile-search" onClick={() => { setLibraryMobileSearchFocused(true); setLibraryMobileSearchOpen(true); setLibraryMobileSearchSubmitted(false) }}>
                           <span className="dora-icon library-search__icon" aria-hidden="true">
                             {ICONS.search}
                           </span>
                           <input
-                            value={librarySearch}
-                            onChange={(e) => setLibrarySearch(e.target.value)}
+                            value=""
+                            readOnly
                             type="text"
                             className="library-search__input"
                             placeholder="搜索名称/描述"
                           />
                         </label>
 
-                        <div className="library-mobile-tabs" role="tablist" aria-label="资料类型">
-                          {MOBILE_LIBRARY_FILTER_OPTIONS.map((option) => (
-                            <button
-                              key={`mobile-library-${option.value}`}
-                              type="button"
-                              role="tab"
-                              aria-selected={libraryFilter === option.value}
-                              className={`library-mobile-tab ${libraryFilter === option.value ? 'active' : ''}`}
-                              onClick={() => setLibraryFilter(option.value)}
-                            >
-                              {option.label}
-                            </button>
-                          ))}
-                        </div>
                       </div>
 
                       {libraryRecentItems.length ? (
@@ -9985,6 +10339,20 @@ export default function QuestionPage() {
 
                       <section className="library-section library-section--fill">
                         <h2 className="library-mobile-section-title">全部资料</h2>
+                        <div className="library-mobile-tabs" role="tablist" aria-label="全部资料类型">
+                          {availableMobileLibraryFilterOptions.map((option) => (
+                            <button
+                              key={`mobile-library-${option.value}`}
+                              type="button"
+                              role="tab"
+                              aria-selected={libraryFilter === option.value}
+                              className={`library-mobile-tab ${libraryFilter === option.value ? 'active' : ''}`}
+                              onClick={() => setLibraryFilter(option.value)}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </div>
                         <div className="library-section__row">
                           <div className="library-section__title">
                             <span className="library-section__accent library-section__accent--blue"></span>
@@ -10051,6 +10419,47 @@ export default function QuestionPage() {
                   </section>
                 ) : (
                   <section className={`library-detail-page library-detail-page--enter ${libraryChatCollapsed ? 'chat-collapsed' : ''}`}>
+                    <section className="mobile-library-detail" aria-label={`${activeLibraryTitle}文件预览`}>
+                      <header className="mobile-library-detail__header">
+                        <button type="button" className="mobile-library-detail__action" aria-label="返回资料库" onClick={() => setActiveLibraryItem(null)}>
+                          <span className="dora-icon" aria-hidden="true">{ICONS.arrowLeft}</span>
+                        </button>
+                        <h1 title={activeLibraryTitle}>{activeLibraryTitle}</h1>
+                        <div className="mobile-library-detail__actions">
+                          <button type="button" className="mobile-library-detail__action" aria-label="分享">
+                            <span className="dora-icon" aria-hidden="true">{ICONS.share}</span>
+                          </button>
+                          <button type="button" className="mobile-library-detail__action" aria-label="下载">
+                            <span className="dora-icon" aria-hidden="true">{ICONS.download}</span>
+                          </button>
+                        </div>
+                      </header>
+
+                      <div className={`mobile-library-detail__content mobile-library-detail__content--${activeLibraryItem?.type ?? 'other'}`}>
+                        {activeLibraryItem?.type === 'ppt' ? (
+                          SESSION_SOURCE_PPT_PREVIEW_SLIDES.map((slide, index) => (
+                            <img key={`mobile-library-ppt-${index}`} src={slide} alt={`第 ${index + 1} 页`} className="mobile-library-detail__page mobile-library-detail__page--slide" />
+                          ))
+                        ) : activeLibraryItem?.type === 'pdf' ? (
+                          SESSION_SOURCE_PDF_PREVIEW_PAGES.map((page, index) => (
+                            <img key={`mobile-library-pdf-${index}`} src={page} alt={`第 ${index + 1} 页`} className="mobile-library-detail__page" />
+                          ))
+                        ) : activeLibraryItem?.type === 'doc' ? (
+                          SESSION_SOURCE_DOC_PREVIEW_PAGES.map((page, index) => (
+                            <img key={`mobile-library-doc-${index}`} src={page} alt={`第 ${index + 1} 页`} className="mobile-library-detail__page" />
+                          ))
+                        ) : activeLibraryItem?.type === 'md' ? (
+                          <article className="library-detail-markdown mobile-library-detail__document" dangerouslySetInnerHTML={{ __html: activeLibraryHtml }} />
+                        ) : activeLibraryItem?.type === 'txt' ? (
+                          <pre className="mobile-library-detail__text">华润集团销售拓客速读{`\n\n`}本文档整理了集团业务概况、销售机会与重点客户洞察。{`\n\n`}建议结合区域销售数据和客户分层结果，制定差异化的跟进策略。</pre>
+                        ) : activeLibraryItem?.type === 'xls' ? (
+                          <div className="mobile-library-detail__spreadsheet">{renderSessionSourceSpreadsheetPreview()}</div>
+                        ) : (
+                          <img src={activeLibraryItem?.cover} alt={activeLibraryTitle} className="mobile-library-detail__asset" />
+                        )}
+                      </div>
+                    </section>
+
                     <div className="library-detail-main">
                       <header className="library-detail-main__header">
                         <IconButton tip="返回" className="expert-detail-page__back" onClick={() => setActiveLibraryItem(null)}>
@@ -10175,6 +10584,7 @@ export default function QuestionPage() {
                                   hue={0}
                                   forceHoverState={false}
                                   backgroundColor="#ffffff"
+                                  transparentBackground={true}
                                 />
                               </div>
                             ) : null}
@@ -10242,7 +10652,7 @@ export default function QuestionPage() {
                 renderSharedSessionStage(doraIntroPhase)
               ) : (
                 <div
-                  className={`dora-stage dora-stage--${doraIntroPhase} dora-stage--${doraVisualScheme}`}
+                  className={`dora-stage dora-stage--${doraIntroPhase} dora-stage--${doraVisualScheme}${mobileNewChatPageOpen ? ' mobile-new-chat-page' : ''}`}
                   onPointerMove={(event) => {
                     handleScheme3PointerMove(event)
                     handleHeatmapPointerMove(event)
@@ -10274,6 +10684,9 @@ export default function QuestionPage() {
                       </>
                     )}
                   </header>
+
+                  {renderMobileCatalogDrawer()}
+                  {renderMobileAvatarMenu()}
 
                   {practicesPageOpen ? (
                     <section className="practices-browser dora-stage__practices-browser">
@@ -10315,6 +10728,7 @@ export default function QuestionPage() {
                                   hue={0}
                                   forceHoverState={false}
                                   backgroundColor="#ffffff"
+                                  transparentBackground={true}
                                 />
                               </div>
                             ) : null}
@@ -10354,8 +10768,9 @@ export default function QuestionPage() {
                           </div>
                         </div>
                         {renderHeroSkillSlot()}
+                        {mobileNewChatPageOpen ? <p className="mobile-new-chat-tip">内容均由AI生成, 仅供参考</p> : null}
                       </section>
-                      {renderPracticesFooter()}
+                      {!mobileNewChatPageOpen ? renderPracticesFooter() : null}
                     </>
                   )}
                 </div>

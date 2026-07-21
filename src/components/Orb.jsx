@@ -22,6 +22,7 @@ const frag = /* glsl */ `
   uniform float hover;
   uniform float rot;
   uniform float hoverIntensity;
+  uniform float transparentBackground;
   uniform vec3 backgroundColor;
   varying vec2 vUv;
 
@@ -161,6 +162,9 @@ const frag = /* glsl */ `
   void main() {
     vec2 fragCoord = vUv * iResolution.xy;
     vec4 col = mainImage(fragCoord);
+    float backgroundDistance = distance(col.rgb, backgroundColor);
+    float transparentAlpha = smoothstep(0.015, 0.22, backgroundDistance);
+    col.a *= mix(1.0, transparentAlpha, transparentBackground);
     gl_FragColor = vec4(col.rgb * col.a, col.a);
   }
 `
@@ -222,6 +226,7 @@ export default function Orb({
   rotateOnHover = true,
   forceHoverState = false,
   backgroundColor = '#000000',
+  transparentBackground = false,
   className = '',
 }) {
   const ctnDom = useRef(null)
@@ -246,6 +251,7 @@ export default function Orb({
         hover: { value: 0 },
         rot: { value: 0 },
         hoverIntensity: { value: hoverIntensity },
+        transparentBackground: { value: transparentBackground ? 1 : 0 },
         backgroundColor: { value: hexToVec3(backgroundColor) },
       },
     })
@@ -298,6 +304,7 @@ export default function Orb({
       program.uniforms.iTime.value = time * 0.001
       program.uniforms.hue.value = hue
       program.uniforms.hoverIntensity.value = hoverIntensity
+      program.uniforms.transparentBackground.value = transparentBackground ? 1 : 0
 
       const effectiveHover = forceHoverState ? 1 : targetHover
       program.uniforms.hover.value += (effectiveHover - program.uniforms.hover.value) * 0.1
@@ -321,7 +328,7 @@ export default function Orb({
       container.removeChild(gl.canvas)
       gl.getExtension('WEBGL_lose_context')?.loseContext()
     }
-  }, [hue, hoverIntensity, rotateOnHover, forceHoverState, backgroundColor])
+  }, [hue, hoverIntensity, rotateOnHover, forceHoverState, backgroundColor, transparentBackground])
 
   return <div ref={ctnDom} className={`orb-container ${className}`} />
 }
