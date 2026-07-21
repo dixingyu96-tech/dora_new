@@ -2445,16 +2445,6 @@ const MOBILE_EXPERT_BUSINESS_TABS = [
   { value: '风控', label: '风控' },
 ]
 
-const FIGMA_MOBILE_EXPERT_ASSETS = [
-  'http://localhost:3845/assets/4ee6aa9a07062612bf4306774685c66d6cf46fd3.png',
-  'http://localhost:3845/assets/980f0ce4242143f7934a73c709ffd59744f1b156.png',
-  'http://localhost:3845/assets/ccf429cd20e7ee55cb0860d3b4e954e142e84f70.png',
-  'http://localhost:3845/assets/39f45c27dbacfb9e16d3afcdd708c74fd5ae0799.png',
-  'http://localhost:3845/assets/77010b818c3459dea6664c7305235fbd9bb8bf35.png',
-  'http://localhost:3845/assets/fba1afc6698cd9a908bbec1fdc0c6753e1fa4ed0.png',
-  'http://localhost:3845/assets/888b5a04228240a1d9ffbc2df3bd4ed1636acb02.png',
-]
-
 const EXPERT_AGENT_AVATAR_MODULES = import.meta.glob('../assets/images/expert-agents/*.png', {
   eager: true,
   import: 'default',
@@ -3617,10 +3607,7 @@ export default function QuestionPage() {
 
   const defaultMobileRecommendationItems = useMemo(() => {
     const fallbackExperts = EXPERT_CARDS.slice(0, 5).map((card, index) =>
-      createExpertRecommendationItem({
-        ...normalizeExpertCard(card, index),
-        mobileIcon: FIGMA_MOBILE_EXPERT_ASSETS[index % FIGMA_MOBILE_EXPERT_ASSETS.length],
-      }),
+      createExpertRecommendationItem(normalizeExpertCard(card, index)),
     )
     const fallbackLibraryItems = LIBRARY_ITEMS.slice(0, 5).map(createLibraryRecommendationItem)
 
@@ -3781,11 +3768,7 @@ export default function QuestionPage() {
   )
 
   const expertCards = useMemo(
-    () =>
-      EXPERT_CARDS.map((card, index) => ({
-        ...normalizeExpertCard(card, index),
-        mobileIcon: FIGMA_MOBILE_EXPERT_ASSETS[index % FIGMA_MOBILE_EXPERT_ASSETS.length],
-      })),
+    () => EXPERT_CARDS.map((card, index) => normalizeExpertCard(card, index)),
     [],
   )
 
@@ -9901,7 +9884,7 @@ export default function QuestionPage() {
                           <div className="library-mobile-search-page__content experts-mobile-search-page__content">
                             {filteredExpertCards.length ? (
                               <div className="experts-grid">
-                                {filteredExpertCards.map((card, cardIndex) => {
+                                {filteredExpertCards.map((card) => {
                                   const cardKey = getExpertCardKey(card)
                                   const isFavorite = expertFavoriteKeys.includes(cardKey)
                                   return (
@@ -9914,7 +9897,7 @@ export default function QuestionPage() {
                                       onKeyDown={(e) => onEnterKey(e, () => openExpertCard(card))}
                                     >
                                       <div className="expert-card__mobile">
-                                        <img src={card.mobileIcon ?? FIGMA_MOBILE_EXPERT_ASSETS[cardIndex % FIGMA_MOBILE_EXPERT_ASSETS.length]} alt="" className="expert-card__mobile-avatar" />
+                                        <img src={card.mobileIcon ?? card.icon} alt="" className="expert-card__mobile-avatar" />
                                         <div className="expert-card__mobile-body">
                                           <div className="expert-card__mobile-top">
                                             <div className="expert-card__mobile-copy">
@@ -10028,7 +10011,7 @@ export default function QuestionPage() {
                                   <div className="experts-mobile-quick__section">
                                     <h2>{section.title}</h2>
                                     <div className="experts-mobile-quick__rail">
-                                      {section.cards.map((card, cardIndex) => (
+                                      {section.cards.map((card) => (
                                         <button
                                           key={`${section.id}-${getExpertCardKey(card)}`}
                                           type="button"
@@ -10036,7 +10019,7 @@ export default function QuestionPage() {
                                           onClick={() => openExpertCard(card)}
                                         >
                                           <img
-                                            src={card.mobileIcon ?? FIGMA_MOBILE_EXPERT_ASSETS[cardIndex % FIGMA_MOBILE_EXPERT_ASSETS.length]}
+                                            src={card.mobileIcon ?? card.icon}
                                             alt=""
                                           />
                                           <span>{card.title}</span>
@@ -10088,7 +10071,7 @@ export default function QuestionPage() {
                                   >
                                     <div className="expert-card__mobile">
                                       <img
-                                        src={card.mobileIcon ?? FIGMA_MOBILE_EXPERT_ASSETS[cardIndex % FIGMA_MOBILE_EXPERT_ASSETS.length]}
+                                        src={card.mobileIcon ?? card.icon}
                                         alt=""
                                         className="expert-card__mobile-avatar"
                                       />
