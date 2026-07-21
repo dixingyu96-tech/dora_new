@@ -1560,6 +1560,7 @@
 
 .experts-mobile-quick,
 .experts-mobile-all,
+.experts-mobile-search,
 .expert-card__mobile {
   display: none;
 }
@@ -1853,6 +1854,10 @@
   flex: 1 1 180px;
   width: auto;
   max-width: 300px;
+}
+
+.experts-search.experts-mobile-search {
+  display: none;
 }
 
 .library-select-wrap {
@@ -11129,6 +11134,10 @@ select {
     display: none;
   }
 
+  .experts-page.is-mobile-searching > .experts-page__body {
+    display: none;
+  }
+
   .library-mobile-search-page {
     display: flex;
     flex: 1 1 auto;
@@ -11154,7 +11163,7 @@ select {
     min-width: 0;
     height: 40px;
     padding: 0 var(--fd-padding, 8px);
-    border-radius: var(--fd-border-radius, 6px);
+    border-radius: var(--fd-border-radius);
     background: var(--fd-color-bg-container);
     color: var(--fd-color-icon-normal);
   }
@@ -11230,6 +11239,10 @@ select {
     min-height: 0;
     border: 0;
     border-radius: 0;
+  }
+
+  .experts-mobile-search-page__content > .experts-grid {
+    margin: 0;
   }
 
   .schedule-page__body {
@@ -12021,6 +12034,15 @@ select {
     line-height: 18px;
   }
 
+  .mobile-schedule-page__catalog-action {
+    flex-basis: var(--fd-control-height);
+    width: var(--fd-control-height);
+    height: var(--fd-control-height);
+    font-size: var(--fd-font-size-2xl);
+    line-height: var(--fd-line-height-sm);
+    -webkit-tap-highlight-color: transparent;
+  }
+
   .mobile-schedule-page__body {
     flex: 1 1 auto;
     min-height: 0;
@@ -12084,6 +12106,12 @@ select {
     gap: var(--fd-gap-xs);
     padding: 8px 16px 6px;
     border-radius: var(--fd-border-radius-xl);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .nav-item:active {
+    background: transparent;
   }
 
   .nav-icon-slot,
@@ -12571,6 +12599,38 @@ select {
 
 /* Figma 12516:49183 — Dora 首页最小展示界面（402 × 874） */
 @media (max-width: 599px) {
+  .experts-search--desktop {
+    display: none;
+  }
+
+  .experts-search.experts-mobile-search {
+    display: flex;
+    flex: 0 0 var(--fd-control-height-lg);
+    width: 100%;
+    max-width: none;
+    height: var(--fd-control-height-lg);
+    padding: var(--fd-padding-zero) var(--fd-padding);
+    border: 0;
+    border-radius: var(--fd-border-radius);
+    background: var(--fd-color-bg-container);
+    box-shadow: none;
+  }
+
+  .experts-mobile-search .experts-search__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 var(--fd-icon-size-lg);
+    width: var(--fd-icon-size-lg);
+    height: var(--fd-icon-size-lg);
+    font-size: var(--fd-icon-size);
+  }
+
+  .experts-mobile-search .experts-search__input {
+    font-size: var(--fd-font-size-lg);
+    line-height: var(--fd-line-height-lg);
+  }
+
   .page--dora-ask {
     position: relative;
     height: 100svh;
@@ -12888,6 +12948,11 @@ select {
     animation: mobile-catalog-drawer-in 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
+  .mobile-catalog-drawer.is-searching {
+    width: 100vw;
+    box-shadow: none;
+  }
+
   @keyframes mobile-catalog-backdrop-in {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -13018,41 +13083,34 @@ select {
 
   .mobile-catalog-search-page__header {
     display: flex;
-    flex: 0 0 56px;
+    flex: 0 0 calc(var(--fd-control-height-lg) + 2 * var(--fd-gap-xl));
     align-items: center;
-    gap: 12px;
-    height: 56px;
-    padding: 0 16px;
-  }
-
-  .mobile-catalog-search-page__back {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 18px;
-    width: 18px;
-    height: 18px;
-    padding: 0;
-    color: var(--fd-color-icon);
-    font-size: 18px;
+    gap: var(--fd-gap-2xl);
+    height: calc(var(--fd-control-height-lg) + 2 * var(--fd-gap-xl));
+    padding: var(--fd-gap-xl) var(--fd-padding-layout);
   }
 
   .mobile-catalog-search-page__field {
     display: flex;
     flex: 1 1 auto;
     align-items: center;
-    gap: 8px;
+    gap: var(--fd-gap);
     min-width: 0;
-    height: 36px;
-    padding: 0 12px;
+    height: var(--fd-control-height-lg);
+    padding: var(--fd-padding-zero) var(--fd-padding);
     border-radius: var(--fd-border-radius);
-    background: var(--fd-color-fill-quaternary);
+    background: var(--fd-color-bg-container);
     color: var(--fd-color-icon-normal);
   }
 
   .mobile-catalog-search-page__field > .dora-icon {
-    flex: 0 0 16px;
-    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 var(--fd-icon-size-lg);
+    width: var(--fd-icon-size-lg);
+    height: var(--fd-icon-size-lg);
+    font-size: var(--fd-icon-size);
   }
 
   .mobile-catalog-search-page__field input {
@@ -13067,24 +13125,51 @@ select {
     line-height: var(--fd-line-height-lg);
   }
 
+  .mobile-catalog-search-page__field input::placeholder {
+    color: var(--fd-color-text-placeholder);
+  }
+
   .mobile-catalog-search-page__field button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 16px;
-    width: 16px;
-    height: 16px;
-    padding: 0;
+    flex: 0 0 var(--fd-icon-size);
+    width: var(--fd-icon-size);
+    height: var(--fd-icon-size);
+    padding: var(--fd-padding-zero);
     color: var(--fd-color-icon-normal);
-    font-size: 14px;
+    font-size: var(--fd-icon-size-sm);
+  }
+
+  .mobile-catalog-search-page__cancel {
+    flex: 0 0 auto;
+    padding: var(--fd-padding-zero);
+    color: var(--fd-color-text-heading);
+    font-size: var(--fd-font-size-lg);
+    line-height: var(--fd-line-height-lg);
+    white-space: nowrap;
   }
 
   .mobile-catalog-history--search-page {
-    padding-top: 4px;
+    padding-top: 0;
   }
 
   .mobile-catalog-history--search-page .mobile-catalog-history__scroll {
-    padding-top: 8px;
+    padding-top: 0;
+  }
+
+  .mobile-catalog-search-results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fd-gap);
+  }
+
+  .mobile-catalog-history__item.mobile-catalog-search-results__item {
+    flex: 0 0 var(--fd-control-height-lg);
+    height: var(--fd-control-height-lg);
+    padding: var(--fd-padding-zero);
+    font-size: var(--fd-font-size-lg);
+    line-height: var(--fd-line-height-lg);
   }
 
   .mobile-catalog-search-page__empty {

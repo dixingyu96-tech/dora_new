@@ -218,6 +218,7 @@ const ICONS = {
   send: '\ue791',
   back: '\ue790',
   arrowLeft: '\ue7da',
+  mobileBack: '\ue830',
   download: '\ue7b9',
   share: '\ue7a5',
   collapseCatalog: '\ue7cc',
@@ -3449,6 +3450,9 @@ export default function QuestionPage() {
   const [expertFilter, setExpertFilter] = useState('all-creators')
   const [expertBusinessFilter, setExpertBusinessFilter] = useState('all')
   const [expertSearch, setExpertSearch] = useState('')
+  const [expertMobileSearchOpen, setExpertMobileSearchOpen] = useState(false)
+  const [expertMobileSearchFocused, setExpertMobileSearchFocused] = useState(false)
+  const [expertMobileSearchSubmitted, setExpertMobileSearchSubmitted] = useState(false)
   const [libraryFilter, setLibraryFilter] = useState('all')
   const [librarySearch, setLibrarySearch] = useState('')
   const [libraryMobileSearchOpen, setLibraryMobileSearchOpen] = useState(false)
@@ -3819,12 +3823,24 @@ export default function QuestionPage() {
     [expertBusinessFilter, expertCardsMatchingBaseFilters],
   )
 
+  useEffect(() => {
+    if (!expertSearch.trim()) {
+      setExpertMobileSearchSubmitted(false)
+    }
+  }, [expertSearch])
+
   const libraryItemsMatchingSearch = useMemo(() => {
     const keyword = librarySearch.trim().toLowerCase()
 
     return LIBRARY_ITEMS.filter(
       (item) => !keyword || `${item.title} ${item.owner}`.toLowerCase().includes(keyword),
     )
+  }, [librarySearch])
+
+  useEffect(() => {
+    if (!librarySearch.trim()) {
+      setLibraryMobileSearchSubmitted(false)
+    }
   }, [librarySearch])
 
   const availableMobileLibraryFilterOptions = useMemo(
@@ -5947,6 +5963,11 @@ export default function QuestionPage() {
   const renderMobileCatalogDrawer = () => {
     if (!mobileCatalogOpen) return null
     const keyword = mobileCatalogSearch.trim().toLowerCase()
+    const mobileCatalogSearchResults = keyword
+      ? groupedHistoryItems
+          .flatMap((group) => group.items)
+          .filter((item) => item.label.toLowerCase().includes(keyword))
+      : []
 
     return createPortal(
       <div className="mobile-catalog-layer" role="presentation">
@@ -5954,23 +5975,12 @@ export default function QuestionPage() {
         <aside className={`mobile-catalog-drawer${mobileCatalogSearchOpen ? ' is-searching' : ''}`} role="dialog" aria-modal="true" aria-label={mobileCatalogSearchOpen ? '搜索会话' : '目录'}>
           {mobileCatalogSearchOpen ? (
             <header className="mobile-catalog-search-page__header">
-              <button
-                type="button"
-                className="mobile-catalog-search-page__back"
-                aria-label="返回目录"
-                onClick={() => {
-                  setMobileCatalogSearchOpen(false)
-                  setMobileCatalogSearch('')
-                }}
-              >
-                <span className="dora-icon" aria-hidden="true">{ICONS.arrowLeft}</span>
-              </button>
               <label className="mobile-catalog-search-page__field">
                 <span className="dora-icon" aria-hidden="true">{ICONS.search}</span>
                 <input
                   value={mobileCatalogSearch}
                   onChange={(event) => setMobileCatalogSearch(event.target.value)}
-                  placeholder="搜索会话"
+                  placeholder="请输入"
                   aria-label="搜索会话"
                   autoFocus
                 />
@@ -5980,6 +5990,17 @@ export default function QuestionPage() {
                   </button>
                 ) : null}
               </label>
+              <button
+                type="button"
+                className="mobile-catalog-search-page__cancel"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  setMobileCatalogSearchOpen(false)
+                  setMobileCatalogSearch('')
+                }}
+              >
+                取消
+              </button>
             </header>
           ) : (
             <>
@@ -6015,14 +6036,12 @@ export default function QuestionPage() {
               </div>
             ) : null}
 
-            <div className="mobile-catalog-history__scroll">
-              {groupedHistoryItems.map((group) => {
-                const items = group.items.filter((item) => !keyword || item.label.toLowerCase().includes(keyword))
-                if (!items.length) return null
-                return (
+            {!mobileCatalogSearchOpen ? (
+              <div className="mobile-catalog-history__scroll">
+                {groupedHistoryItems.map((group) => (
                   <section key={`mobile-catalog-${group.id}`} className="mobile-catalog-history__group" aria-label={group.label}>
                     <h3>{group.label}</h3>
-                    {items.map((item) => (
+                    {group.items.map((item) => (
                       <button
                         key={`mobile-catalog-item-${item.id}`}
                         type="button"
@@ -6033,12 +6052,23 @@ export default function QuestionPage() {
                       </button>
                     ))}
                   </section>
-                )
-              })}
-              {keyword && !groupedHistoryItems.some((group) => group.items.some((item) => item.label.toLowerCase().includes(keyword))) ? (
-                <p className="mobile-catalog-search-page__empty">暂无匹配的会话</p>
-              ) : null}
-            </div>
+                ))}
+              </div>
+            ) : keyword ? (
+              <div className="mobile-catalog-history__scroll mobile-catalog-search-results">
+                {mobileCatalogSearchResults.map((item) => (
+                  <button
+                    key={`mobile-catalog-search-item-${item.id}`}
+                    type="button"
+                    className="mobile-catalog-history__item mobile-catalog-search-results__item"
+                    onClick={() => { openHistorySession(item); closeMobileCatalog() }}
+                  >
+                    {highlightSearchText(item.label, mobileCatalogSearch)}
+                  </button>
+                ))}
+                {!mobileCatalogSearchResults.length ? <p className="mobile-catalog-search-page__empty">暂无匹配的会话</p> : null}
+              </div>
+            ) : null}
           </section>
         </aside>
       </div>,
@@ -6084,7 +6114,7 @@ export default function QuestionPage() {
     <div className="mobile-home-nav" aria-label="首页快捷导航">
       {mobileNewChatPageOpen ? (
         <button type="button" className="mobile-home-nav__action" aria-label="返回首页" onClick={() => setMobileNewChatPageOpen(false)}>
-          <span className="dora-icon" aria-hidden="true">{ICONS.arrowLeft}</span>
+          <span className="dora-icon" aria-hidden="true">{ICONS.mobileBack}</span>
         </button>
       ) : (
         <button
@@ -7637,7 +7667,7 @@ export default function QuestionPage() {
                     closeMobileCatalog()
                   }}
                 >
-                  <span className="dora-icon" aria-hidden="true">{ICONS.arrowLeft}</span>
+                  <span className="dora-icon" aria-hidden="true">{ICONS.mobileBack}</span>
                 </button>
                 <h2 title={activeSessionHistoryItem?.label ?? activeSessionPrompt}>
                   {activeSessionHistoryItem?.label ?? activeSessionPrompt}
@@ -8771,18 +8801,18 @@ export default function QuestionPage() {
                 setMobileNewChatPageOpen(false)
               }}
             >
-              <span className="dora-icon" aria-hidden="true">{ICONS.arrowLeft}</span>
+              <span className="dora-icon" aria-hidden="true">{ICONS.mobileBack}</span>
             </button>
             <h1>定时任务</h1>
           </div>
           <button
             type="button"
-            className="mobile-schedule-page__action"
-            aria-label="目录"
+            className="mobile-schedule-page__action mobile-schedule-page__catalog-action"
+            aria-label="打开侧边栏"
             aria-expanded={mobileCatalogOpen}
             onClick={() => setMobileCatalogOpen(true)}
           >
-            <span className="dora-icon" aria-hidden="true">{ICONS.catalog}</span>
+            <span className="dora-icon" aria-hidden="true">{ICONS.sidebar}</span>
           </button>
         </header>
         <div className="mobile-schedule-page__body" />
@@ -9042,7 +9072,24 @@ export default function QuestionPage() {
       completedSessionMeta: null,
     })
 
-    if (isQuestionMode && activeHistoryItemId && !isLibraryDetailView) {
+    if (isQuestionMode && activeHistoryItemId) {
+      if (isLibraryDetailView) {
+        const libraryKey = getLibraryItemKey(activeLibraryItem)
+        setLibraryChatSessionsByKey((prev) => ({
+          ...prev,
+          [libraryKey]: (prev[libraryKey] ?? []).map((item) =>
+            item.id === activeHistoryItemId
+              ? {
+                  ...item,
+                  sessionTurns: [...getSessionTurnsFromHistoryItem(item), nextTurn],
+                  isGenerating: true,
+                  badge: '',
+                }
+              : item,
+          ),
+        }))
+      }
+
       updateSessionScopeState(activeSessionScope, (prev) => {
         const nextTurns = [...getSessionTurnsFromState(prev), nextTurn]
         const currentHistoryItem = prev.historyItems.find((item) => item.id === prev.activeHistoryItemId)
@@ -9091,6 +9138,7 @@ export default function QuestionPage() {
       }))
       updateSessionScopeState(activeSessionScope, (prev) => ({
         ...prev,
+        historyItems: upsertHistoryItem(prev.historyItems, nextHistoryItem),
         inputText: '',
         composerFiles: [],
         composerSegments: DEFAULT_COMPOSER_SEGMENTS,
@@ -9791,15 +9839,127 @@ export default function QuestionPage() {
             <div className="content-column" ref={contentColumnRef}>
               {activeNav === 'experts' ? (
                 !activeExpertCard ? (
-                  <section className="experts-page">
+                  <section className={`experts-page${expertMobileSearchOpen ? ' is-mobile-searching' : ''}`}>
                     <header className="experts-page__header">专家团</header>
+
+                    {expertMobileSearchOpen ? (
+                      <section className="library-mobile-search-page experts-mobile-search-page" aria-label="搜索专家">
+                        <header className="library-mobile-search-page__header">
+                          <label className="library-mobile-search-page__field">
+                            <span className="dora-icon" aria-hidden="true">{ICONS.search}</span>
+                            <input
+                              value={expertSearch}
+                              onChange={(e) => {
+                                const nextSearch = e.target.value
+                                setExpertSearch(nextSearch)
+                                if (!nextSearch.trim()) setExpertMobileSearchSubmitted(false)
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault()
+                                  setExpertMobileSearchSubmitted(Boolean(e.currentTarget.value.trim()))
+                                }
+                              }}
+                              onFocus={() => setExpertMobileSearchFocused(true)}
+                              onBlur={() => setExpertMobileSearchFocused(false)}
+                              type="search"
+                              placeholder="请输入"
+                              autoFocus
+                            />
+                            {expertSearch ? (
+                              <button
+                                type="button"
+                                aria-label="清空搜索"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => {
+                                  setExpertSearch('')
+                                  setExpertMobileSearchSubmitted(false)
+                                }}
+                              >
+                                <span className="dora-icon" aria-hidden="true">{ICONS.close}</span>
+                              </button>
+                            ) : null}
+                          </label>
+                          {expertMobileSearchFocused ? (
+                            <button
+                              type="button"
+                              className="library-mobile-search-page__cancel"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => {
+                                setExpertMobileSearchOpen(false)
+                                setExpertMobileSearchFocused(false)
+                                setExpertMobileSearchSubmitted(false)
+                                setExpertSearch('')
+                              }}
+                            >
+                              取消
+                            </button>
+                          ) : null}
+                        </header>
+
+                        {expertMobileSearchSubmitted ? (
+                          <div className="library-mobile-search-page__content experts-mobile-search-page__content">
+                            {filteredExpertCards.length ? (
+                              <div className="experts-grid">
+                                {filteredExpertCards.map((card, cardIndex) => {
+                                  const cardKey = getExpertCardKey(card)
+                                  const isFavorite = expertFavoriteKeys.includes(cardKey)
+                                  return (
+                                    <article
+                                      key={`mobile-search-${cardKey}-${card.desc}`}
+                                      className="expert-card"
+                                      role="button"
+                                      tabIndex={0}
+                                      onClick={() => openExpertCard(card)}
+                                      onKeyDown={(e) => onEnterKey(e, () => openExpertCard(card))}
+                                    >
+                                      <div className="expert-card__mobile">
+                                        <img src={card.mobileIcon ?? FIGMA_MOBILE_EXPERT_ASSETS[cardIndex % FIGMA_MOBILE_EXPERT_ASSETS.length]} alt="" className="expert-card__mobile-avatar" />
+                                        <div className="expert-card__mobile-body">
+                                          <div className="expert-card__mobile-top">
+                                            <div className="expert-card__mobile-copy">
+                                              <h3>{highlightSearchText(card.title, expertSearch)}</h3>
+                                              <p>{highlightSearchText(card.desc, expertSearch)}</p>
+                                            </div>
+                                            <button
+                                              type="button"
+                                              className={`expert-card__favorite expert-card__favorite--mobile ${isFavorite ? 'active' : ''}`}
+                                              aria-label={isFavorite ? '取消收藏' : '收藏'}
+                                              onClick={(event) => {
+                                                event.stopPropagation()
+                                                toggleExpertFavorite(card)
+                                              }}
+                                            >
+                                              <span className="dora-icon" aria-hidden="true">{isFavorite ? ICONS.favoriteActive : ICONS.favorite}</span>
+                                            </button>
+                                          </div>
+                                          <div className="expert-card__mobile-meta">
+                                            <span>创建人：{card.creator}</span>
+                                            <span className="expert-card__mobile-meta-divider" aria-hidden="true" />
+                                            <span>{card.usage}</span>
+                                          </div>
+                                          <div className="expert-card__mobile-tags">
+                                            {card.tags.slice(0, 2).map((tag) => <span key={`mobile-search-${tag}`}>{tag}</span>)}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </article>
+                                  )
+                                })}
+                              </div>
+                            ) : <div className="experts-search-empty">暂无搜索结果</div>}
+                          </div>
+                        ) : null}
+                      </section>
+                    ) : null}
+
                     <div className={`experts-page__body ${expertsPageScrolled ? 'experts-page__body--scrolled' : ''}`}>
                       <div className={`experts-page__layout ${showExpertSidePanel ? 'has-side-panel' : ''}`}>
                         <div className="experts-page__main" ref={expertsPageMainRef}>
                           <div className="experts-main-sticky">
                             <div className="experts-toolbar">
                               <div className="experts-toolbar__filters">
-                                <label className="experts-search">
+                                <label className="experts-search experts-search--desktop">
                                   <span className="dora-icon experts-search__icon" aria-hidden="true">
                                     {ICONS.search}
                                   </span>
@@ -9810,6 +9970,18 @@ export default function QuestionPage() {
                                     className="experts-search__input"
                                     placeholder="搜索名称/描述"
                                   />
+                                </label>
+
+                                <label
+                                  className="experts-search experts-mobile-search"
+                                  onClick={() => {
+                                    setExpertMobileSearchFocused(true)
+                                    setExpertMobileSearchOpen(true)
+                                    setExpertMobileSearchSubmitted(false)
+                                  }}
+                                >
+                                  <span className="dora-icon experts-search__icon" aria-hidden="true">{ICONS.search}</span>
+                                  <input value="" readOnly type="text" className="experts-search__input" placeholder="搜索名称/描述" />
                                 </label>
 
                                 <FieldSelect
@@ -10083,7 +10255,7 @@ export default function QuestionPage() {
                       <div className="expert-detail-page__mobile-header">
                         <div className="expert-detail-page__mobile-title">
                           <button type="button" className="expert-detail-page__mobile-action" aria-label="返回专家团" onClick={() => setActiveExpertCard(null)}>
-                            <span className="dora-icon" aria-hidden="true">{ICONS.arrowLeft}</span>
+                            <span className="dora-icon" aria-hidden="true">{ICONS.mobileBack}</span>
                           </button>
                           <h1>新聊天</h1>
                         </div>
@@ -10200,7 +10372,13 @@ export default function QuestionPage() {
                             <span className="dora-icon" aria-hidden="true">{ICONS.search}</span>
                             <input
                               value={librarySearch}
-                              onChange={(e) => setLibrarySearch(e.target.value)}
+                              onChange={(e) => {
+                                const nextSearch = e.target.value
+                                setLibrarySearch(nextSearch)
+                                if (!nextSearch.trim()) {
+                                  setLibraryMobileSearchSubmitted(false)
+                                }
+                              }}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                   e.preventDefault()
@@ -10214,7 +10392,15 @@ export default function QuestionPage() {
                               autoFocus
                             />
                             {librarySearch ? (
-                              <button type="button" aria-label="清空搜索" onMouseDown={(e) => e.preventDefault()} onClick={() => setLibrarySearch('')}>
+                              <button
+                                type="button"
+                                aria-label="清空搜索"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => {
+                                  setLibrarySearch('')
+                                  setLibraryMobileSearchSubmitted(false)
+                                }}
+                              >
                                 <span className="dora-icon" aria-hidden="true">{ICONS.close}</span>
                               </button>
                             ) : null}
@@ -10422,7 +10608,7 @@ export default function QuestionPage() {
                     <section className="mobile-library-detail" aria-label={`${activeLibraryTitle}文件预览`}>
                       <header className="mobile-library-detail__header">
                         <button type="button" className="mobile-library-detail__action" aria-label="返回资料库" onClick={() => setActiveLibraryItem(null)}>
-                          <span className="dora-icon" aria-hidden="true">{ICONS.arrowLeft}</span>
+                          <span className="dora-icon" aria-hidden="true">{ICONS.mobileBack}</span>
                         </button>
                         <h1 title={activeLibraryTitle}>{activeLibraryTitle}</h1>
                         <div className="mobile-library-detail__actions">
