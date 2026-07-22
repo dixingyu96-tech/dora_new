@@ -7,30 +7,17 @@ import activeLibraryImage from '../assets/images/资料库_选中.png'
 import agentDefaultAvatarImage from '../assets/images/Agent默认头像.png'
 import doraTitleImage from '../assets/images/dora标题.png'
 import doraUploadedImage from '../assets/images/Dora_uploaded.png'
+import doraLogoImage from '../assets/images/dora-logo.png'
 import avatarImage from '../assets/images/avatar.png'
 import mobileProfileAvatarImage from '../assets/images/mobile-profile-avatar.png'
-import builtinAnalysisThemeImage from '../assets/images/agent-builtins/analysis_theme_bi.png'
-import builtinDashboardCatalogImage from '../assets/images/agent-builtins/dashboard_bi_catalog.png'
-import builtinDatasetCatalogImage from '../assets/images/agent-builtins/dataset_bi_catalog.png'
-import builtinExcelFileImage from '../assets/images/agent-builtins/excel_file_builtin.png'
-import builtinModelMetricsImage from '../assets/images/agent-builtins/model_metrics_dataset.png'
-import connectorBiAnalysisSelfServiceImage from '../assets/images/connector-sources/bi_analysis_self_service.png'
-import connectorBiAnalysisStandardImage from '../assets/images/connector-sources/bi_analysis_standard.png'
-import connectorBiCatalogImage from '../assets/images/connector-sources/bi_catalog.png'
-import connectorBusinessModelExtractImage from '../assets/images/connector-sources/business_model_extract.png'
-import connectorExcelExtractImage from '../assets/images/connector-sources/excel_extract.png'
+import mobileUserMenuAvatarImage from '../assets/images/mobile-user-menu-avatar.png'
+import { FINEBI_ASSET_ICONS } from '../assets/images/finebiAssetIcons'
 import btnBiImage from '../assets/images/btn_bi.png'
 import attachDashboardImage from '../assets/images/attach_dashboard.png'
 import attachTreeRootImage from '../assets/images/attach_tree_root.png'
 import attachTreeLeafImage from '../assets/images/attach_tree_leaf.png'
 import attachTreeFolderClosedImage from '../assets/images/attach_tree_folder_closed.png'
 import attachTreeFolderOpenImage from '../assets/images/attach_tree_folder_open.png'
-import fineBiAnalysisThemeImage from '../assets/images/finebi/analysis-theme-bi-my-analysis.png'
-import fineBiDashboardImage from '../assets/images/finebi/dashboard-bi-catalog.png'
-import fineBiDatasetImage from '../assets/images/finebi/dataset-bi-data-catalog.png'
-import fineBiModelMetricSetImage from '../assets/images/finebi/model-metric-set-bi-dataset.png'
-import sourceBiAnalysisSelfServiceThemeImage from '../assets/images/finebi/source-bi-analysis-self-service-theme.png'
-import sourceBiAnalysisStandardThemeImage from '../assets/images/finebi/source-bi-analysis-standard-theme.png'
 import menuFineBiImage from '../assets/images/menu_finebi.png'
 import menuFineReportImage from '../assets/images/menu_finereport.png'
 import outputFileDocImage from '../assets/images/output_file_doc.png'
@@ -79,16 +66,12 @@ import bestPracticeCustomerHealthImage from '../assets/images/best-practices/客
 import bestPracticeInventoryHealthImage from '../assets/images/best-practices/库存健康度诊断报告.png'
 import bestPracticeStoreReportImage from '../assets/images/best-practices/门店经营报告.png'
 
-const mobileAttachCameraIcon = 'http://localhost:3845/assets/16c2db42f8cb7ee8e8d4f22e14a7c07ebe165af2.svg'
-const mobileAttachImageIcon = 'http://localhost:3845/assets/187133bb461f073d960b958d7f511a40dfddd1d3.svg'
-const mobileAttachFileIcon = 'http://localhost:3845/assets/5beddcc48238d9c89fcc94df4a1b3939e039d95d.svg'
 const mobileBiAssetIcons = {
-  'analysis-theme': 'http://localhost:3845/assets/77dceb4e97762384cabb1a9e13b55b38cebabb0a.png',
-  dashboard: 'http://localhost:3845/assets/94b92e4a3ba2759fa0131e51180f450fd665035c.png',
-  'model-metric-set': 'http://localhost:3845/assets/5e40e270134f384da355d30e8ea662e758567905.png',
-  dataset: 'http://localhost:3845/assets/5997ea5f477c21fd90c3453003b6f3ecc37a4303.png',
+  'analysis-theme': FINEBI_ASSET_ICONS.builtins.analysisTheme,
+  dashboard: FINEBI_ASSET_ICONS.builtins.dashboard,
+  'model-metric-set': FINEBI_ASSET_ICONS.builtins.modelMetricSet,
+  dataset: FINEBI_ASSET_ICONS.builtins.dataset,
 }
-const mobileProfileDrawerIcon = 'http://localhost:3845/assets/b5912a893581c43cbfd18783a388250b806bddb6.svg'
 import bestPracticeBenefitCardImage from '../assets/images/best-practices/生成权益卡片.png'
 import bestPracticeFinanceBriefImage from '../assets/images/best-practices/月度财务经营分析简报.png'
 import bestPracticeStoreBenchmarkImage from '../assets/images/best-practices/月度门店经营对标分析报告.png'
@@ -119,6 +102,38 @@ import SessionPdfPreview from '../components/SessionPdfPreview'
 import SessionMarkdownEditor from '../components/SessionMarkdownEditor'
 import SessionMarkdownPreview from '../components/SessionMarkdownPreview'
 import SessionPptPreview from '../components/SessionPptPreview'
+
+const {
+  analysisTheme: builtinAnalysisThemeImage,
+  dashboard: builtinDashboardCatalogImage,
+  dataset: builtinDatasetCatalogImage,
+  excelFile: builtinExcelFileImage,
+  modelMetricSet: builtinModelMetricsImage,
+} = FINEBI_ASSET_ICONS.builtins
+
+const {
+  analysisSelfService: connectorBiAnalysisSelfServiceImage,
+  analysisStandard: connectorBiAnalysisStandardImage,
+  catalog: connectorBiCatalogImage,
+  businessModelDirect: businessModelDirectImage,
+  businessModelExtract: connectorBusinessModelExtractImage,
+  dbTableDirect: datasetDbDirectImage,
+  dimensionDirect: dimensionDirectImage,
+  dimensionExtract: dimensionExtractImage,
+  etlDirect: datasetEtlDirectImage,
+  etlExtract: datasetEtlExtractImage,
+  excelDirect: datasetExcelDirectImage,
+  excelExtract: connectorExcelExtractImage,
+  metricDirect: modelMetricDirectImage,
+  metricExtract: modelMetricExtractImage,
+  sqlExtract: datasetSqlExtractImage,
+  sqlTableDirect: datasetSqlDirectImage,
+} = FINEBI_ASSET_ICONS.sources
+
+const businessModelExtractImage = connectorBusinessModelExtractImage
+const datasetExcelExtractImage = connectorExcelExtractImage
+const sourceBiAnalysisSelfServiceThemeImage = connectorBiAnalysisSelfServiceImage
+const sourceBiAnalysisStandardThemeImage = connectorBiAnalysisStandardImage
 import SessionSpreadsheetEditor, {
   createSessionSpreadsheetEditState,
   getSpreadsheetColumnWidths,
@@ -132,7 +147,7 @@ import LibraryDetailMainMeta from '../components/LibraryDetailMainMeta'
 import FourPointStarLoader from '../components/FourPointStarLoader'
 import './QuestionPage.css'
 
-function OverflowTooltipText({ text, className, tipPlacement = 'top', anchorSelector = null }) {
+function OverflowTooltipText({ text, className, tipPlacement = 'top', anchorSelector = null, highlight = '' }) {
   const textRef = useRef(null)
   const [tipVisible, setTipVisible] = useState(false)
   const [tipPos, setTipPos] = useState({ top: 0, left: 0 })
@@ -164,6 +179,7 @@ function OverflowTooltipText({ text, className, tipPlacement = 'top', anchorSele
   }, [])
 
   const showTip = () => {
+    if (window.matchMedia('(max-width: 599px)').matches) return
     if (!shouldShowTip()) return
     updateTipPosition()
     setTipVisible(true)
@@ -200,7 +216,7 @@ function OverflowTooltipText({ text, className, tipPlacement = 'top', anchorSele
   return (
     <>
       <span ref={textRef} className={className} onMouseEnter={showTip} onMouseLeave={hideTip}>
-        {text}
+        {highlight ? highlightSearchText(text, highlight) : text}
       </span>
       {tipVisible
         ? createPortal(
@@ -242,6 +258,7 @@ const ICONS = {
   triangleDown: '\ue794',
   triangleRight: '\ue795',
   close: '\ue7ab',
+  toastErrorFilled: '\ue7b3',
   expand: '\ue7aa',
   shrink: '\ue7ad',
   cite: '\ue804',
@@ -262,8 +279,10 @@ const ICONS = {
   indent: '\ue7bd',
   catalog: '\ue7d1',
   aiDecor: '\ue7d0',
-  favorite: '\ue820',
+  favorite: '\ue832',
   favoriteActive: '\ue816',
+  favoriteCompact: '\ue833',
+  added: '\ue806',
   goTo: '\ue7dc',
   zoomOut: '\ue80a',
   zoomIn: '\ue80b',
@@ -1010,10 +1029,10 @@ const renderSenderMentionLabel = (label, query) => {
 const UPLOAD_PROGRESS_INTERVAL_MS = 80
 
 const BI_ATTACH_MENU_ITEMS = [
-  { id: 'analysis-theme', label: '分析主题', image: fineBiAnalysisThemeImage, accent: 'analysis' },
-  { id: 'dashboard', label: '仪表板', image: fineBiDashboardImage, accent: 'dashboard' },
-  { id: 'model-metric-set', label: '模型指标集', image: fineBiModelMetricSetImage, accent: 'metrics' },
-  { id: 'dataset', label: '数据集', image: fineBiDatasetImage, accent: 'dataset' },
+  { id: 'analysis-theme', label: '分析主题', image: FINEBI_ASSET_ICONS.builtins.analysisTheme, accent: 'analysis' },
+  { id: 'dashboard', label: '仪表板', image: FINEBI_ASSET_ICONS.builtins.dashboard, accent: 'dashboard' },
+  { id: 'model-metric-set', label: '模型指标集', image: FINEBI_ASSET_ICONS.builtins.modelMetricSet, accent: 'metrics' },
+  { id: 'dataset', label: '数据集', image: FINEBI_ASSET_ICONS.builtins.dataset, accent: 'dataset' },
 ]
 
 const ATTACH_CONNECT_OWNER_SEGMENTS = [
@@ -1034,8 +1053,15 @@ const ATTACH_CONNECT_ANALYSIS_THEME_TREE_NODES = [
         label: '文件夹1',
         kind: 'folder',
         children: [
-          { id: 'folder-1-topic-1', label: '分析主题1', kind: 'leaf' },
-          { id: 'folder-1-topic-2', label: '节点名称2', kind: 'leaf' },
+          {
+            id: 'folder-1-region',
+            label: '区域分析',
+            kind: 'folder',
+            children: [
+              { id: 'folder-1-topic-1', label: '分析主题1', kind: 'leaf' },
+              { id: 'folder-1-topic-2', label: '节点名称2', kind: 'leaf' },
+            ],
+          },
         ],
       },
       {
@@ -1044,7 +1070,19 @@ const ATTACH_CONNECT_ANALYSIS_THEME_TREE_NODES = [
         kind: 'folder',
         children: [
           { id: 'folder-2-topic-1', label: '分析主题3', kind: 'leaf' },
-          { id: 'folder-2-topic-2', label: '分析主题分析主题', kind: 'leaf' },
+          {
+            id: 'folder-2-business',
+            label: '业务专题',
+            kind: 'folder',
+            children: [
+              {
+                id: 'folder-2-archive',
+                label: '年度归档',
+                kind: 'folder',
+                children: [{ id: 'folder-2-topic-2', label: '分析主题分析主题', kind: 'leaf' }],
+              },
+            ],
+          },
         ],
       },
       { id: 'folder-3', label: '文件夹3的名称很长很长', kind: 'folder' },
@@ -1065,8 +1103,15 @@ const ATTACH_CONNECT_ANALYSIS_THEME_USER_TREE_NODES = [
         label: '用户文件夹1',
         kind: 'folder',
         children: [
-          { id: 'folder-1-topic-1', label: '用户分析主题1', kind: 'leaf' },
-          { id: 'folder-1-topic-2', label: '用户节点名称2', kind: 'leaf' },
+          {
+            id: 'folder-1-region',
+            label: '区域分析',
+            kind: 'folder',
+            children: [
+              { id: 'folder-1-topic-1', label: '用户分析主题1', kind: 'leaf' },
+              { id: 'folder-1-topic-2', label: '用户节点名称2', kind: 'leaf' },
+            ],
+          },
         ],
       },
       {
@@ -1075,7 +1120,19 @@ const ATTACH_CONNECT_ANALYSIS_THEME_USER_TREE_NODES = [
         kind: 'folder',
         children: [
           { id: 'folder-2-topic-1', label: '用户分析主题3', kind: 'leaf' },
-          { id: 'folder-2-topic-2', label: '用户分析主题分析主题', kind: 'leaf' },
+          {
+            id: 'folder-2-business',
+            label: '业务专题',
+            kind: 'folder',
+            children: [
+              {
+                id: 'folder-2-archive',
+                label: '年度归档',
+                kind: 'folder',
+                children: [{ id: 'folder-2-topic-2', label: '用户分析主题分析主题', kind: 'leaf' }],
+              },
+            ],
+          },
         ],
       },
       { id: 'folder-3', label: '用户文件夹3的名称很长很长', kind: 'folder' },
@@ -1120,15 +1177,15 @@ const ATTACH_CONNECT_MODEL_METRIC_SET_TREE_NODES = [
     label: '全部数据',
     kind: 'root',
     children: [
-      { id: 'topic-a', label: '经营分析模型指标集', kind: 'leaf' },
-      { id: 'topic-b', label: '销售预测模型指标集名称很长', kind: 'leaf' },
+      { id: 'topic-a', label: '经营分析模型指标集', kind: 'leaf', icon: modelMetricDirectImage },
+      { id: 'topic-b', label: '销售预测模型指标集名称很长', kind: 'leaf', icon: modelMetricExtractImage },
       {
         id: 'folder-1',
         label: '文件夹1',
         kind: 'folder',
         children: [
-          { id: 'folder-1-topic-1', label: '门店运营指标集', kind: 'leaf' },
-          { id: 'folder-1-topic-2', label: '利润分析指标集', kind: 'leaf' },
+          { id: 'folder-1-topic-1', label: '门店运营指标集', kind: 'leaf', icon: businessModelDirectImage },
+          { id: 'folder-1-topic-2', label: '利润分析指标集', kind: 'leaf', icon: businessModelExtractImage },
         ],
       },
       {
@@ -1136,11 +1193,11 @@ const ATTACH_CONNECT_MODEL_METRIC_SET_TREE_NODES = [
         label: '文件夹2',
         kind: 'folder',
         children: [
-          { id: 'folder-2-topic-1', label: '库存周转指标集', kind: 'leaf' },
-          { id: 'folder-2-topic-2', label: '会员增长指标集', kind: 'leaf' },
+          { id: 'folder-2-topic-1', label: '库存周转指标集', kind: 'leaf', icon: dimensionDirectImage },
+          { id: 'folder-2-topic-2', label: '会员增长指标集', kind: 'leaf', icon: dimensionExtractImage },
         ],
       },
-      { id: 'folder-3', label: '文件夹3的名称很长很长', kind: 'folder' },
+      { id: 'folder-3', label: '文件夹3的名称很长很长', kind: 'folder', icon: dimensionExtractImage },
     ],
   },
 ]
@@ -1151,15 +1208,15 @@ const ATTACH_CONNECT_DATASET_TREE_NODES = [
     label: '全部数据',
     kind: 'root',
     children: [
-      { id: 'topic-a', label: '销售明细数据集', kind: 'leaf' },
-      { id: 'topic-b', label: '经营指标汇总数据集名称很长', kind: 'leaf' },
+      { id: 'topic-a', label: '销售明细数据集', kind: 'leaf', icon: datasetSqlDirectImage },
+      { id: 'topic-b', label: '经营指标汇总数据集名称很长', kind: 'leaf', icon: datasetSqlExtractImage },
       {
         id: 'folder-1',
         label: '文件夹1',
         kind: 'folder',
         children: [
-          { id: 'folder-1-topic-1', label: '区域营收数据集', kind: 'leaf' },
-          { id: 'folder-1-topic-2', label: '会员行为数据集', kind: 'leaf' },
+          { id: 'folder-1-topic-1', label: '区域营收数据集', kind: 'leaf', icon: datasetEtlDirectImage },
+          { id: 'folder-1-topic-2', label: '会员行为数据集', kind: 'leaf', icon: datasetExcelExtractImage },
         ],
       },
       {
@@ -1167,24 +1224,24 @@ const ATTACH_CONNECT_DATASET_TREE_NODES = [
         label: '文件夹2',
         kind: 'folder',
         children: [
-          { id: 'folder-2-topic-1', label: '商品库存数据集', kind: 'leaf' },
-          { id: 'folder-2-topic-2', label: '门店经营数据集', kind: 'leaf' },
+          { id: 'folder-2-topic-1', label: '商品库存数据集', kind: 'leaf', icon: datasetExcelDirectImage },
+          { id: 'folder-2-topic-2', label: '门店经营数据集', kind: 'leaf', icon: datasetDbDirectImage },
         ],
       },
-      { id: 'folder-3', label: '文件夹3的名称很长很长', kind: 'folder' },
+      { id: 'folder-3', label: '文件夹3的名称很长很长', kind: 'folder', icon: datasetEtlExtractImage },
     ],
   },
 ]
 
 const ATTACH_CONNECT_TREE_SCOPE_DEFAULTS = {
   mine: {
-    checkedIds: ['topic-a', 'topic-b', 'folder-1-topic-1', 'folder-3'],
-    expandedIds: ['root', 'folder-1', 'folder-2'],
+    checkedIds: [],
+    expandedIds: ['root', 'folder-1', 'folder-1-region', 'folder-2', 'folder-2-business', 'folder-2-archive'],
     activeId: 'topic-b',
   },
   user: {
-    checkedIds: ['topic-a', 'folder-1-topic-1', 'folder-2-topic-2'],
-    expandedIds: ['root', 'folder-1', 'folder-2'],
+    checkedIds: [],
+    expandedIds: ['root', 'folder-1', 'folder-1-region', 'folder-2', 'folder-2-business', 'folder-2-archive'],
     activeId: 'folder-2-topic-2',
   },
 }
@@ -2931,7 +2988,141 @@ const USER_MENU_LANGUAGES = [
   { id: 'zh-cn', label: '简体中文' },
   { id: 'zh-tw', label: '繁体中文' },
   { id: 'en', label: 'English' },
+  { id: 'ja', label: '日本语' },
+  { id: 'ko', label: '한국어' },
+  { id: 'ru', label: 'Русский' },
 ]
+
+const MOBILE_USER_MENU_LANGUAGES = [
+  { id: 'system', label: '跟随系统', description: '简体中文' },
+  { id: 'zh-cn', label: '简体中文', description: 'Chinese' },
+  { id: 'zh-tw', label: '繁体中文', description: 'Traditional Chinese' },
+  { id: 'en', label: '英语', description: 'English' },
+  { id: 'ja', label: '日本语', description: 'Japanese' },
+  { id: 'ko', label: '한국어', description: 'Korean' },
+  { id: 'ru', label: 'Русский', description: 'Russian' },
+]
+
+const SYSTEM_COPY = {
+  en: {
+    '语言': 'Language', '退出': 'Sign out', '跟随系统': 'Follow system', '简体中文': 'Simplified Chinese', '繁体中文': 'Traditional Chinese',
+    '英语': 'English', '新聊天': 'New chat', '定时任务': 'Scheduled tasks', '个人中心': 'Profile', '专家团': 'Experts', '资料库': 'Library',
+    '最近使用': 'Recently used', '我收藏的': 'My favorites', '全部专家': 'All experts', '全部资料': 'All resources',
+    '全部资料类型': 'All resource types', '表格': 'Spreadsheets', '文稿': 'Documents', '网页': 'Web', '图像': 'Images',
+    '搜索': 'Search', '全部': 'All', '收藏': 'Favorite', '已收藏': 'Favorited', '取消收藏': 'Remove from favorites', '我的分析': 'My analysis', '目录': 'Catalog', '数据目录': 'Data catalog',
+    '分析主题': 'Analysis subject', '仪表板': 'Dashboard', '模型指标集': 'Model & metric sets', '数据集': 'Dataset',
+    '拍照': 'Camera', '图片': 'Photos', '文件': 'Files', '添加': 'Add', '关闭': 'Close', '返回': 'Back',
+    '输入任何您想查询或分析的问题': 'Ask anything you want to query or analyze', 'Hi, 需要Dora帮你做什么？': 'Hi, what can Dora help you with?',
+    '内容均由AI生成, 仅供参考': 'AI-generated content, for reference only', '选择上传方式': 'Choose upload method', '用户菜单': 'User menu',
+    '选择语言': 'Choose language', '返回用户菜单': 'Back to user menu', '关闭用户菜单': 'Close user menu', 'Fine BI 连接器': 'Fine BI Connector',
+    '超级智能体': 'Super Agent', '会话记录': 'Chat history', '今天': 'Today', '7天内': 'Last 7 days', '30天内': 'Last 30 days', '更早': 'Earlier',
+    '取消': 'Cancel', '请输入': 'Search', '搜索会话': 'Search chats', '搜索结果': 'Search results', '清空搜索': 'Clear search',
+    '搜索名称': 'Search by name', '搜索名称/描述': 'Search name/description', '搜索名称/来源对话/来源Agent': 'Search name/source chat/source Agent',
+    '添加分析主题': 'Add analysis subject', '添加仪表板': 'Add dashboard', '添加模型指标集': 'Add model & metric set', '添加数据集': 'Add dataset',
+    '添加 FineBI 资产': 'Add FineBI asset', '分析主题范围': 'Analysis subject scope', '我的': 'Mine', '用户的': "User's",
+    '搜索分析主题': 'Search analysis subjects', '搜索仪表板': 'Search dashboards', '搜索模型指标集': 'Search model & metric sets', '搜索数据集': 'Search datasets',
+    '创建人：': 'Creator: ', '次使用': '{{count}} uses',
+  },
+  'zh-tw': {
+    '语言': '語言', '退出': '登出', '跟随系统': '跟隨系統', '简体中文': '簡體中文', '繁体中文': '繁體中文', '英语': '英語',
+    '新聊天': '新聊天', '定时任务': '定時任務', '个人中心': '個人中心', '专家团': '專家團', '资料库': '資料庫', '搜索': '搜尋',
+    '最近使用': '最近使用', '我收藏的': '我的收藏', '全部专家': '全部專家', '全部资料': '全部資料',
+    '全部资料类型': '全部資料類型', '表格': '試算表', '文稿': '文件', '网页': '網頁', '图像': '圖像',
+    '全部': '全部', '收藏': '收藏', '已收藏': '已收藏', '取消收藏': '取消收藏', '我的分析': '我的分析', '目录': '目錄', '数据目录': '資料目錄', '分析主题': '分析主題',
+    '仪表板': '儀表板', '模型指标集': '模型指標集', '数据集': '資料集', '拍照': '拍照', '图片': '圖片', '文件': '檔案',
+    '添加': '新增', '关闭': '關閉', '返回': '返回', '输入任何您想查询或分析的问题': '輸入任何您想查詢或分析的問題',
+    'Hi, 需要Dora帮你做什么？': 'Hi，需要 Dora 幫你做什麼？', '内容均由AI生成, 仅供参考': '內容均由 AI 生成，僅供參考',
+    '选择上传方式': '選擇上傳方式', '用户菜单': '使用者選單', '选择语言': '選擇語言', '返回用户菜单': '返回使用者選單',
+    '关闭用户菜单': '關閉使用者選單', 'Fine BI 连接器': 'Fine BI 連接器',
+    '超级智能体': '超級智能體', '会话记录': '會話記錄', '今天': '今天', '7天内': '7天內', '30天内': '30天內', '更早': '更早',
+    '取消': '取消', '请输入': '請輸入', '搜索会话': '搜尋會話', '搜索结果': '搜尋結果', '清空搜索': '清除搜尋',
+    '搜索名称': '搜尋名稱', '搜索名称/描述': '搜尋名稱／描述', '搜索名称/来源对话/来源Agent': '搜尋名稱／來源對話／來源 Agent',
+    '添加分析主题': '新增分析主題', '添加仪表板': '新增儀表板', '添加模型指标集': '新增模型指標集', '添加数据集': '新增資料集',
+    '添加 FineBI 资产': '新增 FineBI 資產', '分析主题范围': '分析主題範圍', '我的': '我的', '用户的': '使用者的',
+    '搜索分析主题': '搜尋分析主題', '搜索仪表板': '搜尋儀表板', '搜索模型指标集': '搜尋模型指標集', '搜索数据集': '搜尋資料集',
+    '创建人：': '建立者：', '次使用': '使用 {{count}} 次',
+  },
+  ja: {
+    '语言': '言語', '退出': 'ログアウト', '跟随系统': 'システム設定に従う', '简体中文': '簡体字中国語', '繁体中文': '繁体字中国語',
+    '英语': '英語', '新聊天': '新しいチャット', '定时任务': 'スケジュール', '个人中心': 'プロフィール', '专家团': 'エキスパート',
+    '最近使用': '最近使用した項目', '我收藏的': 'お気に入り', '全部专家': 'すべてのエキスパート', '全部资料': 'すべての資料',
+    '全部资料类型': 'すべての資料タイプ', '表格': '表計算', '文稿': '文書', '网页': 'ウェブ', '图像': '画像',
+    '资料库': 'ライブラリ', '搜索': '検索', '全部': 'すべて', '收藏': 'お気に入り', '已收藏': 'お気に入り済み', '取消收藏': 'お気に入りから削除', '我的分析': 'マイ分析', '目录': 'カタログ',
+    '数据目录': 'データカタログ', '分析主题': '分析テーマ', '仪表板': 'ダッシュボード', '模型指标集': 'モデル・指標セット',
+    '数据集': 'データセット', '拍照': 'カメラ', '图片': '写真', '文件': 'ファイル', '添加': '追加', '关闭': '閉じる', '返回': '戻る',
+    '输入任何您想查询或分析的问题': '照会または分析したい内容を入力してください', 'Hi, 需要Dora帮你做什么？': 'こんにちは、Doraに何を依頼しますか？',
+    '内容均由AI生成, 仅供参考': 'AIが生成した内容です。参考としてご利用ください', '选择上传方式': 'アップロード方法を選択',
+    '用户菜单': 'ユーザーメニュー', '选择语言': '言語を選択', '返回用户菜单': 'ユーザーメニューに戻る', '关闭用户菜单': 'ユーザーメニューを閉じる',
+    '超级智能体': 'スーパーエージェント', '会话记录': 'チャット履歴', '今天': '今日', '7天内': '過去7日間', '30天内': '過去30日間', '更早': 'それ以前',
+    '取消': 'キャンセル', '请输入': '検索', '搜索会话': 'チャットを検索', '搜索结果': '検索結果', '清空搜索': '検索をクリア',
+    '搜索名称': '名前を検索', '搜索名称/描述': '名前／説明を検索', '搜索名称/来源对话/来源Agent': '名前／元チャット／元エージェントを検索',
+    '添加分析主题': '分析テーマを追加', '添加仪表板': 'ダッシュボードを追加', '添加模型指标集': 'モデル・指標セットを追加', '添加数据集': 'データセットを追加',
+    '添加 FineBI 资产': 'FineBIアセットを追加', '分析主题范围': '分析テーマの範囲', '我的': '自分', '用户的': 'ユーザー',
+    '搜索分析主题': '分析テーマを検索', '搜索仪表板': 'ダッシュボードを検索', '搜索模型指标集': 'モデル・指標セットを検索', '搜索数据集': 'データセットを検索',
+    '创建人：': '作成者：', '次使用': '{{count}} 回使用',
+  },
+  ko: {
+    '语言': '언어', '退出': '로그아웃', '跟随系统': '시스템 설정 따르기', '简体中文': '중국어 간체', '繁体中文': '중국어 번체',
+    '英语': '영어', '新聊天': '새 채팅', '定时任务': '예약 작업', '个人中心': '프로필', '专家团': '전문가', '资料库': '자료실',
+    '最近使用': '최근 사용', '我收藏的': '내 즐겨찾기', '全部专家': '모든 전문가', '全部资料': '모든 자료',
+    '全部资料类型': '모든 자료 유형', '表格': '스프레드시트', '文稿': '문서', '网页': '웹', '图像': '이미지',
+    '搜索': '검색', '全部': '전체', '收藏': '즐겨찾기', '已收藏': '즐겨찾기됨', '取消收藏': '즐겨찾기 해제', '我的分析': '내 분석', '目录': '카탈로그', '数据目录': '데이터 카탈로그',
+    '分析主题': '분석 주제', '仪表板': '대시보드', '模型指标集': '모델 및 지표 세트', '数据集': '데이터 세트', '拍照': '카메라',
+    '图片': '사진', '文件': '파일', '添加': '추가', '关闭': '닫기', '返回': '뒤로', '输入任何您想查询或分析的问题': '조회하거나 분석할 내용을 입력하세요',
+    'Hi, 需要Dora帮你做什么？': '안녕하세요, Dora가 무엇을 도와드릴까요?', '内容均由AI生成, 仅供参考': 'AI가 생성한 내용이며 참고용입니다',
+    '选择上传方式': '업로드 방식 선택', '用户菜单': '사용자 메뉴', '选择语言': '언어 선택', '返回用户菜单': '사용자 메뉴로 돌아가기',
+    '关闭用户菜单': '사용자 메뉴 닫기',
+    '超级智能体': '슈퍼 에이전트', '会话记录': '채팅 기록', '今天': '오늘', '7天内': '최근 7일', '30天内': '최근 30일', '更早': '이전',
+    '取消': '취소', '请输入': '검색', '搜索会话': '채팅 검색', '搜索结果': '검색 결과', '清空搜索': '검색 지우기',
+    '搜索名称': '이름 검색', '搜索名称/描述': '이름/설명 검색', '搜索名称/来源对话/来源Agent': '이름/원본 채팅/원본 에이전트 검색',
+    '添加分析主题': '분석 주제 추가', '添加仪表板': '대시보드 추가', '添加模型指标集': '모델 및 지표 세트 추가', '添加数据集': '데이터 세트 추가',
+    '添加 FineBI 资产': 'FineBI 자산 추가', '分析主题范围': '분석 주제 범위', '我的': '내 항목', '用户的': '사용자 항목',
+    '搜索分析主题': '분석 주제 검색', '搜索仪表板': '대시보드 검색', '搜索模型指标集': '모델 및 지표 세트 검색', '搜索数据集': '데이터 세트 검색',
+    '创建人：': '생성자: ', '次使用': '{{count}}회 사용',
+  },
+  ru: {
+    '语言': 'Язык', '退出': 'Выйти', '跟随系统': 'Как в системе', '简体中文': 'Китайский (упрощённый)', '繁体中文': 'Китайский (традиционный)',
+    '英语': 'Английский', '新聊天': 'Новый чат', '定时任务': 'Задачи по расписанию', '个人中心': 'Профиль', '专家团': 'Эксперты',
+    '最近使用': 'Недавние', '我收藏的': 'Моё избранное', '全部专家': 'Все эксперты', '全部资料': 'Все материалы',
+    '全部资料类型': 'Все типы материалов', '表格': 'Таблицы', '文稿': 'Документы', '网页': 'Веб', '图像': 'Изображения',
+    '资料库': 'Библиотека', '搜索': 'Поиск', '全部': 'Все', '收藏': 'В избранное', '已收藏': 'В избранном', '取消收藏': 'Удалить из избранного', '我的分析': 'Мой анализ', '目录': 'Каталог',
+    '数据目录': 'Каталог данных', '分析主题': 'Тема анализа', '仪表板': 'Панель', '模型指标集': 'Модели и метрики', '数据集': 'Набор данных',
+    '拍照': 'Камера', '图片': 'Фото', '文件': 'Файлы', '添加': 'Добавить', '关闭': 'Закрыть', '返回': 'Назад',
+    '输入任何您想查询或分析的问题': 'Введите вопрос для поиска или анализа', 'Hi, 需要Dora帮你做什么？': 'Здравствуйте! Чем может помочь Dora?',
+    '内容均由AI生成, 仅供参考': 'Контент создан ИИ и приведён для справки', '选择上传方式': 'Выберите способ загрузки',
+    '用户菜单': 'Меню пользователя', '选择语言': 'Выберите язык', '返回用户菜单': 'Назад в меню пользователя', '关闭用户菜单': 'Закрыть меню пользователя',
+    '超级智能体': 'Суперагент', '会话记录': 'История чатов', '今天': 'Сегодня', '7天内': 'За 7 дней', '30天内': 'За 30 дней', '更早': 'Ранее',
+    '取消': 'Отмена', '请输入': 'Поиск', '搜索会话': 'Поиск чатов', '搜索结果': 'Результаты поиска', '清空搜索': 'Очистить поиск',
+    '搜索名称': 'Поиск по названию', '搜索名称/描述': 'Поиск по названию/описанию', '搜索名称/来源对话/来源Agent': 'Название/исходный чат/агент',
+    '添加分析主题': 'Добавить тему анализа', '添加仪表板': 'Добавить панель', '添加模型指标集': 'Добавить модели и метрики', '添加数据集': 'Добавить набор данных',
+    '添加 FineBI 资产': 'Добавить ресурс FineBI', '分析主题范围': 'Область тем анализа', '我的': 'Мои', '用户的': 'Пользовательские',
+    '搜索分析主题': 'Поиск тем анализа', '搜索仪表板': 'Поиск панелей', '搜索模型指标集': 'Поиск моделей и метрик', '搜索数据集': 'Поиск наборов данных',
+    '创建人：': 'Автор: ', '次使用': 'Использований: {{count}}',
+  },
+}
+
+const systemTextNodeState = new WeakMap()
+const systemAttributeState = new WeakMap()
+
+const resolveSystemLanguage = (selected) => {
+  if (selected !== 'system') return selected
+  const locale = typeof navigator === 'undefined' ? 'zh-cn' : String(navigator.language || 'zh-CN').toLowerCase()
+  if (locale.startsWith('zh-tw') || locale.startsWith('zh-hk') || locale.startsWith('zh-mo')) return 'zh-tw'
+  if (locale.startsWith('ja')) return 'ja'
+  if (locale.startsWith('ko')) return 'ko'
+  if (locale.startsWith('ru')) return 'ru'
+  if (locale.startsWith('en')) return 'en'
+  return 'zh-cn'
+}
+
+const translateSystemCopy = (source, activeLanguage, dictionary) => {
+  if (activeLanguage === 'zh-cn') return source
+  const addCountMatch = source.match(/^添加\((\d+)\)$/)
+  if (addCountMatch) return `${dictionary['添加'] ?? '添加'}(${addCountMatch[1]})`
+  const usageMatch = source.match(/^(.+?)\s+次使用$/)
+  if (usageMatch && dictionary['次使用']) return dictionary['次使用'].replace('{{count}}', usageMatch[1])
+  return dictionary[source] ?? source
+}
 
 const USER_DISPLAY_NAME = 'Admin这是用户的名称（Admin）'
 const CURRENT_USER_EXPERT_CREATOR = 'Admin'
@@ -3387,6 +3578,10 @@ function FieldSelect({ classPrefix, value, options, onChange, ariaLabel, minWidt
 }
 
 export default function QuestionPage() {
+  const isIOSSystem =
+    typeof navigator !== 'undefined' &&
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
   const [sessionStates, setSessionStates] = useState({
     dora: {
       historyItems: INITIAL_HISTORY_ITEMS,
@@ -3548,8 +3743,75 @@ export default function QuestionPage() {
   const [historyRenameDraft, setHistoryRenameDraft] = useState('')
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false)
   const [mobileAvatarMenuOpen, setMobileAvatarMenuOpen] = useState(false)
+  const [mobileLanguagePageOpen, setMobileLanguagePageOpen] = useState(false)
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState('system')
+  useEffect(() => {
+    const activeLanguage = resolveSystemLanguage(selectedLanguage)
+    const dictionary = SYSTEM_COPY[activeLanguage] ?? {}
+    document.documentElement.lang = activeLanguage
+
+    const translateTextNode = (node) => {
+      if (!node?.parentElement || ['SCRIPT', 'STYLE'].includes(node.parentElement.tagName)) return
+      const previous = systemTextNodeState.get(node)
+      const source = previous && node.data === previous.rendered ? previous.source : node.data
+      const trimmed = source.trim()
+      const translated = translateSystemCopy(trimmed, activeLanguage, dictionary)
+      const rendered = trimmed ? source.replace(trimmed, translated) : source
+      systemTextNodeState.set(node, { source, rendered })
+      if (node.data !== rendered) node.data = rendered
+    }
+
+    const translateElementAttributes = (element) => {
+      if (!(element instanceof HTMLElement)) return
+      const previous = systemAttributeState.get(element) ?? {}
+      const next = { ...previous }
+      ;['aria-label', 'placeholder', 'data-placeholder', 'aria-placeholder', 'title'].forEach((attribute) => {
+        if (!element.hasAttribute(attribute)) return
+        const current = element.getAttribute(attribute) ?? ''
+        const state = previous[attribute]
+        const source = state && current === state.rendered ? state.source : current
+        const rendered = translateSystemCopy(source, activeLanguage, dictionary)
+        next[attribute] = { source, rendered }
+        if (current !== rendered) element.setAttribute(attribute, rendered)
+      })
+      systemAttributeState.set(element, next)
+    }
+
+    const translateTree = (root) => {
+      if (!root) return
+      if (root.nodeType === Node.TEXT_NODE) {
+        translateTextNode(root)
+        return
+      }
+      if (root.nodeType !== Node.ELEMENT_NODE && root.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) return
+      if (root.nodeType === Node.ELEMENT_NODE) translateElementAttributes(root)
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT)
+      let current = walker.nextNode()
+      while (current) {
+        if (current.nodeType === Node.TEXT_NODE) translateTextNode(current)
+        else translateElementAttributes(current)
+        current = walker.nextNode()
+      }
+    }
+
+    translateTree(document.body)
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'characterData') translateTextNode(mutation.target)
+        if (mutation.type === 'attributes') translateElementAttributes(mutation.target)
+        mutation.addedNodes.forEach(translateTree)
+      })
+    })
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['aria-label', 'placeholder', 'data-placeholder', 'aria-placeholder', 'title'],
+    })
+    return () => observer.disconnect()
+  }, [selectedLanguage])
   const [avatarMenuPos, setAvatarMenuPos] = useState({ top: 0, left: 0 })
   const [languageMenuPos, setLanguageMenuPos] = useState({ top: 0, left: 0 })
   const heatmapStageRef = useRef(null)
@@ -3891,6 +4153,8 @@ export default function QuestionPage() {
   }, [sessionFilesSourceSearch])
 
   const isExpertDetailView = activeNav === 'experts' && Boolean(activeExpertCard)
+  const showDoraSidebarBrand = !isExpertDetailView
+  const mobileCatalogAgentTitle = isExpertDetailView ? activeExpertCard.title : '超级智能体'
   const expertAlertCards = useMemo(() => expertCards.filter((card) => card.alertCount > 0), [expertCards])
   const expertAlertCount = useMemo(
     () => expertCards.reduce((sum, card) => sum + card.alertCount, 0),
@@ -4029,6 +4293,8 @@ export default function QuestionPage() {
     () => USER_MENU_LANGUAGES.find((lang) => lang.id === selectedLanguage) ?? USER_MENU_LANGUAGES[0],
     [selectedLanguage],
   )
+  const activeSystemLanguage = resolveSystemLanguage(selectedLanguage)
+  const isChineseSystemLanguage = activeSystemLanguage === 'zh-cn' || activeSystemLanguage === 'zh-tw'
   const inputText = activeSessionState.inputText
   const composerSegments = normalizeComposerSegments(activeSessionState)
   const composerPlainText = useMemo(() => getComposerPlainText(composerSegments), [composerSegments])
@@ -4602,6 +4868,10 @@ export default function QuestionPage() {
       )
     }
 
+    if (file.source === 'bi') {
+      return <p className="sender-attachment-card__size">{file.meta}</p>
+    }
+
     return <p className="sender-attachment-card__size">{formatAttachmentFileSize(file.size)}</p>
   }
 
@@ -4622,6 +4892,7 @@ export default function QuestionPage() {
               key={file.id}
               className={[
                 'sender-attachment-card',
+                file.source === 'bi' ? 'sender-attachment-card--bi' : '',
                 isUploading ? 'uploading' : '',
                 isFailed ? 'is-failed' : '',
                 isHovered ? 'is-hovered' : '',
@@ -4657,7 +4928,7 @@ export default function QuestionPage() {
                   onClick={() => removeComposerFile(scope, file.id)}
                 >
                   <span className="dora-icon" aria-hidden="true">
-                    {ICONS.close}
+                    {ICONS.toastErrorFilled}
                   </span>
                 </button>
               ) : null}
@@ -5370,6 +5641,54 @@ export default function QuestionPage() {
     setAttachConnectModal(null)
   }
 
+  const addAttachConnectSelectionToSender = () => {
+    if (!attachConnectModal || attachConnectCheckedIds.size === 0) {
+      closeAttachConnectModal()
+      return
+    }
+
+    const selectedNodes = []
+    const collectSelectedNodes = (nodes) => {
+      nodes.forEach((node) => {
+        if (node.children?.length) {
+          collectSelectedNodes(node.children)
+          return
+        }
+        if (node.kind !== 'root' && attachConnectCheckedIds.has(node.id)) selectedNodes.push(node)
+      })
+    }
+    collectSelectedNodes(currentAttachConnectTreeNodes)
+
+    const assetType = attachConnectModal.assetType ?? 'analysis-theme'
+    const assetLabel = getBiAttachMenuItemById(assetType)?.label ?? '分析主题'
+    const assetIcon = getBiAttachMenuItemById(assetType)?.image ?? attachTreeLeafImage
+    const selectedAttachments = selectedNodes.map((node) => ({
+      id: `bi-${assetType}-${attachConnectOwnerScope}-${node.id}`,
+      name: node.label,
+      meta: assetLabel,
+      size: 0,
+      icon:
+        assetType === 'analysis-theme'
+          ? attachConnectTreeContentIcons[node.id] ?? ATTACH_CONNECT_ANALYSIS_THEME_DIMENSION_IMAGES[0]
+          : node.icon
+            ? node.icon ?? assetIcon
+            : assetIcon,
+      source: 'bi',
+      status: 'done',
+      progress: 100,
+    }))
+
+    updateSessionScopeState(activeSessionScope, (prev) => {
+      const existing = prev.composerFiles ?? []
+      const existingIds = new Set(existing.map((file) => file.id))
+      return {
+        ...prev,
+        composerFiles: [...existing, ...selectedAttachments.filter((file) => !existingIds.has(file.id))],
+      }
+    })
+    closeAttachConnectModal()
+  }
+
   const handleAttachConnectOwnerScopeChange = (ownerScope) => {
     if (ownerScope === attachConnectOwnerScope) return
 
@@ -5452,11 +5771,18 @@ export default function QuestionPage() {
       attachConnectModal.assetType === 'analysis-theme'
         ? attachConnectTreeContentIcons[attachConnectActiveTreeNodeId] ??
           ATTACH_CONNECT_ANALYSIS_THEME_DIMENSION_IMAGES[0]
-        : getBiAttachMenuItemById(attachConnectModal.assetType)?.image ?? null
+        : activeAttachConnectTreeNode?.icon ?? getBiAttachMenuItemById(attachConnectModal.assetType)?.image ?? null
     const query = attachConnectSearch.trim().toLowerCase()
     const forceExpandTree = Boolean(query)
     const filteredTreeNodes = filterAttachConnectTreeNodes(currentAttachConnectTreeNodes, query)
     const visibleTreeNodes = filteredTreeNodes.flatMap((node) => (node.kind === 'root' ? node.children ?? [] : [node]))
+    const flattenAttachConnectNodes = (nodes, path = []) =>
+      nodes.flatMap((node) => {
+        const nextPath = node.kind === 'root' ? path : [...path, node.label]
+        if (node.children?.length) return flattenAttachConnectNodes(node.children, nextPath)
+        return [{ node, path: path.filter(Boolean) }]
+      })
+    const mobileVisibleTreeNodes = flattenAttachConnectNodes(filteredTreeNodes)
 
     const renderAttachConnectTreeNodes = (nodes, level = 0) =>
       nodes.flatMap((node) => {
@@ -5472,6 +5798,8 @@ export default function QuestionPage() {
               : attachTreeFolderClosedImage
             : attachConnectModal.assetType === 'analysis-theme'
               ? attachConnectTreeContentIcons[node.id] ?? ATTACH_CONNECT_ANALYSIS_THEME_DIMENSION_IMAGES[0]
+              : node.icon
+                ? node.icon
               : showLeafDashboardIcon
                 ? attachDashboardImage
                 : attachTreeLeafImage
@@ -5530,6 +5858,7 @@ export default function QuestionPage() {
                 text={node.label}
                 className="attach-connect-tree__label"
                 anchorSelector=".attach-connect-tree__node"
+                highlight={attachConnectSearch}
               />
             </button>
           </div>
@@ -5545,7 +5874,7 @@ export default function QuestionPage() {
         role="presentation"
       >
         <div
-          className="attach-connect-dialog"
+          className={`attach-connect-dialog${isIOSSystem ? ' is-ios-system' : ''}`}
           role="dialog"
           aria-modal="true"
           aria-labelledby="attach-connect-dialog-title"
@@ -5564,6 +5893,13 @@ export default function QuestionPage() {
               <span className="dora-icon icon-16" aria-hidden="true">
                 {ICONS.close}
               </span>
+            </button>
+            <button
+              type="button"
+              className="attach-connect-dialog__mobile-add"
+              onClick={addAttachConnectSelectionToSender}
+            >
+              {`添加(${attachConnectCheckedIds.size})`}
             </button>
           </header>
 
@@ -5607,6 +5943,49 @@ export default function QuestionPage() {
               </label>
               <div className="attach-connect-tree" role="tree" aria-label={currentAttachAssetLabel}>
                 {renderAttachConnectTreeNodes(visibleTreeNodes)}
+              </div>
+              <div className="attach-connect-mobile-list" role="list" aria-label={currentAttachAssetLabel}>
+                {mobileVisibleTreeNodes.map(({ node, path }) => {
+                  const checkState = getAttachConnectCheckState(node, attachConnectCheckedIds)
+                  const iconSrc =
+                    attachConnectModal.assetType === 'analysis-theme'
+                      ? attachConnectTreeContentIcons[node.id] ?? ATTACH_CONNECT_ANALYSIS_THEME_DIMENSION_IMAGES[0]
+                      : node.icon
+                        ? node.icon
+                      : showLeafDashboardIcon
+                        ? attachDashboardImage
+                        : attachTreeLeafImage
+                  return (
+                    <div key={`mobile-${node.id}`} className="attach-connect-mobile-list__item" role="listitem">
+                      <label className={`attach-connect-tree__checkbox attach-connect-tree__checkbox--${checkState}`}>
+                        <input
+                          type="checkbox"
+                          className="attach-connect-tree__checkbox-input"
+                          checked={checkState === 'checked'}
+                          onChange={(event) => toggleAttachConnectTreeNode(node.id, event.target.checked)}
+                        />
+                        <span className="attach-connect-tree__checkbox-box" aria-hidden="true" />
+                      </label>
+                      <span className="attach-connect-mobile-list__icon" aria-hidden="true">
+                        <img src={iconSrc} alt="" />
+                      </span>
+                      <button
+                        type="button"
+                        className="attach-connect-mobile-list__content"
+                        onClick={() => handleAttachConnectTreeContentClick(node)}
+                      >
+                        <span className="attach-connect-mobile-list__label">
+                          {highlightSearchText(node.label, attachConnectSearch)}
+                        </span>
+                        {path.length ? (
+                          <span className="attach-connect-mobile-list__path">
+                            {highlightSearchText(path.join('/'), attachConnectSearch)}
+                          </span>
+                        ) : null}
+                      </button>
+                    </div>
+                  )
+                })}
               </div>
               <div className="attach-connect-dialog__sidebar-foot">
                 <span className="attach-connect-dialog__sidebar-foot-label">{`已选择${currentAttachAssetLabel}：`}</span>
@@ -5729,7 +6108,7 @@ export default function QuestionPage() {
             <button type="button" className="attach-connect-dialog__btn attach-connect-dialog__btn--ghost" onClick={closeAttachConnectModal}>
               取消
             </button>
-            <button type="button" className="attach-connect-dialog__btn attach-connect-dialog__btn--primary" onClick={closeAttachConnectModal}>
+            <button type="button" className="attach-connect-dialog__btn attach-connect-dialog__btn--primary" onClick={addAttachConnectSelectionToSender}>
               确定
             </button>
           </footer>
@@ -5810,7 +6189,7 @@ export default function QuestionPage() {
               <span className="dora-icon icon-16 attach-btn__plus-icon" aria-hidden="true">
                 {ICONS.frbiConnector}
               </span>
-              <span className="attach-btn__connector-label">Fine BI</span>
+              <span className="attach-btn__connector-label">FineBI</span>
             </span>
           </button>
           <span className={`attach-tip${isQuestionMode ? '' : ' attach-tip--above'}`} role="tooltip">
@@ -5850,9 +6229,9 @@ export default function QuestionPage() {
     if (!mobileAttachmentDrawerOpen) return null
 
     const actions = [
-      { label: '拍照', icon: mobileAttachCameraIcon, inputRef: cameraInputRef },
-      { label: '图片', icon: mobileAttachImageIcon, inputRef: imageInputRef },
-      { label: '文件', icon: mobileAttachFileIcon, inputRef: fileInputRef },
+      { label: '拍照', icon: '\ue831', inputRef: cameraInputRef },
+      { label: '图片', icon: '\ue80f', inputRef: imageInputRef },
+      { label: '文件', icon: '\ue7f6', inputRef: fileInputRef },
     ]
 
     return createPortal(
@@ -5863,7 +6242,7 @@ export default function QuestionPage() {
           aria-label="关闭上传选项"
           onClick={() => setMobileAttachmentDrawerOpen(false)}
         />
-        <section className="mobile-attachment-drawer" role="dialog" aria-modal="true" aria-label="选择上传方式">
+        <section className={`mobile-attachment-drawer${isIOSSystem ? ' is-ios-system' : ''}`} role="dialog" aria-modal="true" aria-label="选择上传方式">
           <span className="mobile-attachment-drawer__grabber" aria-hidden="true" />
           <div className="mobile-attachment-drawer__actions">
             {actions.map((action) => (
@@ -5873,7 +6252,9 @@ export default function QuestionPage() {
                 className="mobile-attachment-drawer__action"
                 onClick={() => openMobileAttachmentInput(action.inputRef)}
               >
-                <img src={action.icon} alt="" />
+                <span className="dora-icon mobile-attachment-drawer__action-icon" aria-hidden="true">
+                  {action.icon}
+                </span>
                 <span>{action.label}</span>
               </button>
             ))}
@@ -5896,7 +6277,7 @@ export default function QuestionPage() {
     return createPortal(
       <div className="mobile-bi-drawer-layer" role="presentation">
         <button type="button" className="mobile-bi-drawer-backdrop" aria-label="关闭 Fine BI 连接器" onClick={() => setMobileBiDrawerOpen(false)} />
-        <section className="mobile-bi-drawer" role="dialog" aria-modal="true" aria-label="Fine BI 连接器">
+        <section className={`mobile-bi-drawer${isIOSSystem ? ' is-ios-system' : ''}`} role="dialog" aria-modal="true" aria-label="Fine BI 连接器">
           <span className="mobile-bi-drawer__grabber" aria-hidden="true" />
           {groups.map((group) => (
             <div key={group.label} className="mobile-bi-drawer__group">
@@ -6095,9 +6476,12 @@ export default function QuestionPage() {
           ) : (
             <>
               <header className="mobile-catalog-drawer__header">
-                <div className="mobile-catalog-drawer__brand" aria-label="Dora 超级智能体">
-                  <span className="mobile-catalog-drawer__logo">Dora</span>
-                  <strong>超级智能体</strong>
+                <div
+                  className="mobile-catalog-drawer__brand"
+                  aria-label={showDoraSidebarBrand ? `Dora ${mobileCatalogAgentTitle}` : mobileCatalogAgentTitle}
+                >
+                  {showDoraSidebarBrand ? <img className="mobile-catalog-drawer__logo" src={doraLogoImage} alt="Dora" /> : null}
+                  <strong>{mobileCatalogAgentTitle}</strong>
                 </div>
               </header>
 
@@ -6169,13 +6553,65 @@ export default function QuestionPage() {
   const renderMobileAvatarMenu = () => {
     if (!mobileAvatarMenuOpen) return null
 
+    if (mobileLanguagePageOpen) {
+      return createPortal(
+        <div className="mobile-language-page" role="dialog" aria-modal="true" aria-label="语言">
+          <header className="mobile-language-page__header">
+            <button
+              type="button"
+              className="mobile-language-page__back"
+              aria-label="返回"
+              onClick={() => {
+                setMobileLanguagePageOpen(false)
+                setMobileAvatarMenuOpen(false)
+              }}
+            >
+              <span className="dora-icon" aria-hidden="true">{ICONS.mobileBack}</span>
+            </button>
+            <h2>语言</h2>
+          </header>
+          <div className="mobile-language-page__body">
+            <div className="mobile-language-page__list" role="radiogroup" aria-label="选择语言">
+              {MOBILE_USER_MENU_LANGUAGES.map((language) => (
+                <button
+                  key={language.id}
+                  type="button"
+                  className="mobile-language-page__item"
+                  role="radio"
+                  aria-checked={selectedLanguage === language.id}
+                  onClick={() => setSelectedLanguage(language.id)}
+                >
+                  <span className="mobile-language-page__copy">
+                    <strong>{language.label}</strong>
+                    <span>{language.description}</span>
+                  </span>
+                  {selectedLanguage === language.id ? (
+                    <span className="dora-icon mobile-language-page__check" aria-hidden="true">{ICONS.added}</span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )
+    }
+
     return createPortal(
       <div className="mobile-avatar-menu-layer" role="presentation">
-        <button type="button" className="mobile-avatar-menu__backdrop" aria-label="关闭用户菜单" onClick={() => setMobileAvatarMenuOpen(false)} />
-        <section className="mobile-avatar-menu" role="dialog" aria-modal="true" aria-label="用户菜单">
+        <button
+          type="button"
+          className="mobile-avatar-menu__backdrop"
+          aria-label="关闭用户菜单"
+          onClick={() => {
+            setMobileAvatarMenuOpen(false)
+            setMobileLanguagePageOpen(false)
+          }}
+        />
+        <section className={`mobile-avatar-menu${isIOSSystem ? ' is-ios-system' : ''}`} role="dialog" aria-modal="true" aria-label="用户菜单">
           <div className="mobile-avatar-menu__profile">
             <span className="mobile-avatar-menu__avatar-wrap">
-              <img src={mobileProfileDrawerIcon} alt="" />
+              <img src={mobileUserMenuAvatarImage} alt="" />
             </span>
             <div className="mobile-avatar-menu__identity">
               <strong>这是用户的名称很长很长很长</strong>
@@ -6183,7 +6619,7 @@ export default function QuestionPage() {
             </div>
           </div>
           <div className="mobile-avatar-menu__settings">
-            <button type="button" className="mobile-avatar-menu__item">
+            <button type="button" className="mobile-avatar-menu__item" onClick={() => setMobileLanguagePageOpen(true)}>
               <span>语言</span>
               <span className="mobile-avatar-menu__meta">
                 <span>{selectedLanguageOption.shortLabel ?? selectedLanguageOption.label}</span>
@@ -6191,7 +6627,7 @@ export default function QuestionPage() {
               </span>
             </button>
             <div className="mobile-avatar-menu__divider" />
-            <button type="button" className="mobile-avatar-menu__item" onClick={() => setMobileAvatarMenuOpen(false)}>
+            <button type="button" className="mobile-avatar-menu__item" onClick={() => { setMobileAvatarMenuOpen(false); setMobileLanguagePageOpen(false) }}>
               <span>退出</span>
             </button>
           </div>
@@ -6216,14 +6652,17 @@ export default function QuestionPage() {
           className={`mobile-home-nav__profile${mobileAvatarMenuOpen ? ' is-open' : ''}`}
           aria-label="个人中心"
           aria-expanded={mobileAvatarMenuOpen}
-          onClick={() => setMobileAvatarMenuOpen((current) => !current)}
+          onClick={() => {
+            setMobileLanguagePageOpen(false)
+            setMobileAvatarMenuOpen((current) => !current)
+          }}
         >
           <img src={mobileProfileAvatarImage} alt="" className="mobile-home-nav__profile-bg" />
         </button>
       )}
       <div className="mobile-home-nav__actions">
         {!mobileNewChatPageOpen ? (
-          <button type="button" className="mobile-home-nav__action" aria-label="新聊天" onClick={() => { setMobileAvatarMenuOpen(false); startNewAgentChat(); setMobileNewChatPageOpen(true) }}>
+          <button type="button" className="mobile-home-nav__action mobile-home-nav__action--primary" aria-label="新聊天" onClick={() => { setMobileAvatarMenuOpen(false); startNewAgentChat(); setMobileNewChatPageOpen(true) }}>
             <span className="dora-icon" aria-hidden="true">{ICONS.newChat}</span>
           </button>
         ) : null}
@@ -7768,7 +8207,7 @@ export default function QuestionPage() {
                 </h2>
               </div>
               <div className="mobile-session-header__actions">
-                <button type="button" className="mobile-session-header__action" aria-label="会话文件" aria-pressed={sessionFilesPanelOpen} onClick={toggleSessionFilesPanel}>
+                <button type="button" className="mobile-session-header__action" aria-label="会话文件" aria-disabled="true">
                   <span className="dora-icon" aria-hidden="true">{ICONS.sessionFile}</span>
                 </button>
                 <button type="button" className="mobile-session-header__action" aria-label="分享">
@@ -9814,7 +10253,7 @@ export default function QuestionPage() {
                 }`}
               >
                 <div className="inner-sidebar__head">
-                  {isExpertDetailView ? (
+                  {!showDoraSidebarBrand ? (
                     <div className="inner-sidebar__detail-head">
                       <IconButton
                         tip="返回"
@@ -10033,7 +10472,11 @@ export default function QuestionPage() {
                                                 toggleExpertFavorite(card)
                                               }}
                                             >
-                                              {!isFavorite ? <span className="dora-icon" aria-hidden="true">{ICONS.favorite}</span> : null}
+                                              {!isFavorite || !isChineseSystemLanguage ? (
+                                                <span className="dora-icon" aria-hidden="true">
+                                                  {isChineseSystemLanguage ? ICONS.favorite : ICONS.favoriteCompact}
+                                                </span>
+                                              ) : null}
                                               <span className="expert-card__favorite-label">{isFavorite ? '已收藏' : '收藏'}</span>
                                             </button>
                                           </div>
@@ -10213,7 +10656,11 @@ export default function QuestionPage() {
                                               toggleExpertFavorite(card)
                                             }}
                                           >
-                                            {!isFavorite ? <span className="dora-icon" aria-hidden="true">{ICONS.favorite}</span> : null}
+                                            {!isFavorite || !isChineseSystemLanguage ? (
+                                              <span className="dora-icon" aria-hidden="true">
+                                                {isChineseSystemLanguage ? ICONS.favorite : ICONS.favoriteCompact}
+                                              </span>
+                                            ) : null}
                                             <span className="expert-card__favorite-label">{isFavorite ? '已收藏' : '收藏'}</span>
                                           </button>
                                         </div>

@@ -33,6 +33,12 @@ export default function IconButton({
   }, [tipPlacement])
 
   const showTip = (event) => {
+    const isMobileViewport = window.matchMedia('(max-width: 599px)').matches
+    if (isMobileViewport) {
+      if (event.type === 'mouseenter') onMouseEnter?.(event)
+      if (event.type === 'focus') onFocus?.(event)
+      return
+    }
     updateTipPosition()
     setTipVisible(true)
     if (event.type === 'mouseenter') onMouseEnter?.(event)

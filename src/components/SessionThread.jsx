@@ -692,13 +692,9 @@ const copyTextToClipboard = async (text) => {
 
 function CopyMessageIcon() {
   return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" className="session-thread__user-copy-icon">
-      <path
-        d="M13.648 0.001H5.429A2.572 2.572 0 0 0 2.857 2.572v0.857H2.57A2.572 2.572 0 0 0 0 6v8c0 1.419 1.151 2.571 2.571 2.571h8A2.572 2.572 0 0 0 13.143 14v-0.857h0.505A2.572 2.572 0 0 0 16.22 10.57v-8A2.572 2.572 0 0 0 13.648 0Zm-3.077 14.857H2.57A0.857 0.857 0 0 1 1.714 14V6c0-0.473 0.384-0.857 0.857-0.857h8c0.473 0 0.857 0.384 0.857 0.857v8a0.857 0.857 0 0 1-0.857 0.857Zm3.934-4.286a0.857 0.857 0 0 1-0.857 0.857h-0.505V6A2.572 2.572 0 0 0 10.57 3.429H4.571v-0.857c0-0.473 0.384-0.857 0.857-0.857h8.22c0.473 0 0.857 0.384 0.857 0.857v8Z"
-        fill="currentColor"
-        fillOpacity="0.78"
-      />
-    </svg>
+    <span aria-hidden="true" className="dora-icon session-thread__user-copy-icon session-thread__user-copy-icon--glyph">
+      {'\ue792'}
+    </span>
   )
 }
 
@@ -1450,8 +1446,17 @@ export default function SessionThread({
 
   const getTurnKey = (turn) => turn?.id ?? `${turn?.prompt ?? ''}-${turn?.sentAt ?? 'turn'}`
 
-  const getTurnFileLayout = (turn) =>
-    computeSenderFileLayout(turn?.userFiles ?? [], senderFilesWidth, Boolean(expandedTurnIds[getTurnKey(turn)]))
+  const getTurnFileLayout = (turn) => {
+    const files = turn?.userFiles ?? []
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 599px)').matches) {
+      return {
+        columns: files.map((file) => [file]),
+        cardWidth: 188,
+        hiddenCount: 0,
+      }
+    }
+    return computeSenderFileLayout(files, senderFilesWidth, Boolean(expandedTurnIds[getTurnKey(turn)]))
+  }
 
   const renderUserTurn = (turn, { showMeta = false } = {}) => {
     const turnFiles = turn?.userFiles ?? []
@@ -1464,44 +1469,46 @@ export default function SessionThread({
       <div className="session-thread__user-col">
         {turnFiles.length ? (
           <div className="session-thread__user-files">
-            {fileLayout.columns.map((column, columnIndex) => (
-              <div
-                key={`${turnKey}-sender-file-column-${columnIndex}`}
-                className="session-thread__user-file-column"
-                style={{ width: `${fileLayout.cardWidth}px` }}
-              >
-                {column.map((item, itemIndex) =>
-                  item.type === 'expand' ? (
-                    <button
-                      key={`${turnKey}-sender-file-expand-${columnIndex}-${itemIndex}`}
-                      type="button"
-                      className="session-thread__user-file session-thread__user-file--expand"
-                      onClick={() =>
-                        setExpandedTurnIds((prev) => ({
-                          ...prev,
-                          [turnKey]: true,
-                        }))
-                      }
-                    >
-                      <span className="session-thread__user-file-expand-count">+{item.count} 个文件</span>
-                      <span className="dora-icon session-thread__user-file-expand-icon" aria-hidden="true">
-                        {ICONS.arrowDown}
-                      </span>
-                    </button>
-                  ) : (
-                    <div key={item.id ?? item.name} className="session-thread__user-file">
-                      <img src={item.icon} alt="" className="session-thread__user-file-icon" />
-                      <div className="session-thread__user-file-text">
-                        <span className="session-thread__user-file-name" title={item.name}>
-                          {item.name}
+            <div className="session-thread__user-files-track">
+              {fileLayout.columns.map((column, columnIndex) => (
+                <div
+                  key={`${turnKey}-sender-file-column-${columnIndex}`}
+                  className="session-thread__user-file-column"
+                  style={{ width: `${fileLayout.cardWidth}px` }}
+                >
+                  {column.map((item, itemIndex) =>
+                    item.type === 'expand' ? (
+                      <button
+                        key={`${turnKey}-sender-file-expand-${columnIndex}-${itemIndex}`}
+                        type="button"
+                        className="session-thread__user-file session-thread__user-file--expand"
+                        onClick={() =>
+                          setExpandedTurnIds((prev) => ({
+                            ...prev,
+                            [turnKey]: true,
+                          }))
+                        }
+                      >
+                        <span className="session-thread__user-file-expand-count">+{item.count} 个文件</span>
+                        <span className="dora-icon session-thread__user-file-expand-icon" aria-hidden="true">
+                          {ICONS.arrowDown}
                         </span>
-                        {item.size ? <span className="session-thread__user-file-size">{item.size}</span> : null}
+                      </button>
+                    ) : (
+                      <div key={item.id ?? item.name} className="session-thread__user-file">
+                        <img src={item.icon} alt="" className="session-thread__user-file-icon" />
+                        <div className="session-thread__user-file-text">
+                          <span className="session-thread__user-file-name" title={item.name}>
+                            {item.name}
+                          </span>
+                          {item.size ? <span className="session-thread__user-file-size">{item.size}</span> : null}
+                        </div>
                       </div>
-                    </div>
-                  ),
-                )}
-              </div>
-            ))}
+                    ),
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         ) : null}
         {turnPrompt || turnSentAt || (showMeta && userMessageCopyText) ? (
