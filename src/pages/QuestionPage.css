@@ -13396,7 +13396,10 @@ select {
     display: flex;
     flex-direction: column;
     gap: var(--fd-gap-xl);
-    padding: var(--fd-padding-layout) var(--fd-padding-layout) var(--fd-padding-layout);
+    padding:
+      var(--fd-padding-layout)
+      var(--fd-padding-layout)
+      max(var(--fd-padding-layout), env(safe-area-inset-bottom));
     overflow: hidden;
     border-radius: 20px 20px 0 0;
     background: var(--fd-color-bg-container);
@@ -14705,14 +14708,8 @@ select {
   }
 
   .library-card__cover-wrap {
-    height: 136px;
-    margin-top: 0;
-  }
-
-  .library-card[data-library-type='xls'] .library-card__cover-wrap,
-  .library-card[data-library-type='ppt'] .library-card__cover-wrap,
-  .library-card[data-library-type='image'] .library-card__cover-wrap {
     height: min(172px, 46.5vw);
+    margin-top: 0;
   }
 
 }
@@ -14855,6 +14852,19 @@ select {
 }
 
 @media (max-width: 599px) {
+  .sidebar.sidebar--mobile-search-hidden {
+    display: none;
+  }
+
+  .page--mobile-search .main {
+    padding-bottom: 0;
+  }
+
+  .page--mobile-search .main-card {
+    min-height: 100svh;
+    max-height: 100svh;
+  }
+
   .session-thread__user-meta {
     display: none;
   }

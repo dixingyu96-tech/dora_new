@@ -5872,6 +5872,7 @@ export default function QuestionPage() {
       <div
         className="attach-connect-modal-overlay"
         role="presentation"
+        onClick={closeAttachConnectModal}
       >
         <div
           className={`attach-connect-dialog${isIOSSystem ? ' is-ios-system' : ''}`}
@@ -10078,7 +10079,7 @@ export default function QuestionPage() {
 
   return (
     <div
-      className={`page${isDoraAskPage ? ' page--dora-ask' : ''}${mobileNewChatPageOpen ? ' page--mobile-new-chat' : ''}${isScheduleView ? ' page--mobile-schedule' : ''}${isQuestionMode && !isLibraryDetailView ? ' page--mobile-session' : ''}${isExpertDetailView && !isQuestionMode && !isScheduleView ? ' page--mobile-expert-detail' : ''}${isLibraryDetailView ? ' page--mobile-library-detail' : ''}${
+      className={`page${isDoraAskPage ? ' page--dora-ask' : ''}${mobileNewChatPageOpen ? ' page--mobile-new-chat' : ''}${isScheduleView ? ' page--mobile-schedule' : ''}${isQuestionMode && !isLibraryDetailView ? ' page--mobile-session' : ''}${isExpertDetailView && !isQuestionMode && !isScheduleView ? ' page--mobile-expert-detail' : ''}${isLibraryDetailView ? ' page--mobile-library-detail' : ''}${expertMobileSearchOpen || libraryMobileSearchOpen ? ' page--mobile-search' : ''}${
         sessionFilesPanelFullscreen && activeSessionPreviewFile ? ' page--session-file-preview-fullscreen' : ''
       }`}
       data-name="2-提问页"
@@ -10108,7 +10109,7 @@ export default function QuestionPage() {
       />
       {renderMobileAttachmentDrawer()}
       {renderMobileBiDrawer()}
-      <aside className="sidebar">
+      <aside className={`sidebar${expertMobileSearchOpen || libraryMobileSearchOpen ? ' sidebar--mobile-search-hidden' : ''}`}>
         <nav className="sidebar-nav">
           {NAV_ITEMS.map((item) => {
             const isDoraNav = item.id === 'dora'
