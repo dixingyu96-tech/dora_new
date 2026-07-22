@@ -14013,7 +14013,12 @@ select {
   }
 
   .mobile-catalog-search-page__empty {
-    margin: 48px 0 0;
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    margin: 0;
     color: var(--fd-color-text-placeholder);
     font-size: var(--fd-font-size);
     line-height: var(--fd-line-height);
@@ -14083,6 +14088,12 @@ select {
   .mobile-catalog-history__search:focus-visible {
     outline: none;
     background: var(--fd-color-fill-quaternary);
+  }
+
+  .mobile-catalog-history__item.mobile-catalog-search-results__item:is(:hover, :active, :focus, :focus-visible) {
+    outline: none;
+    background: transparent;
+    box-shadow: none;
   }
 
   .page--dora-ask .dora-stage:not(.dora-stage--plain-bg) .hero {

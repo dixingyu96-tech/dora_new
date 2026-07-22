@@ -10426,21 +10426,19 @@ export default function QuestionPage() {
                               </button>
                             ) : null}
                           </label>
-                          {expertMobileSearchFocused ? (
-                            <button
-                              type="button"
-                              className="library-mobile-search-page__cancel"
-                              onMouseDown={(e) => e.preventDefault()}
-                              onClick={() => {
-                                setExpertMobileSearchOpen(false)
-                                setExpertMobileSearchFocused(false)
-                                setExpertMobileSearchSubmitted(false)
-                                setExpertSearch('')
-                              }}
-                            >
-                              取消
-                            </button>
-                          ) : null}
+                          <button
+                            type="button"
+                            className="library-mobile-search-page__cancel"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => {
+                              setExpertMobileSearchOpen(false)
+                              setExpertMobileSearchFocused(false)
+                              setExpertMobileSearchSubmitted(false)
+                              setExpertSearch('')
+                            }}
+                          >
+                            取消
+                          </button>
                         </header>
 
                         {expertMobileSearchSubmitted ? (
@@ -10961,16 +10959,14 @@ export default function QuestionPage() {
                               </button>
                             ) : null}
                           </label>
-                          {libraryMobileSearchFocused ? (
-                            <button
-                              type="button"
-                              className="library-mobile-search-page__cancel"
-                              onMouseDown={(e) => e.preventDefault()}
-                              onClick={() => { setLibraryMobileSearchOpen(false); setLibraryMobileSearchFocused(false); setLibraryMobileSearchSubmitted(false); setLibrarySearch('') }}
-                            >
-                              取消
-                            </button>
-                          ) : null}
+                          <button
+                            type="button"
+                            className="library-mobile-search-page__cancel"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => { setLibraryMobileSearchOpen(false); setLibraryMobileSearchFocused(false); setLibraryMobileSearchSubmitted(false); setLibrarySearch('') }}
+                          >
+                            取消
+                          </button>
                         </header>
 
                         {libraryMobileSearchSubmitted ? <div className="library-mobile-search-page__content">
