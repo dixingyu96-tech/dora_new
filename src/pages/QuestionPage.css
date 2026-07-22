@@ -12476,6 +12476,10 @@ select {
     max-height: 58px;
   }
 
+  .page--mobile-session .session-thread__user-file:is(:hover, :active, :focus, :focus-visible) {
+    background: var(--fd-color-bg-container-grey);
+  }
+
   .page--mobile-session .sender-wrap--session {
     padding-top: 0;
   }
@@ -15010,6 +15014,18 @@ select {
     height: 58px;
     min-height: 58px;
     max-height: 58px;
+  }
+
+  .sender-attachment-card.is-hovered {
+    z-index: 1;
+  }
+
+  .sender-attachment-card.is-hovered:not(.is-failed) .sender-attachment-card__inner {
+    background: var(--fd-color-bg-container-grey);
+  }
+
+  .sender-attachment-card.uploading.is-hovered .sender-attachment-card__inner {
+    background: #f8f9fc;
   }
 
   .sender-attachment-card__remove {
