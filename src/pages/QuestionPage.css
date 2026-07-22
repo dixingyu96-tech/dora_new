@@ -8863,7 +8863,9 @@ button.library-detail-main__source--icon-only .library-detail-main__source-label
 }
 
 .attach-btn-wrap--connector {
-  width: 160px;
+  width: max-content;
+  min-width: 0;
+  max-width: 160px;
   height: 32px;
 }
 
@@ -11329,6 +11331,18 @@ select {
     border-bottom: 1px solid var(--fd-color-split);
   }
 
+  .attach-connect-mobile-list__empty {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    color: var(--fd-color-text-placeholder);
+    font-size: var(--fd-font-size);
+    line-height: var(--fd-line-height);
+    text-align: center;
+  }
+
   .attach-connect-mobile-list__item .attach-connect-tree__checkbox,
   .attach-connect-mobile-list__item .attach-connect-tree__checkbox-box {
     width: 18px;
@@ -11551,7 +11565,8 @@ select {
     display: flex;
     align-items: center;
     gap: var(--fd-gap);
-    min-height: 48px;
+    height: 56px;
+    min-height: 56px;
     padding: var(--fd-padding-layout-sm) 0;
     border: 0;
     background: transparent;
@@ -13489,7 +13504,8 @@ select {
     justify-content: space-between;
     gap: 12px;
     width: 100%;
-    min-height: 40px;
+    height: 32px;
+    min-height: 32px;
     padding: 0;
     color: var(--fd-color-text-heading);
     font-size: var(--fd-font-size-lg, 16px);
@@ -14220,16 +14236,18 @@ select {
   }
 
   .page--dora-ask .dora-stage:not(.dora-stage--plain-bg) .attach-actions .attach-btn__plus-icon {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+    line-height: 22px;
   }
 
   .page--dora-ask .dora-stage:not(.dora-stage--plain-bg) .send-icon,
   .page--dora-ask .dora-stage:not(.dora-stage--plain-bg) .send-btn svg {
-    width: 18px;
-    height: 18px;
-    font-size: 18px;
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+    line-height: 22px;
   }
 
   .page--dora-ask .dora-stage:not(.dora-stage--plain-bg) .practices {
@@ -14615,7 +14633,7 @@ select {
   }
 
   .library-recent-card__title {
-    min-height: 44px;
+    min-height: 0;
     color: var(--fd-color-text);
     font-size: var(--fd-font-size);
     font-weight: 400;
@@ -14841,6 +14859,47 @@ select {
     display: none;
   }
 
+  :is(
+    .experts-search__icon,
+    .schedule-search__icon,
+    .library-search__icon,
+    .session-files-panel__search-icon,
+    .library-detail-chat__session-search-icon,
+    .attach-connect-search__icon,
+    .library-mobile-search-page__field > .dora-icon,
+    .mobile-catalog-search-page__field > .dora-icon,
+    .mobile-avatar-menu__meta .dora-icon,
+    .mobile-catalog-action .dora-icon
+  ) {
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+    line-height: 22px;
+  }
+
+  :is(
+    .experts-search__input,
+    .schedule-search__input,
+    .library-search__input,
+    .session-files-panel__search-input,
+    .library-detail-chat__session-search-input,
+    .attach-connect-search__input,
+    .library-mobile-search-page__field input,
+    .mobile-catalog-search-page__field input
+  ) {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .experts-mobile-all .experts-tab:not(.active):is(:hover, :active, :focus, :focus-visible) {
+    outline: none;
+    border-color: transparent;
+    background: var(--fd-color-fill-quaternary);
+    color: var(--fd-color-text);
+    box-shadow: none;
+  }
+
   .page--dora-ask .dora-stage:not(.dora-stage--plain-bg) .hero-skill-slot {
     display: none;
   }
@@ -14951,6 +15010,15 @@ select {
     pointer-events: none !important;
   }
 
+  .attach-actions .attach-btn--plus:is(:hover, :active, :focus, :focus-visible, .is-active) .attach-btn__visual,
+  .attach-actions .attach-btn--connector:is(:hover, :active, :focus, :focus-visible, .is-active) .attach-btn__visual--connector {
+    border-color: var(--fd-color-border);
+    background: var(--fd-color-bg-container);
+    color: var(--fd-color-icon);
+    box-shadow: none;
+    filter: none;
+  }
+
   :where(
     .mobile-home-nav__profile,
     .mobile-home-nav__action,
@@ -15006,10 +15074,10 @@ select {
   .attach-actions .attach-btn__plus-icon,
   .send-icon,
   .send-btn svg {
-    width: 18px !important;
-    height: 18px !important;
-    font-size: 18px !important;
-    line-height: 18px !important;
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 22px !important;
+    line-height: 22px !important;
   }
 
   .attach-btn__connector-label {

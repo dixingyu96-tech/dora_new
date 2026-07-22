@@ -3016,7 +3016,7 @@ const SYSTEM_COPY = {
     '内容均由AI生成, 仅供参考': 'AI-generated content, for reference only', '选择上传方式': 'Choose upload method', '用户菜单': 'User menu',
     '选择语言': 'Choose language', '返回用户菜单': 'Back to user menu', '关闭用户菜单': 'Close user menu', 'Fine BI 连接器': 'Fine BI Connector',
     '超级智能体': 'Super Agent', '会话记录': 'Chat history', '今天': 'Today', '7天内': 'Last 7 days', '30天内': 'Last 30 days', '更早': 'Earlier',
-    '取消': 'Cancel', '请输入': 'Search', '搜索会话': 'Search chats', '搜索结果': 'Search results', '清空搜索': 'Clear search',
+    '取消': 'Cancel', '请输入': 'Search', '搜索会话': 'Search chats', '搜索结果': 'Search results', '清空搜索': 'Clear search', '暂无搜索结果': 'No search results',
     '搜索名称': 'Search by name', '搜索名称/描述': 'Search name/description', '搜索名称/来源对话/来源Agent': 'Search name/source chat/source Agent',
     '添加分析主题': 'Add analysis subject', '添加仪表板': 'Add dashboard', '添加模型指标集': 'Add model & metric set', '添加数据集': 'Add dataset',
     '添加 FineBI 资产': 'Add FineBI asset', '分析主题范围': 'Analysis subject scope', '我的': 'Mine', '用户的': "User's",
@@ -3035,7 +3035,7 @@ const SYSTEM_COPY = {
     '选择上传方式': '選擇上傳方式', '用户菜单': '使用者選單', '选择语言': '選擇語言', '返回用户菜单': '返回使用者選單',
     '关闭用户菜单': '關閉使用者選單', 'Fine BI 连接器': 'Fine BI 連接器',
     '超级智能体': '超級智能體', '会话记录': '會話記錄', '今天': '今天', '7天内': '7天內', '30天内': '30天內', '更早': '更早',
-    '取消': '取消', '请输入': '請輸入', '搜索会话': '搜尋會話', '搜索结果': '搜尋結果', '清空搜索': '清除搜尋',
+    '取消': '取消', '请输入': '請輸入', '搜索会话': '搜尋會話', '搜索结果': '搜尋結果', '清空搜索': '清除搜尋', '暂无搜索结果': '暫無搜尋結果',
     '搜索名称': '搜尋名稱', '搜索名称/描述': '搜尋名稱／描述', '搜索名称/来源对话/来源Agent': '搜尋名稱／來源對話／來源 Agent',
     '添加分析主题': '新增分析主題', '添加仪表板': '新增儀表板', '添加模型指标集': '新增模型指標集', '添加数据集': '新增資料集',
     '添加 FineBI 资产': '新增 FineBI 資產', '分析主题范围': '分析主題範圍', '我的': '我的', '用户的': '使用者的',
@@ -3054,7 +3054,7 @@ const SYSTEM_COPY = {
     '内容均由AI生成, 仅供参考': 'AIが生成した内容です。参考としてご利用ください', '选择上传方式': 'アップロード方法を選択',
     '用户菜单': 'ユーザーメニュー', '选择语言': '言語を選択', '返回用户菜单': 'ユーザーメニューに戻る', '关闭用户菜单': 'ユーザーメニューを閉じる',
     '超级智能体': 'スーパーエージェント', '会话记录': 'チャット履歴', '今天': '今日', '7天内': '過去7日間', '30天内': '過去30日間', '更早': 'それ以前',
-    '取消': 'キャンセル', '请输入': '検索', '搜索会话': 'チャットを検索', '搜索结果': '検索結果', '清空搜索': '検索をクリア',
+    '取消': 'キャンセル', '请输入': '検索', '搜索会话': 'チャットを検索', '搜索结果': '検索結果', '清空搜索': '検索をクリア', '暂无搜索结果': '検索結果がありません',
     '搜索名称': '名前を検索', '搜索名称/描述': '名前／説明を検索', '搜索名称/来源对话/来源Agent': '名前／元チャット／元エージェントを検索',
     '添加分析主题': '分析テーマを追加', '添加仪表板': 'ダッシュボードを追加', '添加模型指标集': 'モデル・指標セットを追加', '添加数据集': 'データセットを追加',
     '添加 FineBI 资产': 'FineBIアセットを追加', '分析主题范围': '分析テーマの範囲', '我的': '自分', '用户的': 'ユーザー',
@@ -3073,7 +3073,7 @@ const SYSTEM_COPY = {
     '选择上传方式': '업로드 방식 선택', '用户菜单': '사용자 메뉴', '选择语言': '언어 선택', '返回用户菜单': '사용자 메뉴로 돌아가기',
     '关闭用户菜单': '사용자 메뉴 닫기',
     '超级智能体': '슈퍼 에이전트', '会话记录': '채팅 기록', '今天': '오늘', '7天内': '최근 7일', '30天内': '최근 30일', '更早': '이전',
-    '取消': '취소', '请输入': '검색', '搜索会话': '채팅 검색', '搜索结果': '검색 결과', '清空搜索': '검색 지우기',
+    '取消': '취소', '请输入': '검색', '搜索会话': '채팅 검색', '搜索结果': '검색 결과', '清空搜索': '검색 지우기', '暂无搜索结果': '검색 결과가 없습니다',
     '搜索名称': '이름 검색', '搜索名称/描述': '이름/설명 검색', '搜索名称/来源对话/来源Agent': '이름/원본 채팅/원본 에이전트 검색',
     '添加分析主题': '분석 주제 추가', '添加仪表板': '대시보드 추가', '添加模型指标集': '모델 및 지표 세트 추가', '添加数据集': '데이터 세트 추가',
     '添加 FineBI 资产': 'FineBI 자산 추가', '分析主题范围': '분석 주제 범위', '我的': '내 항목', '用户的': '사용자 항목',
@@ -3092,7 +3092,7 @@ const SYSTEM_COPY = {
     '内容均由AI生成, 仅供参考': 'Контент создан ИИ и приведён для справки', '选择上传方式': 'Выберите способ загрузки',
     '用户菜单': 'Меню пользователя', '选择语言': 'Выберите язык', '返回用户菜单': 'Назад в меню пользователя', '关闭用户菜单': 'Закрыть меню пользователя',
     '超级智能体': 'Суперагент', '会话记录': 'История чатов', '今天': 'Сегодня', '7天内': 'За 7 дней', '30天内': 'За 30 дней', '更早': 'Ранее',
-    '取消': 'Отмена', '请输入': 'Поиск', '搜索会话': 'Поиск чатов', '搜索结果': 'Результаты поиска', '清空搜索': 'Очистить поиск',
+    '取消': 'Отмена', '请输入': 'Поиск', '搜索会话': 'Поиск чатов', '搜索结果': 'Результаты поиска', '清空搜索': 'Очистить поиск', '暂无搜索结果': 'Результаты не найдены',
     '搜索名称': 'Поиск по названию', '搜索名称/描述': 'Поиск по названию/описанию', '搜索名称/来源对话/来源Agent': 'Название/исходный чат/агент',
     '添加分析主题': 'Добавить тему анализа', '添加仪表板': 'Добавить панель', '添加模型指标集': 'Добавить модели и метрики', '添加数据集': 'Добавить набор данных',
     '添加 FineBI 资产': 'Добавить ресурс FineBI', '分析主题范围': 'Область тем анализа', '我的': 'Мои', '用户的': 'Пользовательские',
@@ -5191,7 +5191,7 @@ export default function QuestionPage() {
             </div>
           ))
         ) : (
-          <p className="sender-mention-panel__empty">无匹配文件</p>
+          <p className="sender-mention-panel__empty">暂无搜索结果</p>
         )}
       </div>
     )
@@ -5945,6 +5945,9 @@ export default function QuestionPage() {
                 {renderAttachConnectTreeNodes(visibleTreeNodes)}
               </div>
               <div className="attach-connect-mobile-list" role="list" aria-label={currentAttachAssetLabel}>
+                {query && !mobileVisibleTreeNodes.length ? (
+                  <div className="attach-connect-mobile-list__empty">暂无搜索结果</div>
+                ) : null}
                 {mobileVisibleTreeNodes.map(({ node, path }) => {
                   const checkState = getAttachConnectCheckState(node, attachConnectCheckedIds)
                   const iconSrc =
@@ -6540,7 +6543,7 @@ export default function QuestionPage() {
                     {highlightSearchText(item.label, mobileCatalogSearch)}
                   </button>
                 ))}
-                {!mobileCatalogSearchResults.length ? <p className="mobile-catalog-search-page__empty">暂无匹配的会话</p> : null}
+                {!mobileCatalogSearchResults.length ? <p className="mobile-catalog-search-page__empty">暂无搜索结果</p> : null}
               </div>
             ) : null}
           </section>
@@ -6898,7 +6901,7 @@ export default function QuestionPage() {
     if (!hasVisibleBlocks) {
       return (
         <div className="session-files-panel__empty session-files-panel__empty--tab">
-          {sessionFilesSourceSearch.trim() ? '暂无匹配数据' : '暂无内容'}
+          {sessionFilesSourceSearch.trim() ? '暂无搜索结果' : '暂无内容'}
         </div>
       )
     }
@@ -7629,7 +7632,7 @@ export default function QuestionPage() {
 
                   {!isCollapsed && !section.files.length ? (
                     <div className="session-files-panel__source-empty">
-                      {sessionFilesSourceSearch.trim() ? '暂无匹配数据' : '暂无内容'}
+                      {sessionFilesSourceSearch.trim() ? '暂无搜索结果' : '暂无内容'}
                     </div>
                   ) : null}
                 </section>
@@ -7637,7 +7640,7 @@ export default function QuestionPage() {
             })
           ) : (
             <div className="session-files-panel__empty session-files-panel__empty--tab">
-              {sessionFilesSourceSearch.trim() ? '暂无匹配数据' : '暂无内容'}
+              {sessionFilesSourceSearch.trim() ? '暂无搜索结果' : '暂无内容'}
             </div>
           )}
         </div>
@@ -7780,7 +7783,7 @@ export default function QuestionPage() {
 
                 {!filteredSessionFiles.length ? (
                   <div className="session-files-panel__empty">
-                    {sessionFilesSearch.trim() ? '暂无匹配文件' : '暂无内容'}
+                    {sessionFilesSearch.trim() ? '暂无搜索结果' : '暂无内容'}
                   </div>
                 ) : null}
               </div>
@@ -9481,7 +9484,7 @@ export default function QuestionPage() {
             ))}
 
             {!filteredScheduleTasks.length ? (
-              <div className="schedule-empty">暂无匹配任务，请尝试调整筛选条件。</div>
+              <div className="schedule-empty">暂无搜索结果</div>
             ) : null}
           </div>
         </div>
@@ -10983,7 +10986,7 @@ export default function QuestionPage() {
                                 <div className="library-card__cover-wrap"><img src={item.cover} alt="" className="library-card__cover" /></div>
                               </article>
                             ))}
-                            {!filteredLibraryItems.length ? <div className="library-empty">暂无匹配资源</div> : null}
+                            {!filteredLibraryItems.length ? <div className="library-empty">暂无搜索结果</div> : null}
                           </div>
                         </div> : null}
                       </section>
@@ -11149,7 +11152,7 @@ export default function QuestionPage() {
                           ))}
 
                           {!filteredLibraryItems.length ? (
-                            <div className="library-empty">暂无匹配资源，请尝试调整筛选条件。</div>
+                            <div className="library-empty">暂无搜索结果</div>
                           ) : null}
                         </div>
                       </section>
