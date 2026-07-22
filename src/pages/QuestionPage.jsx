@@ -3865,6 +3865,8 @@ export default function QuestionPage() {
   const fileInputRef = useRef(null)
   const cameraInputRef = useRef(null)
   const imageInputRef = useRef(null)
+  const senderAttachmentsRef = useRef(null)
+  const composerAttachmentsScrollStateRef = useRef({ sessionKey: '', fileCount: 0 })
   const uploadTimersRef = useRef(new Map())
   const sessionTransitionTimersRef = useRef(new Map())
   const historyGenerationTimersRef = useRef(new Map())
@@ -4510,6 +4512,25 @@ export default function QuestionPage() {
     }
   }, [activeSessionFile, activeSessionFileId])
   const composerFiles = activeSessionState.composerFiles ?? []
+  const composerAttachmentsSessionKey = `${activeSessionScope}:${activeHistoryItemId ?? 'none'}`
+  useEffect(() => {
+    const previous = composerAttachmentsScrollStateRef.current
+    const sessionChanged = previous.sessionKey !== composerAttachmentsSessionKey
+    const startsNewBatch = previous.fileCount === 0 && composerFiles.length > 0
+
+    composerAttachmentsScrollStateRef.current = {
+      sessionKey: composerAttachmentsSessionKey,
+      fileCount: composerFiles.length,
+    }
+
+    if (!sessionChanged && !startsNewBatch) return undefined
+
+    const frame = window.requestAnimationFrame(() => {
+      if (senderAttachmentsRef.current) senderAttachmentsRef.current.scrollLeft = 0
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [composerAttachmentsSessionKey, composerFiles.length])
+
   const canSend = useMemo(() => {
     const hasText = composerPlainText.trim().length > 0 || getComposerHasContent(composerSegments)
     const hasReadyFiles = composerFiles.some((file) => file.status === 'done')
@@ -4880,7 +4901,7 @@ export default function QuestionPage() {
     if (!attachments.length) return null
 
     return (
-      <div className="sender-attachments" aria-label="已上传文件">
+      <div ref={senderAttachmentsRef} className="sender-attachments" aria-label="已上传文件">
         {attachments.map((file) => {
           const isHovered = hoveredComposerFileId === file.id
           const isUploading = file.status === 'uploading'

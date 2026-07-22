@@ -1392,6 +1392,16 @@ export default function SessionThread({
   }, [resetExpandKey])
 
   useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      threadRef.current?.querySelectorAll('.session-thread__user-files').forEach((element) => {
+        element.scrollLeft = 0
+      })
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [resetExpandKey])
+
+  useEffect(() => {
     const body = bodyRef.current
     if (!body || thinkingExpanded || thinkingCollapsed || !isGenerating) return
     body.scrollTop = body.scrollHeight
@@ -1567,7 +1577,9 @@ export default function SessionThread({
         </Fragment>
       ))}
 
-      {currentTurn ? renderUserTurn(currentTurn, { showMeta: true }) : null}
+      {currentTurn ? (
+        <Fragment key={getTurnKey(currentTurn)}>{renderUserTurn(currentTurn, { showMeta: true })}</Fragment>
+      ) : null}
 
       {currentTurn && showAssistantThinking ? (
         <div className="session-thread__assistant">
