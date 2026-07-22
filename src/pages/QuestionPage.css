@@ -14098,7 +14098,7 @@ select {
     flex: 0 0 auto;
     align-items: center;
     width: 100%;
-    padding: 32px 12px;
+    padding: 0 12px 32px;
     margin: 0;
   }
 
@@ -14192,7 +14192,7 @@ select {
 
   .page--dora-ask .dora-stage:not(.dora-stage--plain-bg) .sender-wrap {
     order: 3;
-    margin-top: 8px;
+    margin-top: var(--fd-gap-4xl);
   }
 
   .page--dora-ask .dora-stage:not(.dora-stage--plain-bg) .sender-inner {
