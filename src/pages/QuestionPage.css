@@ -12378,13 +12378,19 @@ select {
     display: none;
   }
 
+  .page--mobile-expert-detail .expert-detail-page__panel:has(.expert-question-carousel) {
+    flex: 1 1 auto;
+  }
+
   .page--mobile-expert-detail .expert-question-carousel {
     --expert-question-card-width: 258px;
-    --expert-question-card-height: 318px;
+    --expert-question-card-height: calc(100% - 48px);
     position: relative;
+    flex: 1 1 0;
     display: block;
     width: 100%;
-    height: calc(var(--expert-question-card-height) + (var(--fd-padding) * 2));
+    height: auto;
+    min-height: 0;
     min-width: 0;
     overflow: visible;
     cursor: grab;
@@ -12403,13 +12409,14 @@ select {
     display: block;
     width: 100%;
     height: 100%;
-    padding-block: var(--fd-padding);
+    box-sizing: border-box;
+    padding-block: var(--fd-padding-3xl);
     padding-inline: var(--fd-padding-zero);
   }
 
   .page--mobile-expert-detail .expert-question-card {
     position: absolute;
-    top: var(--fd-padding);
+    top: var(--fd-padding-3xl);
     left: 50%;
     z-index: var(--practice-deck-z);
     display: flex;
@@ -12445,10 +12452,10 @@ select {
   .page--mobile-expert-detail .expert-question-card__header {
     position: relative;
     display: flex;
-    flex: 0 0 46px;
+    flex: 0 0 48px;
     align-items: center;
     width: 100%;
-    height: 46px;
+    height: 48px;
     padding: var(--fd-padding-layout-sm) var(--fd-padding-layout);
     overflow: hidden;
   }
@@ -12469,9 +12476,9 @@ select {
     width: max-content;
     max-width: 226px;
     margin: var(--fd-padding-zero);
-    font-size: 14px;
+    font-size: var(--fd-font-size-lg, 16px);
     font-weight: 600;
-    line-height: 22px;
+    line-height: var(--fd-line-height-lg, 24px);
   }
 
   .page--mobile-expert-detail .expert-question-card__title::after {
@@ -12541,9 +12548,9 @@ select {
     border: 0;
     background: transparent;
     color: var(--fd-color-text, rgba(9, 30, 64, 0.9));
-    font-size: 14px;
+    font-size: var(--fd-font-size-lg, 16px);
     font-weight: 400;
-    line-height: 22px;
+    line-height: var(--fd-line-height-lg, 24px);
     text-align: left;
     text-overflow: ellipsis;
     cursor: pointer;
