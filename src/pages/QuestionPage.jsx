@@ -422,6 +422,11 @@ const MOBILE_RECOMMENDATION_MAX_SWIPE_CARDS = 3
 const MOBILE_RECOMMENDATION_LIMIT = 10
 const EXPERT_QUESTION_CARD_HEIGHT = 318
 const EXPERT_QUESTION_CARD_LAYER_HEIGHT_STEP = 30
+const EXPERT_QUESTION_SWIPE_DISTANCE_FALLBACK = 134
+const EXPERT_QUESTION_SWIPE_DISTANCE_RATIO = 0.52
+const EXPERT_QUESTION_MAX_DRAG_PROGRESS = 1.12
+const EXPERT_QUESTION_DRAG_ROTATION = 13
+const EXPERT_QUESTION_DRAG_SCALE_LOSS = 0.18
 const EXPERT_QUESTION_CARD_SECOND_LAYER_SCALE =
   (EXPERT_QUESTION_CARD_HEIGHT - EXPERT_QUESTION_CARD_LAYER_HEIGHT_STEP) / EXPERT_QUESTION_CARD_HEIGHT
 const EXPERT_QUESTION_CARD_THIRD_LAYER_SCALE =
@@ -529,10 +534,31 @@ function interpolatePracticeDeckPose(relativePosition, variant) {
   }
 }
 
-function getPracticeDeckCardStyle(relative, variant, dragX = 0) {
-  const swipeDistance = variant === 'recommendation' ? MOBILE_RECOMMENDATION_SWIPE_DISTANCE : PRACTICE_DECK_SWIPE_DISTANCE
+function getPracticeDeckCardStyle(
+  relative,
+  variant,
+  dragX = 0,
+  expertSwipeDistance = EXPERT_QUESTION_SWIPE_DISTANCE_FALLBACK,
+) {
+  const swipeDistance =
+    variant === 'recommendation'
+      ? MOBILE_RECOMMENDATION_SWIPE_DISTANCE
+      : variant === 'expert'
+        ? expertSwipeDistance
+        : PRACTICE_DECK_SWIPE_DISTANCE
   const dragProgress = dragX / swipeDistance
   const pose = interpolatePracticeDeckPose(relative + dragProgress, variant)
+
+  if (variant === 'expert' && relative === 0 && dragX !== 0) {
+    const boundedProgress = Math.max(-1, Math.min(1, dragProgress))
+    const dragIntensity = Math.abs(boundedProgress)
+
+    pose.x = dragX
+    pose.scale = 1 - EXPERT_QUESTION_DRAG_SCALE_LOSS * dragIntensity
+    pose.rotate = EXPERT_QUESTION_DRAG_ROTATION * boundedProgress
+    pose.opacity = 1
+    pose.zIndex = 12
+  }
 
   return {
     '--practice-deck-x':
@@ -547,12 +573,17 @@ function getPracticeDeckCardStyle(relative, variant, dragX = 0) {
   }
 }
 
-function applyPracticeDeckDragStyles(container, dragX, variant) {
+function applyPracticeDeckDragStyles(
+  container,
+  dragX,
+  variant,
+  expertSwipeDistance = EXPERT_QUESTION_SWIPE_DISTANCE_FALLBACK,
+) {
   if (!container) return
 
   container.querySelectorAll('[data-practice-relative]').forEach((element) => {
     const relative = Number(element.dataset.practiceRelative)
-    const style = getPracticeDeckCardStyle(relative, variant, dragX)
+    const style = getPracticeDeckCardStyle(relative, variant, dragX, expertSwipeDistance)
     Object.entries(style).forEach(([property, value]) => element.style.setProperty(property, value))
   })
 }
@@ -4076,14 +4107,28 @@ export default function QuestionPage() {
   const handlePracticeDeckPointerDown = (event) => {
     if (event.button !== 0) return
 
+    const scope = event.currentTarget.dataset.practiceDeckScope ?? 'practice'
+    const activeCardWidth = event.currentTarget
+      .querySelector('[data-practice-relative="0"]')
+      ?.getBoundingClientRect().width
+    const expertSwipeDistance =
+      scope === 'expert-question' && activeCardWidth
+        ? activeCardWidth * EXPERT_QUESTION_SWIPE_DISTANCE_RATIO
+        : EXPERT_QUESTION_SWIPE_DISTANCE_FALLBACK
+
     practiceDeckPointerRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
       startedAt: performance.now(),
       target: event.currentTarget,
       variant: event.currentTarget.dataset.practiceDeckVariant,
-      scope: event.currentTarget.dataset.practiceDeckScope ?? 'practice',
+      scope,
+      expertSwipeDistance,
+      latestRawDragX: 0,
       latestDragX: 0,
+      lastX: event.clientX,
+      lastAt: event.timeStamp,
+      velocityX: 0,
       animationFrame: null,
     }
     practiceDeckSuppressClickRef.current = false
@@ -4095,18 +4140,35 @@ export default function QuestionPage() {
     const pointer = practiceDeckPointerRef.current
     if (!pointer || pointer.pointerId !== event.pointerId) return
 
-    const rawDragX = event.clientX - pointer.startX
+    const coalescedEvents = event.getCoalescedEvents?.() ?? []
+    const sample = coalescedEvents[coalescedEvents.length - 1] ?? event
+    const rawDragX = sample.clientX - pointer.startX
     const maxDragDistance =
       pointer.scope === 'recommendation'
         ? MOBILE_RECOMMENDATION_SWIPE_DISTANCE * MOBILE_RECOMMENDATION_MAX_SWIPE_CARDS
-        : PRACTICE_DECK_SWIPE_DISTANCE
+        : pointer.scope === 'expert-question'
+          ? pointer.expertSwipeDistance * EXPERT_QUESTION_MAX_DRAG_PROGRESS
+          : PRACTICE_DECK_SWIPE_DISTANCE
     const dragX = Math.max(-maxDragDistance, Math.min(maxDragDistance, rawDragX))
+    const sampleTime = Number.isFinite(sample.timeStamp) ? sample.timeStamp : performance.now()
+    const sampleElapsed = Math.max(1, sampleTime - pointer.lastAt)
+    const instantVelocity = (sample.clientX - pointer.lastX) / sampleElapsed
+
     if (Math.abs(rawDragX) > 6) practiceDeckSuppressClickRef.current = true
+    pointer.latestRawDragX = rawDragX
     pointer.latestDragX = dragX
+    pointer.velocityX = pointer.velocityX * 0.25 + instantVelocity * 0.75
+    pointer.lastX = sample.clientX
+    pointer.lastAt = sampleTime
 
     if (pointer.animationFrame !== null) return
     pointer.animationFrame = requestAnimationFrame(() => {
-      applyPracticeDeckDragStyles(pointer.target, pointer.latestDragX, pointer.variant)
+      applyPracticeDeckDragStyles(
+        pointer.target,
+        pointer.latestDragX,
+        pointer.variant,
+        pointer.expertSwipeDistance,
+      )
       pointer.animationFrame = null
     })
   }
@@ -4115,13 +4177,18 @@ export default function QuestionPage() {
     const pointer = practiceDeckPointerRef.current
     if (!pointer || pointer.pointerId !== event.pointerId) return
 
-    const rawDragX = event.clientX - pointer.startX
+    const rawDragX = pointer.latestRawDragX || event.clientX - pointer.startX
     const elapsed = Math.max(1, performance.now() - pointer.startedAt)
-    const velocity = rawDragX / elapsed
+    const velocity = Math.abs(pointer.velocityX) > 0.01 ? pointer.velocityX : rawDragX / elapsed
     const shouldAdvance = !cancelled && (Math.abs(rawDragX) >= 32 || Math.abs(velocity) >= 0.35)
 
     if (pointer.animationFrame !== null) cancelAnimationFrame(pointer.animationFrame)
-    applyPracticeDeckDragStyles(pointer.target, pointer.latestDragX, pointer.variant)
+    applyPracticeDeckDragStyles(
+      pointer.target,
+      pointer.latestDragX,
+      pointer.variant,
+      pointer.expertSwipeDistance,
+    )
     pointer.target.classList.remove('is-dragging')
     if (shouldAdvance) {
       const direction = rawDragX < 0 ? 1 : -1
@@ -4139,7 +4206,7 @@ export default function QuestionPage() {
     practiceDeckPointerRef.current = null
 
     requestAnimationFrame(() => {
-      applyPracticeDeckDragStyles(pointer.target, 0, pointer.variant)
+      applyPracticeDeckDragStyles(pointer.target, 0, pointer.variant, pointer.expertSwipeDistance)
     })
   }
 
@@ -4355,6 +4422,7 @@ export default function QuestionPage() {
         .slice(visibleStart, visibleStart + EXPERT_RECOMMENDATION_DECK_SIZE)
         .map((card, offset) => ({
           card,
+          cardIndex: visibleStart + offset,
           relative: visibleStart + offset - activeExpertTab,
         }))
     },
@@ -11055,9 +11123,9 @@ export default function QuestionPage() {
                                 {...practiceDeckGestureProps}
                               >
                                 <div className="expert-question-carousel__track">
-                                  {activeExpertRecommendationDeckCards.map(({ card, relative }, cardIndex) => (
+                                  {activeExpertRecommendationDeckCards.map(({ card, cardIndex, relative }) => (
                                     <article
-                                      key={`${getExpertCardKey(activeExpertCard)}-${card.label}-${cardIndex}`}
+                                      key={`${getExpertCardKey(activeExpertCard)}-${cardIndex}-${card.label}`}
                                       className="expert-question-card"
                                       style={getPracticeDeckCardStyle(relative, 'expert')}
                                       aria-label={`${card.label}推荐问题`}
