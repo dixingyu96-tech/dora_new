@@ -80,6 +80,11 @@ import dingImage from '../assets/images/钉钉.png'
 import feishuImage from '../assets/images/飞书.png'
 import tabCurveLeftImage from '../assets/images/tab-curve-left.svg'
 import tabCurveRightImage from '../assets/images/tab-curve-right.svg'
+import recommendedQuestionTitle1Image from '../assets/images/recommended-question-cards/card-title-1.png'
+import recommendedQuestionTitle2Image from '../assets/images/recommended-question-cards/card-title-2.png'
+import recommendedQuestionTitle3Image from '../assets/images/recommended-question-cards/card-title-3.png'
+import recommendedQuestionTitle4Image from '../assets/images/recommended-question-cards/card-title-4.png'
+import recommendedQuestionTitle5Image from '../assets/images/recommended-question-cards/card-title-5.png'
 import financialBiMdContent from '../assets/content/国内金融行业商业智能软件市场调研报告.md?raw'
 import sessionPptSlide01Image from '../assets/images/session-ppt-preview/slide-01.png'
 import sessionPptSlide02Image from '../assets/images/session-ppt-preview/slide-02.png'
@@ -415,6 +420,12 @@ const PRACTICE_DECK_SWIPE_DISTANCE = 78
 const MOBILE_RECOMMENDATION_SWIPE_DISTANCE = 68
 const MOBILE_RECOMMENDATION_MAX_SWIPE_CARDS = 3
 const MOBILE_RECOMMENDATION_LIMIT = 10
+const EXPERT_QUESTION_CARD_HEIGHT = 318
+const EXPERT_QUESTION_CARD_LAYER_HEIGHT_STEP = 30
+const EXPERT_QUESTION_CARD_SECOND_LAYER_SCALE =
+  (EXPERT_QUESTION_CARD_HEIGHT - EXPERT_QUESTION_CARD_LAYER_HEIGHT_STEP) / EXPERT_QUESTION_CARD_HEIGHT
+const EXPERT_QUESTION_CARD_THIRD_LAYER_SCALE =
+  (EXPERT_QUESTION_CARD_HEIGHT - EXPERT_QUESTION_CARD_LAYER_HEIGHT_STEP * 2) / EXPERT_QUESTION_CARD_HEIGHT
 
 const PRACTICE_DECK_POSES = {
   recommendation: [
@@ -434,6 +445,57 @@ const PRACTICE_DECK_POSES = {
     { x: 78, y: 5, scale: 0.87, rotate: 3, opacity: 0.94, brightness: 0.95 },
     { x: 132, y: 10, scale: 0.73, rotate: 6, opacity: 0.72, brightness: 0.9 },
     { x: 184, y: 13, scale: 0.54, rotate: 9, opacity: 0, brightness: 0.86 },
+  ],
+  expert: [
+    {
+      x: -128,
+      y: 0,
+      scale: EXPERT_QUESTION_CARD_THIRD_LAYER_SCALE,
+      rotate: -9,
+      opacity: 0,
+      brightness: 0.9,
+    },
+    {
+      x: -58,
+      y: 0,
+      scale: EXPERT_QUESTION_CARD_THIRD_LAYER_SCALE,
+      rotate: -6,
+      opacity: 1,
+      brightness: 0.94,
+    },
+    {
+      x: -32,
+      y: 0,
+      scale: EXPERT_QUESTION_CARD_SECOND_LAYER_SCALE,
+      rotate: -3,
+      opacity: 1,
+      brightness: 0.97,
+    },
+    { x: 0, y: 0, scale: 1, rotate: 0, opacity: 1, brightness: 1 },
+    {
+      x: 32,
+      y: 0,
+      scale: EXPERT_QUESTION_CARD_SECOND_LAYER_SCALE,
+      rotate: 3,
+      opacity: 1,
+      brightness: 0.97,
+    },
+    {
+      x: 58,
+      y: 0,
+      scale: EXPERT_QUESTION_CARD_THIRD_LAYER_SCALE,
+      rotate: 6,
+      opacity: 1,
+      brightness: 0.94,
+    },
+    {
+      x: 128,
+      y: 0,
+      scale: EXPERT_QUESTION_CARD_THIRD_LAYER_SCALE,
+      rotate: 9,
+      opacity: 0,
+      brightness: 0.9,
+    },
   ],
   desktop: [
     { x: -225, y: 30, scale: 0.42, rotate: -12, opacity: 0, brightness: 0.84 },
@@ -3334,6 +3396,36 @@ const DEFAULT_EXPERT_DETAIL_TABS = [
   },
 ]
 
+const EXPERT_RECOMMENDATION_CARD_THEMES = [
+  {
+    image: recommendedQuestionTitle1Image,
+    accent: 'rgba(37, 98, 255, 0.2)',
+    titleColor: '#062a7f',
+  },
+  {
+    image: recommendedQuestionTitle2Image,
+    accent: 'rgba(140, 93, 247, 0.2)',
+    titleColor: '#2f256a',
+  },
+  {
+    image: recommendedQuestionTitle3Image,
+    accent: 'rgba(255, 134, 27, 0.2)',
+    titleColor: '#64340a',
+  },
+  {
+    image: recommendedQuestionTitle4Image,
+    accent: 'rgba(16, 183, 165, 0.2)',
+    titleColor: '#004a3d',
+  },
+  {
+    image: recommendedQuestionTitle5Image,
+    accent: 'rgba(240, 67, 125, 0.2)',
+    titleColor: '#601b32',
+  },
+]
+
+const EXPERT_RECOMMENDATION_DECK_SIZE = 3
+
 const EXPERT_DETAIL_CONFIG_BY_KEY = {
   '智能agent 121-2026/02/12': {
     tabs: [
@@ -3463,25 +3555,56 @@ const getExpertDetailConfig = (card) => {
 
 const getVisibleExpertTabs = (tabs) => tabs.filter((tab) => tab.prompts?.length)
 
-function pickRandomExpertPrompts(tabConfig) {
+const EXPERT_PRESENTATION_MODES = ['none', 'cards-only', 'welcome-only', 'both']
+const EXPERT_CARD_COUNT_SEQUENCE = [3, 1, 5, 2, 4]
+
+const hashExpertKey = (value = '') => {
+  let hash = 2166136261
+  for (const character of value) {
+    hash ^= character.codePointAt(0)
+    hash = Math.imul(hash, 16777619)
+  }
+  return hash >>> 0
+}
+
+const getExpertPresentationOrdinal = (card) => {
+  const idMatch = card?.id?.match(/^expert-(\d+)$/)
+  if (idMatch) return Number(idMatch[1])
+  return (hashExpertKey(getExpertCardKey(card ?? {})) % 20) + 1
+}
+
+function getExpertPresentation(card, tabs) {
+  const ordinal = getExpertPresentationOrdinal(card)
+  const mode = EXPERT_PRESENTATION_MODES[(ordinal - 1) % EXPERT_PRESENTATION_MODES.length]
+  const showWelcome = mode === 'welcome-only' || mode === 'both'
+  const showCards = mode === 'cards-only' || mode === 'both'
+  const cardCount = EXPERT_CARD_COUNT_SEQUENCE[(ordinal - 1) % EXPERT_CARD_COUNT_SEQUENCE.length]
+
+  return {
+    ordinal,
+    seed: hashExpertKey(getExpertCardKey(card ?? {})),
+    showWelcome,
+    tabs: showCards ? tabs.slice(0, cardCount) : [],
+  }
+}
+
+function pickExpertPrompts(tabConfig, requestedCount, seed = 1) {
   const prompts = tabConfig?.prompts
   if (!prompts?.length) return []
 
-  const maxPrompts = tabConfig.maxPrompts ?? 5
-  const minPrompts = tabConfig.minPrompts ?? 1
-  if (maxPrompts <= 0) return []
-
   const pool = [...prompts]
+  let randomState = seed >>> 0
+  const nextRandom = () => {
+    randomState = (Math.imul(randomState, 1664525) + 1013904223) >>> 0
+    return randomState / 4294967296
+  }
+
   for (let i = pool.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1))
+    const j = Math.floor(nextRandom() * (i + 1))
     ;[pool[i], pool[j]] = [pool[j], pool[i]]
   }
 
-  const upper = Math.min(maxPrompts, pool.length)
-  const lower = Math.min(Math.max(0, minPrompts), upper)
-  if (upper === 0) return []
-
-  const count = lower + Math.floor(Math.random() * (upper - lower + 1))
+  const count = Math.min(5, Math.max(1, requestedCount), pool.length)
   return pool.slice(0, count)
 }
 
@@ -4009,6 +4132,8 @@ export default function QuestionPage() {
           Math.min(MOBILE_RECOMMENDATION_MAX_SWIPE_CARDS, Math.round(projectedDistance / MOBILE_RECOMMENDATION_SWIPE_DISTANCE)),
         )
         moveMobileRecommendationDeck(direction * cardsToMove)
+      } else if (pointer.scope === 'expert-question') {
+        moveExpertQuestionDeck(direction)
       } else movePracticeDeck(direction)
     }
     practiceDeckPointerRef.current = null
@@ -4197,14 +4322,53 @@ export default function QuestionPage() {
       : []),
   ]
   const showExpertSidePanel = expertRecentCards.length > 0 || expertFavoriteCards.length > 0
-  const activeExpertTabs = useMemo(
+  const availableExpertTabs = useMemo(
     () => getVisibleExpertTabs(activeExpertDetailConfig.tabs),
     [activeExpertDetailConfig],
   )
-  const activeExpertTabPrompts = useMemo(
-    () => pickRandomExpertPrompts(activeExpertTabs[activeExpertTab]),
-    [activeExpertCard, activeExpertTab, activeExpertTabs],
+  const activeExpertPresentation = useMemo(
+    () => getExpertPresentation(activeExpertCard, availableExpertTabs),
+    [activeExpertCard, availableExpertTabs],
   )
+  const activeExpertTabs = activeExpertPresentation.tabs
+  const activeExpertRecommendationCards = useMemo(
+    () =>
+      activeExpertTabs.slice(0, EXPERT_RECOMMENDATION_CARD_THEMES.length).map((tab, index) => ({
+        ...tab,
+        prompts: pickExpertPrompts(
+          tab,
+          ((activeExpertPresentation.ordinal + index * 2) % 5) + 1,
+          activeExpertPresentation.seed + index * 7919,
+        ),
+        theme: EXPERT_RECOMMENDATION_CARD_THEMES[index],
+      })),
+    [activeExpertPresentation.ordinal, activeExpertPresentation.seed, activeExpertTabs],
+  )
+  const activeExpertRecommendationDeckCards = useMemo(
+    () => {
+      const visibleStart = Math.min(
+        Math.max(activeExpertTab - 1, 0),
+        Math.max(activeExpertRecommendationCards.length - EXPERT_RECOMMENDATION_DECK_SIZE, 0),
+      )
+
+      return activeExpertRecommendationCards
+        .slice(visibleStart, visibleStart + EXPERT_RECOMMENDATION_DECK_SIZE)
+        .map((card, offset) => ({
+          card,
+          relative: visibleStart + offset - activeExpertTab,
+        }))
+    },
+    [activeExpertRecommendationCards, activeExpertTab],
+  )
+  const moveExpertQuestionDeck = useCallback(
+    (direction) => {
+      setActiveExpertTab((current) =>
+        Math.max(0, Math.min(activeExpertRecommendationCards.length - 1, current + direction)),
+      )
+    },
+    [activeExpertRecommendationCards.length],
+  )
+  const activeExpertTabPrompts = activeExpertRecommendationCards[activeExpertTab]?.prompts ?? []
   const updateLibraryRecentScrollState = useCallback(() => {
     const scroller = libraryRecentScrollerRef.current
     if (!scroller) {
@@ -10843,21 +11007,117 @@ export default function QuestionPage() {
                     {renderMobileCatalogDrawer()}
 
                     <div className="expert-detail-page__body">
-                      <div className="expert-detail-page__panel-wrap">
+                      <div
+                        className={`expert-detail-page__panel-wrap${
+                          activeExpertPresentation.showWelcome
+                            ? ' expert-detail-page__panel-wrap--has-welcome'
+                            : ''
+                        }`}
+                      >
                         <div className="expert-detail-page__title-wrap expert-detail-page__panel-title">
                           <img src={activeExpertCard?.icon ?? agentDefaultAvatarImage} alt="" className="expert-detail-page__avatar" />
                           <span className="expert-detail-page__title">{activeExpertCard?.title ?? ''}</span>
                         </div>
 
-                        <div className="expert-detail-page__panel">
-                          <div className="expert-intro-card">
-                            <p>您好！我是数据分析专家。您可以向我提问关于数据收集、分析或可视化的问题。</p>
-                          </div>
+                        <div
+                          className={`expert-detail-page__panel${
+                            !activeExpertPresentation.showWelcome && !activeExpertTabs.length
+                              ? ' expert-detail-page__panel--empty'
+                              : ''
+                          }${
+                            !activeExpertPresentation.showWelcome && activeExpertTabs.length
+                              ? ' expert-detail-page__panel--without-welcome'
+                              : ''
+                          }`}
+                        >
+                          {activeExpertPresentation.showWelcome ? (
+                            <div className="expert-intro-card">
+                              <p className="expert-intro-card__desktop-copy">
+                                您好！我是数据分析专家。您可以向我提问关于数据收集、分析或可视化的问题。
+                              </p>
+                              <p className="expert-intro-card__mobile-copy">我可以帮助您完成数据分析任务</p>
+                            </div>
+                          ) : null}
 
                           {activeExpertTabs.length ? (
-                            <div className="expert-tab-cube">
-                              <div className="expert-tab-wrap">
-                                <div className="expert-tab-list" ref={expertTabListRef}>
+                            <>
+                              <div
+                                className="expert-question-carousel"
+                                aria-label="推荐问题卡片"
+                                tabIndex={0}
+                                data-practice-deck-variant="expert"
+                                data-practice-deck-scope="expert-question"
+                                onKeyDown={(event) => {
+                                  if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+                                  event.preventDefault()
+                                  moveExpertQuestionDeck(event.key === 'ArrowRight' ? 1 : -1)
+                                }}
+                                {...practiceDeckGestureProps}
+                              >
+                                <div className="expert-question-carousel__track">
+                                  {activeExpertRecommendationDeckCards.map(({ card, relative }, cardIndex) => (
+                                    <article
+                                      key={`${getExpertCardKey(activeExpertCard)}-${card.label}-${cardIndex}`}
+                                      className="expert-question-card"
+                                      style={getPracticeDeckCardStyle(relative, 'expert')}
+                                      aria-label={`${card.label}推荐问题`}
+                                      aria-hidden={relative !== 0}
+                                      data-active={relative === 0 ? 'true' : 'false'}
+                                      data-practice-relative={relative}
+                                    >
+                                      <header className="expert-question-card__header">
+                                        <img
+                                          src={card.theme.image}
+                                          alt=""
+                                          className="expert-question-card__header-bg"
+                                          draggable={false}
+                                        />
+                                        <h2
+                                          className="expert-question-card__title"
+                                          style={{
+                                            '--expert-question-accent': card.theme.accent,
+                                            '--expert-question-title-color': card.theme.titleColor,
+                                          }}
+                                        >
+                                          <span>{card.label}</span>
+                                        </h2>
+                                      </header>
+                                      <div className="expert-question-card__questions">
+                                        {card.prompts.map((prompt, promptIndex) => (
+                                          <Fragment key={`${card.label}-${promptIndex}-${prompt}`}>
+                                            {promptIndex > 0 ? (
+                                              <span className="expert-question-card__divider" aria-hidden="true" />
+                                            ) : null}
+                                            <button
+                                              type="button"
+                                              className="expert-question-card__question"
+                                              tabIndex={relative === 0 ? 0 : -1}
+                                              onClick={(event) => {
+                                                if (practiceDeckSuppressClickRef.current) {
+                                                  event.preventDefault()
+                                                  practiceDeckSuppressClickRef.current = false
+                                                  return
+                                                }
+                                                updateSessionScopeState('experts', (prev) => ({
+                                                  ...prev,
+                                                  inputText: prompt,
+                                                  composerSegments: [{ type: 'text', value: prompt }],
+                                                }))
+                                              }}
+                                            >
+                                              {prompt}
+                                            </button>
+                                          </Fragment>
+                                        ))}
+                                      </div>
+                                    </article>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="expert-tab-cube">
+                                <div className="expert-tab-wrap">
+                                  <div className="expert-tab-list" ref={expertTabListRef}>
                                   {activeExpertTabs.map((tab, idx) => (
                                     <button
                                       key={`${tab.label}-${idx}`}
@@ -10883,8 +11143,8 @@ export default function QuestionPage() {
                                       <span className="expert-tab__label">{tab.label}</span>
                                     </button>
                                   ))}
+                                  </div>
                                 </div>
-                              </div>
 
                               <div
                                 className={`expert-prompts${
@@ -10910,8 +11170,9 @@ export default function QuestionPage() {
                                     <span>{prompt}</span>
                                   </button>
                                 ))}
+                                </div>
                               </div>
-                            </div>
+                            </>
                           ) : null}
                         </div>
                       </div>
