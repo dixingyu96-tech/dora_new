@@ -10595,7 +10595,9 @@ export default function QuestionPage() {
     isMobileViewport ? (
       <button
         type="button"
-        className={`mobile-model-switch${activeMobileModelSetting.thinkingEnabled ? ' has-thinking' : ''}`}
+        className={`mobile-model-switch${activeMobileModelSetting.thinkingEnabled ? ' has-thinking' : ''}${
+          mobileModelDrawerOpen ? ' is-open' : ''
+        }`}
         aria-label={`切换模型，当前 ${activeMobileModel.label}`}
         aria-haspopup="dialog"
         aria-expanded={mobileModelDrawerOpen}
@@ -10605,8 +10607,13 @@ export default function QuestionPage() {
         {activeMobileModelSetting.thinkingEnabled ? (
           <span className="mobile-model-switch__thinking-tag">思考</span>
         ) : null}
-        <span className="dora-icon mobile-model-switch__arrow" aria-hidden="true">
-          {ICONS.arrowDown}
+        <span className="mobile-model-switch__arrow" aria-hidden="true">
+          <span className="dora-icon mobile-model-switch__arrow-glyph mobile-model-switch__arrow-glyph--down">
+            {ICONS.arrowDown}
+          </span>
+          <span className="dora-icon mobile-model-switch__arrow-glyph mobile-model-switch__arrow-glyph--up">
+            {ICONS.arrowUp}
+          </span>
         </span>
       </button>
     ) : null
