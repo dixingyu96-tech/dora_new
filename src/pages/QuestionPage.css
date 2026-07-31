@@ -10413,6 +10413,18 @@ select {
   color: inherit;
 }
 
+.session-thread__result-context-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10029;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.1);
+  animation: session-thread-result-backdrop-in 0.16s ease-out both;
+}
+
 .session-thread__result-context-menu {
   position: fixed;
   z-index: 10030;
@@ -10555,7 +10567,17 @@ select {
   }
 }
 
+@keyframes session-thread-result-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .session-thread__result-context-backdrop,
   .session-thread__result-context-menu,
   .session-thread__selection-bubble {
     animation: none;

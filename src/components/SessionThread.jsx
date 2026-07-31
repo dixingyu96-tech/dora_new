@@ -2240,6 +2240,18 @@ export default function SessionThread({
           )
         : null}
 
+      {isMobileViewport && (resultContextMenu || resultSelectionBubble) && typeof document !== 'undefined'
+        ? createPortal(
+            <button
+              type="button"
+              className="session-thread__result-context-backdrop"
+              aria-label="关闭返回内容操作"
+              onClick={() => closeResultFloatingPanels()}
+            />,
+            document.body,
+          )
+        : null}
+
       {isMobileViewport && resultContextMenu && typeof document !== 'undefined'
         ? createPortal(
             <div
