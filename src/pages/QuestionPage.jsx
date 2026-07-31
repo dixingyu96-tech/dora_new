@@ -7,6 +7,7 @@ import activeLibraryImage from '../assets/images/资料库_选中.png'
 import agentDefaultAvatarImage from '../assets/images/Agent默认头像.png'
 import doraTitleImage from '../assets/images/dora标题.png'
 import doraUploadedImage from '../assets/images/Dora_uploaded.png'
+import doraAgentAvatarImage from '../assets/images/doraAgentAvatar'
 import doraLogoImage from '../assets/images/dora-logo.png'
 import avatarImage from '../assets/images/avatar.png'
 import mobileProfileAvatarImage from '../assets/images/mobile-profile-avatar.png'
@@ -264,6 +265,8 @@ const ICONS = {
   triangleRight: '\ue795',
   close: '\ue7ab',
   toastErrorFilled: '\ue7b3',
+  toastSuccessFilled: '\ue7b4',
+  toastWarningFilled: '\ue7b6',
   expand: '\ue7aa',
   shrink: '\ue7ad',
   cite: '\ue804',
@@ -287,11 +290,92 @@ const ICONS = {
   favorite: '\ue832',
   favoriteActive: '\ue816',
   favoriteCompact: '\ue833',
+  thinking: '\ue836',
   added: '\ue806',
   goTo: '\ue7dc',
   zoomOut: '\ue80a',
   zoomIn: '\ue80b',
   fitPage: '\ue80c',
+}
+
+const EXECUTION_PLAN_TRIGGER_RATE = 0.5
+const EXECUTION_PLAN_STEP_INTERVAL_MS = 2200
+const MOBILE_VIEWPORT_MEDIA_QUERY = '(max-width: 599px)'
+const MOBILE_MODEL_OPTIONS = [
+  {
+    id: 'kimi-k3',
+    label: 'Kimi K3',
+    icon: 'http://localhost:3845/assets/c5981a36a1ea1daebc61a4635ccc4ee8acaf8a26.png',
+    supportsVision: true,
+  },
+  {
+    id: 'deepseek-v4-flash',
+    label: 'Deepseek-V4-Flash',
+    icon: 'http://localhost:3845/assets/1c2be4e0fc42b96c71848b39f5ec676c4d63f099.png',
+    supportsVision: true,
+  },
+  {
+    id: 'glm-5-1',
+    label: 'GLM-5.1',
+    icon: 'http://localhost:3845/assets/cf674d8da96676cd40639f9431092ba7b523eae1.png',
+  },
+  {
+    id: 'qwen-3-7-plus',
+    label: 'Qwen3.7 plus',
+    icon: 'http://localhost:3845/assets/551767c11e37e4352d73eaf5ee7124a868d109db.png',
+    supportsVision: true,
+  },
+  {
+    id: 'custom-model',
+    label: '这是用户自定义的模型名称',
+    icon: 'http://localhost:3845/assets/b22821b3a34c500fc47a0c2f9699da79b9d7f3cd.png',
+  },
+]
+const DEFAULT_MOBILE_MODEL_ID = 'deepseek-v4-flash'
+const EXECUTION_PLAN_ITEMS = [
+  '明确分析口径与指标范围',
+  '匹配可用业务模型并生成查询',
+  '分析省份维度的销量与成本表现',
+  '生成图表与结论摘要',
+  '交付分析结果文件',
+  '核对区域和时间范围',
+  '清洗缺失值与异常记录',
+  '汇总核心经营指标',
+  '识别主要增长与拖累因素',
+  '对比重点区域表现',
+  '校验关键结论与反例',
+  '形成业务判断',
+  '整理可执行建议',
+  '生成分析结果附件',
+  '完成结果交付',
+]
+const EXECUTION_PLAN_ASSETS = {
+  titleFade: 'http://localhost:3845/assets/b748754979764c8ad15250ec62cd3a66b869844d.svg',
+  completed: 'http://localhost:3845/assets/cbf15c6a9bc2b20642c33cc1f0c3fe8ef68da496.svg',
+  active: 'http://localhost:3845/assets/f8d1dd776496a84a3589f236756268f0e499f429.png',
+  pending: 'http://localhost:3845/assets/fd75a454b0d85562d0fc329456f386efad977255.svg',
+}
+
+const createExecutionPlanState = (turnId) => ({
+  id: `execution-plan-${turnId}`,
+  currentStep: 3,
+  expanded: false,
+})
+
+function useMobileViewport() {
+  const getMatches = () =>
+    typeof window !== 'undefined' && window.matchMedia(MOBILE_VIEWPORT_MEDIA_QUERY).matches
+  const [matches, setMatches] = useState(getMatches)
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(MOBILE_VIEWPORT_MEDIA_QUERY)
+    const updateMatches = () => setMatches(mediaQuery.matches)
+    updateMatches()
+    mediaQuery.addEventListener?.('change', updateMatches)
+    return () => mediaQuery.removeEventListener?.('change', updateMatches)
+  }, [])
+
+  return matches
 }
 
 const ACTIVE_NAV_IMAGES = {
@@ -427,6 +511,7 @@ const EXPERT_QUESTION_SWIPE_DISTANCE_RATIO = 0.52
 const EXPERT_QUESTION_MAX_DRAG_PROGRESS = 1.12
 const EXPERT_QUESTION_DRAG_ROTATION = 13
 const EXPERT_QUESTION_DRAG_SCALE_LOSS = 0.18
+const PRACTICE_DECK_DIRECTION_LOCK_DISTANCE = 6
 
 const createExpertQuestionDeckPoses = (cardHeight = EXPERT_QUESTION_CARD_HEIGHT_FALLBACK) => {
   const safeCardHeight = Math.max(EXPERT_QUESTION_CARD_LAYER_HEIGHT_STEP * 2 + 1, cardHeight)
@@ -1522,12 +1607,18 @@ const createSessionTurn = ({
   userFiles = [],
   sentAt = createSessionSentAt(),
   completedSessionMeta = null,
+  scheduleAction = null,
+  scheduleExecution = null,
+  assistantSummary = '',
 } = {}) => ({
   id,
   prompt,
   userFiles,
   sentAt,
   completedSessionMeta,
+  scheduleAction,
+  scheduleExecution,
+  assistantSummary,
 })
 
 const buildLegacySessionTurns = ({
@@ -2780,6 +2871,7 @@ const EXPERT_CARDS = [
 
 const LIBRARY_SOURCE_EXPERT_CARDS = {
   财务小助手: {
+    id: 'library-expert-finance',
     title: '财务小助手',
     desc: '聚焦财报、经营指标与利润结构分析。',
     category: 'analysis',
@@ -2788,6 +2880,7 @@ const LIBRARY_SOURCE_EXPERT_CARDS = {
     alertCount: 0,
   },
   产品小助手: {
+    id: 'library-expert-product',
     title: '产品小助手',
     desc: '聚焦产品资料、方案解读与业务价值提炼。',
     category: 'report',
@@ -2815,23 +2908,8 @@ const normalizeExpertCard = (card, index = 0) => ({
   usage: card.usage ?? `${(7.9 + (index % 5) * 0.18).toFixed(2)}k 次使用`,
 })
 
-const buildExpertAlertSnapshot = () => {
-  const snapshot = {}
-  EXPERT_CARDS.forEach((card) => {
-    if (card.alertCount > 0) {
-      snapshot[getExpertCardKey(card)] = card.alertCount
-    }
-  })
-  return snapshot
-}
-
-const hasNewExpertAlertsSinceDismiss = (dismissedSnapshot) => {
-  if (dismissedSnapshot === null) return true
-  return EXPERT_CARDS.some((card) => {
-    const previousCount = dismissedSnapshot[getExpertCardKey(card)] ?? 0
-    return card.alertCount > previousCount
-  })
-}
+const getExpertSessionStateKey = (card) =>
+  card ? `expert:${getExpertCardKey(card)}` : 'experts'
 
 const parseMessageBadgeCount = (badge) => {
   if (!badge) return 0
@@ -2842,6 +2920,9 @@ const parseMessageBadgeCount = (badge) => {
 
 const sumMessageBadgeCounts = (items) =>
   items.reduce((sum, item) => sum + parseMessageBadgeCount(item.badge), 0)
+
+const EXPERT_ALERT_BANNER_IMAGE =
+  'http://localhost:3845/assets/baf3d14b74f8075b8afb228d349f14bc1a297642.png'
 
 const formatNavBadgeCount = (count) => (count > 99 ? '99+' : count)
 const formatHistoryBadgeCount = (count) => (count > 99 ? '99+' : count > 0 ? `${count}` : '')
@@ -3026,6 +3107,45 @@ const INITIAL_HISTORY_ITEMS = [
     : {}),
 }))
 
+const createSessionState = (historyItems = []) => ({
+  historyItems,
+  inputText: '',
+  inputFocused: false,
+  isTransitioningSession: false,
+  isGeneratingSession: false,
+  executionPlan: null,
+  activeSessionTurns: [],
+  activeSessionPrompt: '',
+  activeSessionUserFiles: [],
+  activeSessionCompletedMeta: null,
+  activeHistoryItemId: null,
+  composerFiles: [],
+  composerSegments: DEFAULT_COMPOSER_SEGMENTS,
+})
+
+const createInitialExpertHistoryItems = (card) => {
+  const unreadCount = Math.max(0, card?.alertCount ?? 0)
+
+  return INITIAL_HISTORY_ITEMS.map((item) => ({
+    ...item,
+    badge: item.id === 'history-2' ? formatHistoryBadgeCount(unreadCount) : '',
+    isGenerating: false,
+  }))
+}
+
+const createInitialExpertSessionState = (card) =>
+  createSessionState(createInitialExpertHistoryItems(card))
+
+const createInitialSessionStates = () => ({
+  dora: createSessionState(INITIAL_HISTORY_ITEMS),
+  ...Object.fromEntries(
+    EXPERT_CARDS.map((card, index) => {
+      const normalizedCard = normalizeExpertCard(card, index)
+      return [getExpertSessionStateKey(normalizedCard), createInitialExpertSessionState(normalizedCard)]
+    }),
+  ),
+})
+
 const upsertHistoryItem = (items, nextItem) => {
   const filtered = items.filter((item) => item.id !== nextItem.id)
   return [nextItem, ...filtered]
@@ -3052,6 +3172,11 @@ const HISTORY_SESSION_MENU_ITEMS = [
   { id: 'rename', label: '重命名', icon: ICONS.rename },
   { id: 'open-window', label: '新窗口打开', icon: ICONS.openWindow },
   { id: 'delete', label: '删除', icon: ICONS.delete },
+]
+
+const MOBILE_HISTORY_SESSION_MENU_ITEMS = [
+  { id: 'rename', label: '重命名', icon: ICONS.rename },
+  { id: 'delete', label: '删除对话', icon: ICONS.delete },
 ]
 
 const USER_MENU_LANGUAGES = [
@@ -3240,6 +3365,141 @@ const createScheduleTask = ({
   channels,
   enabled,
 })
+
+const SCHEDULE_TASK_ICON_ASSET =
+  'http://localhost:3845/assets/5bc447a2465a33e470ff994a4cafbfd714eb69ca.png'
+
+const normalizeScheduleTaskTitle = (value = '') =>
+  value
+    .replace(/[“”"']/g, '')
+    .replace(/(?:这个|一个|新的)?定时任务/g, '')
+    .replace(/[，,]s*$/g, '')
+    .trim()
+
+const parseScheduleClock = (prompt = '') => {
+  const clockMatch = prompt.match(/(上午|中午|下午|晚上|凌晨|早上)?\s*(\d{1,2})(?::|点)(\d{1,2})?\s*分?/)
+  if (!clockMatch) return '20:00'
+
+  const period = clockMatch[1] ?? ''
+  let hours = Number.parseInt(clockMatch[2], 10)
+  const minutes = Number.parseInt(clockMatch[3] ?? '0', 10)
+
+  if (/(下午|晚上)/.test(period) && hours < 12) hours += 12
+  if (period === '中午' && hours < 11) hours += 12
+  if (period === '凌晨' && hours === 12) hours = 0
+
+  return `${String(Math.min(23, hours)).padStart(2, '0')}:${String(
+    Math.min(59, minutes),
+  ).padStart(2, '0')}`
+}
+
+const parseScheduleFrequency = (prompt = '') => {
+  const clock = parseScheduleClock(prompt)
+  const monthlyMatch = prompt.match(/每月\s*(\d{1,2})\s*日?/)
+  if (monthlyMatch) return `每月${monthlyMatch[1]}日 ${clock}`
+
+  const weekdayMatch = prompt.match(/每周(?:周)?([一二三四五六日天])/)
+  if (weekdayMatch) return `每周周${weekdayMatch[1] === '天' ? '日' : weekdayMatch[1]} ${clock}`
+
+  return `每天 ${clock}`
+}
+
+const findScheduleTaskFromPrompt = (prompt, tasks = []) => {
+  const directMatch = [...tasks]
+    .sort((left, right) => right.title.length - left.title.length)
+    .find((task) => prompt.includes(task.title))
+  if (directMatch) return directMatch
+
+  const quotedTitle = prompt.match(/[“"]([^”"]+)[”"]/i)?.[1]
+  if (quotedTitle) {
+    const normalizedQuoted = normalizeScheduleTaskTitle(quotedTitle)
+    return (
+      tasks.find(
+        (task) =>
+          task.title.includes(normalizedQuoted) || normalizedQuoted.includes(task.title),
+      ) ?? null
+    )
+  }
+
+  const meaningfulWords = prompt
+    .replace(/(请|帮我|把|将|这个|定时任务|关闭|开启|删除|停用|启用|恢复)/g, '')
+    .replace(/[\s，,.。！!]/g, '')
+
+  return (
+    tasks.find((task) => {
+      const compactTitle = task.title.replace(/[\s日报周报月报]/g, '')
+      return compactTitle.length >= 4 && meaningfulWords.includes(compactTitle)
+    }) ?? null
+  )
+}
+
+const inferScheduleTaskTitle = (prompt = '') => {
+  const quotedTitle = prompt.match(/[“"]([^”"]+)[”"]/i)?.[1]
+  if (quotedTitle) {
+    const normalized = normalizeScheduleTaskTitle(quotedTitle)
+    if (normalized) return normalized
+  }
+
+  const namedTask = prompt.match(
+    /(?:创建|新建|添加|设置|设定)(?:一个|名为)?\s*([^，,。]{2,24}?)(?:定时任务|任务|每天|每周|每月|，|,|。|$)/,
+  )?.[1]
+  const normalizedNamedTask = normalizeScheduleTaskTitle(namedTask ?? '')
+  if (normalizedNamedTask) return normalizedNamedTask
+
+  if (prompt.includes('门店销售分析')) return '门店销售分析日报'
+  if (prompt.includes('生产运营分析')) return '生产运营分析'
+  return '我的定时任务'
+}
+
+const buildScheduleTaskSummary = (title = '') => {
+  const normalizedTitle = title.trim()
+  if (!normalizedTitle) return '生成分析报告'
+  if (/分析报告$/.test(normalizedTitle)) return `生成${normalizedTitle}`
+  return `生成${normalizedTitle.replace(/[日周月]报$/, '')}分析报告`
+}
+
+const parseScheduleNaturalLanguage = (prompt = '', tasks = []) => {
+  const text = prompt.trim()
+  if (!text) return null
+
+  let action = null
+  if (/(删除|移除|彻底取消)/.test(text)) action = 'delete'
+  else if (/(关闭|停用|暂停|停止)/.test(text)) action = 'disable'
+  else if (/(开启|打开|启用|恢复)/.test(text)) action = 'enable'
+  else if (
+    /(创建|新建|添加|设置|设定|定时|提醒|以后|每天|每周|每月)/.test(text) &&
+    /(任务|定时|提醒|发送|推送|每天|每周|每月)/.test(text)
+  ) {
+    action = 'create'
+  }
+
+  if (!action) return null
+
+  if (action === 'create') {
+    const title = inferScheduleTaskTitle(text)
+    const scheduleText = parseScheduleFrequency(text)
+    const channels = ['agent']
+    if (text.includes('企业微信') || !/(飞书|钉钉)/.test(text)) channels.push('wechat')
+    if (text.includes('飞书')) channels.push('feishu')
+    if (text.includes('钉钉')) channels.push('ding')
+
+    return {
+      action,
+      task: createScheduleTask({
+        id: `natural-schedule-${Date.now()}`,
+        title,
+        summary: buildScheduleTaskSummary(title),
+        scheduleText,
+        channels,
+        enabled: true,
+      }),
+    }
+  }
+
+  const task = findScheduleTaskFromPrompt(text, tasks)
+  if (!task) return null
+  return { action, task }
+}
 
 const DORA_SCHEDULE_TASKS = [
   createScheduleTask({
@@ -3566,6 +3826,7 @@ const getVisibleExpertTabs = (tabs) => tabs.filter((tab) => tab.prompts?.length)
 
 const EXPERT_PRESENTATION_MODES = ['none', 'cards-only', 'welcome-only', 'both']
 const EXPERT_CARD_COUNT_SEQUENCE = [3, 1, 5, 2, 4]
+const EXPERT_RECOMMENDATION_MAX_PROMPTS = 5
 
 const hashExpertKey = (value = '') => {
   let hash = 2166136261
@@ -3613,7 +3874,11 @@ function pickExpertPrompts(tabConfig, requestedCount, seed = 1) {
     ;[pool[i], pool[j]] = [pool[j], pool[i]]
   }
 
-  const count = Math.min(5, Math.max(1, requestedCount), pool.length)
+  const count = Math.min(
+    EXPERT_RECOMMENDATION_MAX_PROMPTS,
+    Math.max(1, requestedCount),
+    pool.length,
+  )
   return pool.slice(0, count)
 }
 
@@ -3710,48 +3975,28 @@ function FieldSelect({ classPrefix, value, options, onChange, ariaLabel, minWidt
 }
 
 export default function QuestionPage() {
+  const isMobileViewport = useMobileViewport()
   const isIOSSystem =
     typeof navigator !== 'undefined' &&
     (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
-  const [sessionStates, setSessionStates] = useState({
-    dora: {
-      historyItems: INITIAL_HISTORY_ITEMS,
-      inputText: '',
-      inputFocused: false,
-      isTransitioningSession: false,
-      isGeneratingSession: false,
-      activeSessionTurns: [],
-      activeSessionPrompt: '',
-      activeSessionUserFiles: [],
-      activeSessionCompletedMeta: null,
-      activeHistoryItemId: null,
-      composerFiles: [],
-      composerSegments: DEFAULT_COMPOSER_SEGMENTS,
-    },
-    experts: {
-      historyItems: INITIAL_HISTORY_ITEMS,
-      inputText: '',
-      inputFocused: false,
-      isTransitioningSession: false,
-      isGeneratingSession: false,
-      activeSessionTurns: [],
-      activeSessionPrompt: '',
-      activeSessionUserFiles: [],
-      activeSessionCompletedMeta: null,
-      activeHistoryItemId: null,
-      composerFiles: [],
-      composerSegments: DEFAULT_COMPOSER_SEGMENTS,
-    },
-  })
+  const [sessionStates, setSessionStates] = useState(createInitialSessionStates)
   const [activeNav, setActiveNav] = useState('dora')
   const [internalSidebarOpen, setInternalSidebarOpen] = useState(false)
   const [mobileCatalogOpen, setMobileCatalogOpen] = useState(false)
   const [mobileCatalogSearchOpen, setMobileCatalogSearchOpen] = useState(false)
   const [mobileCatalogSearch, setMobileCatalogSearch] = useState('')
+  const [mobileHistoryDialog, setMobileHistoryDialog] = useState(null)
   const [mobileNewChatPageOpen, setMobileNewChatPageOpen] = useState(false)
   const [mobileAttachmentDrawerOpen, setMobileAttachmentDrawerOpen] = useState(false)
   const [mobileBiDrawerOpen, setMobileBiDrawerOpen] = useState(false)
+  const [mobileModelDrawerOpen, setMobileModelDrawerOpen] = useState(false)
+  const [mobileModelSettings, setMobileModelSettings] = useState({
+    dora: { modelId: DEFAULT_MOBILE_MODEL_ID, thinkingEnabled: false },
+    experts: { modelId: DEFAULT_MOBILE_MODEL_ID, thinkingEnabled: false },
+  })
+  const [mobileModelToast, setMobileModelToast] = useState('')
+  const [expertAlertsDrawerOpen, setExpertAlertsDrawerOpen] = useState(false)
   const [activeInnerAction, setActiveInnerAction] = useState('new-chat')
   const [practicesPageOpen, setPracticesPageOpen] = useState(false)
   const [innerAgentMenuOpen, setInnerAgentMenuOpen] = useState(false)
@@ -3759,6 +4004,9 @@ export default function QuestionPage() {
   const [activeExpertCard, setActiveExpertCard] = useState(null)
   const [activeExpertTab, setActiveExpertTab] = useState(0)
   const [expertQuestionCardHeight, setExpertQuestionCardHeight] = useState(
+    EXPERT_QUESTION_CARD_HEIGHT_FALLBACK,
+  )
+  const [expertQuestionNaturalHeight, setExpertQuestionNaturalHeight] = useState(
     EXPERT_QUESTION_CARD_HEIGHT_FALLBACK,
   )
   const [expertRecentCards, setExpertRecentCards] = useState([])
@@ -3793,7 +4041,6 @@ export default function QuestionPage() {
   const [libraryMobileSearchSubmitted, setLibraryMobileSearchSubmitted] = useState(false)
   const [expertsNavPopoverOpen, setExpertsNavPopoverOpen] = useState(false)
   const [expertsNavPopoverPos, setExpertsNavPopoverPos] = useState({ top: 0, left: 0 })
-  const [expertsAlertsDismissedSnapshot, setExpertsAlertsDismissedSnapshot] = useState(null)
   const [expertsPageScrolled, setExpertsPageScrolled] = useState(false)
   const [practiceDeckIndex, setPracticeDeckIndex] = useState(0)
   const [mobileRecommendationIndex, setMobileRecommendationIndex] = useState(0)
@@ -3987,12 +4234,16 @@ export default function QuestionPage() {
   const heroSkillTagsScrollerRef = useRef(null)
   const historyMenuAnchorRef = useRef(null)
   const historyMenuPanelRef = useRef(null)
+  const mobileHistoryLongPressRef = useRef(null)
+  const mobileHistorySuppressClickRef = useRef(null)
   const sessionMarkdownDownloadBtnRef = useRef(null)
   const sessionMarkdownDownloadMenuRef = useRef(null)
   const libraryChatSessionTriggerRef = useRef(null)
   const libraryChatSessionPanelRef = useRef(null)
   const libraryRecentScrollerRef = useRef(null)
   const historyRenameInputRef = useRef(null)
+  const mobileHistoryDialogInputRef = useRef(null)
+  const mobileModelToastTimerRef = useRef(null)
   const historyRenameSkipBlurRef = useRef(false)
   const avatarBtnRef = useRef(null)
   const avatarMenuPanelRef = useRef(null)
@@ -4006,6 +4257,7 @@ export default function QuestionPage() {
   const uploadTimersRef = useRef(new Map())
   const sessionTransitionTimersRef = useRef(new Map())
   const historyGenerationTimersRef = useRef(new Map())
+  const executionPlanListRef = useRef(null)
   const senderEditorRef = useRef(null)
   const composerSyncRef = useRef(false)
   const composerComposingRef = useRef(false)
@@ -4089,6 +4341,23 @@ export default function QuestionPage() {
   const handlePracticeDeckPointerDown = (event) => {
     if (event.button !== 0) return
 
+    if (!isMobileViewport) {
+      practiceDeckPointerRef.current = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startedAt: performance.now(),
+        target: event.currentTarget,
+        variant: event.currentTarget.dataset.practiceDeckVariant,
+        scope: event.currentTarget.dataset.practiceDeckScope ?? 'practice',
+        latestDragX: 0,
+        animationFrame: null,
+      }
+      practiceDeckSuppressClickRef.current = false
+      event.currentTarget.classList.add('is-dragging')
+      event.currentTarget.setPointerCapture?.(event.pointerId)
+      return
+    }
+
     const scope = event.currentTarget.dataset.practiceDeckScope ?? 'practice'
     const activeCard = event.currentTarget.querySelector('[data-practice-relative="0"]')
     const activeCardWidth = activeCard?.getBoundingClientRect().width
@@ -4101,6 +4370,7 @@ export default function QuestionPage() {
     practiceDeckPointerRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
+      startY: event.clientY,
       startedAt: performance.now(),
       target: event.currentTarget,
       variant: event.currentTarget.dataset.practiceDeckVariant,
@@ -4112,20 +4382,63 @@ export default function QuestionPage() {
       lastX: event.clientX,
       lastAt: event.timeStamp,
       velocityX: 0,
+      axis: null,
       animationFrame: null,
     }
     practiceDeckSuppressClickRef.current = false
-    event.currentTarget.classList.add('is-dragging')
-    event.currentTarget.setPointerCapture?.(event.pointerId)
   }
 
   const handlePracticeDeckPointerMove = (event) => {
     const pointer = practiceDeckPointerRef.current
     if (!pointer || pointer.pointerId !== event.pointerId) return
 
+    if (!isMobileViewport) {
+      const rawDragX = event.clientX - pointer.startX
+      const maxDragDistance =
+        pointer.scope === 'recommendation'
+          ? MOBILE_RECOMMENDATION_SWIPE_DISTANCE * MOBILE_RECOMMENDATION_MAX_SWIPE_CARDS
+          : PRACTICE_DECK_SWIPE_DISTANCE
+      const dragX = Math.max(-maxDragDistance, Math.min(maxDragDistance, rawDragX))
+      if (Math.abs(rawDragX) > 6) practiceDeckSuppressClickRef.current = true
+      pointer.latestDragX = dragX
+
+      if (pointer.animationFrame !== null) return
+      pointer.animationFrame = requestAnimationFrame(() => {
+        applyPracticeDeckDragStyles(pointer.target, pointer.latestDragX, pointer.variant)
+        pointer.animationFrame = null
+      })
+      return
+    }
+
     const coalescedEvents = event.getCoalescedEvents?.() ?? []
     const sample = coalescedEvents[coalescedEvents.length - 1] ?? event
     const rawDragX = sample.clientX - pointer.startX
+    const rawDragY = sample.clientY - pointer.startY
+    const absoluteDragX = Math.abs(rawDragX)
+    const absoluteDragY = Math.abs(rawDragY)
+
+    if (
+      Math.max(absoluteDragX, absoluteDragY) >= PRACTICE_DECK_DIRECTION_LOCK_DISTANCE
+    ) {
+      practiceDeckSuppressClickRef.current = true
+    }
+
+    if (!pointer.axis) {
+      if (
+        Math.max(absoluteDragX, absoluteDragY) < PRACTICE_DECK_DIRECTION_LOCK_DISTANCE
+      ) {
+        return
+      }
+
+      pointer.axis = absoluteDragX > absoluteDragY ? 'x' : 'y'
+      if (pointer.axis === 'y') return
+
+      pointer.target.classList.add('is-dragging')
+      pointer.target.setPointerCapture?.(event.pointerId)
+    }
+
+    if (pointer.axis !== 'x') return
+
     const maxDragDistance =
       pointer.scope === 'recommendation'
         ? MOBILE_RECOMMENDATION_SWIPE_DISTANCE * MOBILE_RECOMMENDATION_MAX_SWIPE_CARDS
@@ -4137,7 +4450,6 @@ export default function QuestionPage() {
     const sampleElapsed = Math.max(1, sampleTime - pointer.lastAt)
     const instantVelocity = (sample.clientX - pointer.lastX) / sampleElapsed
 
-    if (Math.abs(rawDragX) > 6) practiceDeckSuppressClickRef.current = true
     pointer.latestRawDragX = rawDragX
     pointer.latestDragX = dragX
     pointer.velocityX = pointer.velocityX * 0.25 + instantVelocity * 0.75
@@ -4161,19 +4473,58 @@ export default function QuestionPage() {
     const pointer = practiceDeckPointerRef.current
     if (!pointer || pointer.pointerId !== event.pointerId) return
 
+    if (!isMobileViewport) {
+      const rawDragX = event.clientX - pointer.startX
+      const elapsed = Math.max(1, performance.now() - pointer.startedAt)
+      const velocity = rawDragX / elapsed
+      const shouldAdvance =
+        !cancelled && (Math.abs(rawDragX) >= 32 || Math.abs(velocity) >= 0.35)
+
+      if (pointer.animationFrame !== null) cancelAnimationFrame(pointer.animationFrame)
+      applyPracticeDeckDragStyles(pointer.target, pointer.latestDragX, pointer.variant)
+      pointer.target.classList.remove('is-dragging')
+      if (shouldAdvance) {
+        const direction = rawDragX < 0 ? 1 : -1
+        if (pointer.scope === 'recommendation') {
+          const projectedDistance = Math.abs(rawDragX) + Math.abs(velocity) * 120
+          const cardsToMove = Math.max(
+            1,
+            Math.min(
+              MOBILE_RECOMMENDATION_MAX_SWIPE_CARDS,
+              Math.round(projectedDistance / MOBILE_RECOMMENDATION_SWIPE_DISTANCE),
+            ),
+          )
+          moveMobileRecommendationDeck(direction * cardsToMove)
+        } else {
+          movePracticeDeck(direction)
+        }
+      }
+      practiceDeckPointerRef.current = null
+      requestAnimationFrame(() => {
+        applyPracticeDeckDragStyles(pointer.target, 0, pointer.variant)
+      })
+      return
+    }
+
     const rawDragX = pointer.latestRawDragX || event.clientX - pointer.startX
     const elapsed = Math.max(1, performance.now() - pointer.startedAt)
     const velocity = Math.abs(pointer.velocityX) > 0.01 ? pointer.velocityX : rawDragX / elapsed
-    const shouldAdvance = !cancelled && (Math.abs(rawDragX) >= 32 || Math.abs(velocity) >= 0.35)
+    const isHorizontalGesture = pointer.axis === 'x'
+    const shouldAdvance =
+      !cancelled &&
+      isHorizontalGesture &&
+      (Math.abs(rawDragX) >= 32 || Math.abs(velocity) >= 0.35)
 
     if (pointer.animationFrame !== null) cancelAnimationFrame(pointer.animationFrame)
-    applyPracticeDeckDragStyles(
-      pointer.target,
-      pointer.latestDragX,
-      pointer.variant,
-      pointer.expertSwipeDistance,
-      pointer.expertCardHeight,
-    )
+    if (isHorizontalGesture) {
+      applyPracticeDeckDragStyles(
+        pointer.target,
+        pointer.latestDragX,
+        pointer.variant,
+        pointer.expertSwipeDistance,
+        pointer.expertCardHeight,
+      )
+    }
     pointer.target.classList.remove('is-dragging')
     if (shouldAdvance) {
       const direction = rawDragX < 0 ? 1 : -1
@@ -4189,6 +4540,8 @@ export default function QuestionPage() {
       } else movePracticeDeck(direction)
     }
     practiceDeckPointerRef.current = null
+
+    if (!isHorizontalGesture) return
 
     requestAnimationFrame(() => {
       applyPracticeDeckDragStyles(
@@ -4230,8 +4583,14 @@ export default function QuestionPage() {
   )
 
   const expertCards = useMemo(
-    () => EXPERT_CARDS.map((card, index) => normalizeExpertCard(card, index)),
-    [],
+    () =>
+      EXPERT_CARDS.map((card, index) => normalizeExpertCard(card, index)).map((card) => ({
+        ...card,
+        alertCount: sumMessageBadgeCounts(
+          sessionStates[getExpertSessionStateKey(card)]?.historyItems ?? [],
+        ),
+      })),
+    [sessionStates],
   )
 
   const expertCardsMatchingBaseFilters = useMemo(() => {
@@ -4345,16 +4704,38 @@ export default function QuestionPage() {
     () => expertCards.reduce((sum, card) => sum + card.alertCount, 0),
     [expertCards],
   )
-  const showExpertsAlerts = useMemo(
-    () => expertAlertCount > 0 && hasNewExpertAlertsSinceDismiss(expertsAlertsDismissedSnapshot),
-    [expertAlertCount, expertsAlertsDismissedSnapshot],
-  )
+  const showExpertsAlerts = expertAlertCount > 0
+  const activeExpertAlertCount = activeExpertCard
+    ? expertCards.find(
+        (card) => getExpertCardKey(card) === getExpertCardKey(activeExpertCard),
+      )?.alertCount ?? 0
+    : 0
   const doraAlertCount = useMemo(() => {
     const historyCount = sumMessageBadgeCounts(sessionStates.dora.historyItems)
     const avatarCount = sumMessageBadgeCounts(doraAvatars)
     return historyCount + avatarCount
   }, [doraAvatars, sessionStates.dora.historyItems])
   const showDoraAlerts = doraAlertCount > 0
+  const mobileActiveAlertCount =
+    activeNav === 'experts'
+      ? isExpertDetailView
+        ? activeExpertAlertCount
+        : expertAlertCount
+      : activeNav === 'dora'
+        ? doraAlertCount
+        : 0
+  const showMobileActiveAlert =
+    activeNav === 'experts'
+      ? mobileActiveAlertCount > 0
+      : activeNav === 'dora'
+        ? showDoraAlerts
+        : false
+  const renderMobileActiveAlertBadge = () =>
+    showMobileActiveAlert ? (
+      <span className="mobile-message-badge mobile-message-badge--menu" aria-hidden="true">
+        {formatNavBadgeCount(mobileActiveAlertCount)}
+      </span>
+    ) : null
   const activeExpertDetailConfig = useMemo(
     () => getExpertDetailConfig(activeExpertCard),
     [activeExpertCard],
@@ -4369,7 +4750,16 @@ export default function QuestionPage() {
     () => expertCards.filter((card) => expertFavoriteKeys.includes(getExpertCardKey(card))),
     [expertCards, expertFavoriteKeys],
   )
-  const mobileRecentExpertCards = expertRecentCards.slice(0, 9)
+  const resolvedExpertRecentCards = useMemo(
+    () =>
+      expertRecentCards.map(
+        (recentCard) =>
+          expertCards.find((card) => getExpertCardKey(card) === getExpertCardKey(recentCard)) ??
+          recentCard,
+      ),
+    [expertCards, expertRecentCards],
+  )
+  const mobileRecentExpertCards = resolvedExpertRecentCards.slice(0, 9)
   const mobileFavoriteExpertCards = expertFavoriteCards
   const mobileExpertQuickSections = [
     ...(mobileRecentExpertCards.length
@@ -4379,14 +4769,22 @@ export default function QuestionPage() {
       ? [{ id: 'favorite', title: '我收藏的', cards: mobileFavoriteExpertCards }]
       : []),
   ]
-  const showExpertSidePanel = expertRecentCards.length > 0 || expertFavoriteCards.length > 0
+  const showExpertSidePanel = resolvedExpertRecentCards.length > 0 || expertFavoriteCards.length > 0
   const availableExpertTabs = useMemo(
     () => getVisibleExpertTabs(activeExpertDetailConfig.tabs),
     [activeExpertDetailConfig],
   )
   const activeExpertPresentation = useMemo(
-    () => getExpertPresentation(activeExpertCard, availableExpertTabs),
-    [activeExpertCard, availableExpertTabs],
+    () => {
+      const presentation = getExpertPresentation(activeExpertCard, availableExpertTabs)
+      if (isMobileViewport) return presentation
+      return {
+        ...presentation,
+        showWelcome: true,
+        tabs: availableExpertTabs,
+      }
+    },
+    [activeExpertCard, availableExpertTabs, isMobileViewport],
   )
   const activeExpertTabs = activeExpertPresentation.tabs
   const activeExpertRecommendationCards = useMemo(
@@ -4395,7 +4793,8 @@ export default function QuestionPage() {
         ...tab,
         prompts: pickExpertPrompts(
           tab,
-          ((activeExpertPresentation.ordinal + index * 2) % 5) + 1,
+          ((activeExpertPresentation.ordinal + index * 2) %
+            EXPERT_RECOMMENDATION_MAX_PROMPTS) + 1,
           activeExpertPresentation.seed + index * 7919,
         ),
         theme: EXPERT_RECOMMENDATION_CARD_THEMES[index],
@@ -4423,6 +4822,22 @@ export default function QuestionPage() {
     const carousel = expertQuestionCarouselRef.current
     if (!carousel || typeof ResizeObserver === 'undefined') return undefined
 
+    const measurementCards = Array.from(
+      carousel.querySelectorAll('.expert-question-card--measure'),
+    )
+
+    const syncNaturalHeight = () => {
+      const nextNaturalHeight = Math.max(
+        0,
+        ...measurementCards.map((card) => card.offsetHeight),
+      )
+      if (!nextNaturalHeight) return
+
+      setExpertQuestionNaturalHeight((currentHeight) =>
+        Math.abs(currentHeight - nextNaturalHeight) < 0.5 ? currentHeight : nextNaturalHeight,
+      )
+    }
+
     const syncCardHeight = () => {
       const activeCard = carousel.querySelector('[data-practice-relative="0"]')
       const nextHeight = activeCard?.offsetHeight
@@ -4433,9 +4848,14 @@ export default function QuestionPage() {
       )
     }
 
+    syncNaturalHeight()
     syncCardHeight()
-    const resizeObserver = new ResizeObserver(syncCardHeight)
+    const resizeObserver = new ResizeObserver(() => {
+      syncNaturalHeight()
+      syncCardHeight()
+    })
     resizeObserver.observe(carousel)
+    measurementCards.forEach((card) => resizeObserver.observe(card))
 
     return () => resizeObserver.disconnect()
   }, [activeExpertCard, activeExpertRecommendationCards.length])
@@ -4521,7 +4941,20 @@ export default function QuestionPage() {
     setExpertFavoriteKeys((prev) => (prev.includes(key) ? prev.filter((item) => item !== key) : [key, ...prev]))
   }
   const activeSessionScope = isExpertDetailView ? 'experts' : 'dora'
-  const activeSessionState = sessionStates[activeSessionScope]
+  const resolveSessionStateKey = (scope) =>
+    scope === 'experts' ? getExpertSessionStateKey(activeExpertCard) : scope
+  const activeSessionStateKey = resolveSessionStateKey(activeSessionScope)
+  const getSessionStateForScope = (scope) =>
+    sessionStates[resolveSessionStateKey(scope)] ??
+    (scope === 'experts'
+      ? createInitialExpertSessionState(activeExpertCard)
+      : createSessionState())
+  const activeSessionState = getSessionStateForScope(activeSessionScope)
+  const activeMobileModelSetting =
+    mobileModelSettings[activeSessionScope] ?? mobileModelSettings.dora
+  const activeMobileModel =
+    MOBILE_MODEL_OPTIONS.find((model) => model.id === activeMobileModelSetting.modelId) ??
+    MOBILE_MODEL_OPTIONS[0]
   const historyItems = activeSessionState.historyItems
   const groupedHistoryItems = useMemo(() => {
     const buckets = Object.fromEntries(HISTORY_GROUPS.map((group) => [group.id, []]))
@@ -4547,6 +4980,7 @@ export default function QuestionPage() {
   const isTransitioningSession = activeSessionState.isTransitioningSession
   const isGeneratingSession = activeSessionState.isGeneratingSession
   const isSessionBusy = isTransitioningSession || isGeneratingSession
+  const activeExecutionPlan = activeSessionState.executionPlan ?? null
   const activeSessionTurns = useMemo(() => getSessionTurnsFromState(activeSessionState), [activeSessionState])
   const activeSessionPrompt = activeSessionState.activeSessionPrompt
   const activeSessionUserFiles = activeSessionState.activeSessionUserFiles ?? []
@@ -4564,7 +4998,7 @@ export default function QuestionPage() {
   const currentScheduleAgentAvatar = isExpertDetailView ? activeExpertCard?.icon ?? agentDefaultAvatarImage : activeDoraImage
   const isScheduleView = activeInnerAction === 'schedule' && (activeNav === 'dora' || isExpertDetailView)
   const isDoraAskPage = activeNav === 'dora' && !isLibraryDetailView && !isScheduleView
-  const isInnerAvatarGroupCollapsed = Boolean(innerAvatarGroupCollapsed[activeSessionScope])
+  const isInnerAvatarGroupCollapsed = Boolean(innerAvatarGroupCollapsed[activeSessionStateKey])
   const activeLibraryKey = activeLibraryItem ? getLibraryItemKey(activeLibraryItem) : ''
   const libraryChatSessions = useMemo(
     () => (activeLibraryKey ? libraryChatSessionsByKey[activeLibraryKey] ?? [] : []),
@@ -4606,18 +5040,18 @@ export default function QuestionPage() {
   const toggleInnerAvatarGroupCollapsed = useCallback(() => {
     setInnerAvatarGroupCollapsed((prev) => ({
       ...prev,
-      [activeSessionScope]: !prev[activeSessionScope],
+      [activeSessionStateKey]: !prev[activeSessionStateKey],
     }))
-  }, [activeSessionScope])
+  }, [activeSessionStateKey])
   const toggleHistoryGroupCollapsed = useCallback(
     (groupId) => {
-      const collapseKey = `${activeSessionScope}:${groupId}`
+      const collapseKey = `${activeSessionStateKey}:${groupId}`
       setHistoryGroupsCollapsed((prev) => ({
         ...prev,
         [collapseKey]: !prev[collapseKey],
       }))
     },
-    [activeSessionScope],
+    [activeSessionStateKey],
   )
   const showSessionSplit =
     sessionFilesPanelOpen && (activeNav === 'dora' || isExpertDetailView)
@@ -4755,7 +5189,7 @@ export default function QuestionPage() {
     }
   }, [activeSessionFile, activeSessionFileId])
   const composerFiles = activeSessionState.composerFiles ?? []
-  const composerAttachmentsSessionKey = `${activeSessionScope}:${activeHistoryItemId ?? 'none'}`
+  const composerAttachmentsSessionKey = `${activeSessionStateKey}:${activeHistoryItemId ?? 'none'}`
   useEffect(() => {
     const previous = composerAttachmentsScrollStateRef.current
     const sessionChanged = previous.sessionKey !== composerAttachmentsSessionKey
@@ -4780,7 +5214,7 @@ export default function QuestionPage() {
     const isUploading = composerFiles.some((file) => file.status === 'uploading')
     return (hasText || hasReadyFiles) && !isUploading
   }, [composerPlainText, composerSegments, composerFiles])
-  const mentionScopeComposerFiles = sessionStates[mentionPanel.scope]?.composerFiles ?? []
+  const mentionScopeComposerFiles = getSessionStateForScope(mentionPanel.scope).composerFiles ?? []
   const senderMentionGroups = useMemo(() => {
     if (!mentionPanel.open) return []
     return buildSenderMentionGroups({
@@ -4872,16 +5306,64 @@ export default function QuestionPage() {
 
   const updateSessionScopeState = (scope, updater) => {
     setSessionStates((prev) => {
-      const current = prev[scope]
+      const stateKey = resolveSessionStateKey(scope)
+      const current =
+        prev[stateKey] ??
+        (scope === 'experts'
+          ? createInitialExpertSessionState(activeExpertCard)
+          : createSessionState())
       const next = typeof updater === 'function' ? updater(current) : { ...current, ...updater }
       if (next === current) return prev
-      return { ...prev, [scope]: next }
+      return { ...prev, [stateKey]: next }
     })
   }
 
   const updateActiveSessionState = (updater) => {
     updateSessionScopeState(activeSessionScope, updater)
   }
+
+  useEffect(() => {
+    if (!isMobileViewport || !isGeneratingSession || !activeExecutionPlan?.id) return undefined
+
+    const timer = window.setInterval(() => {
+      setSessionStates((prev) => {
+        const current = prev[activeSessionStateKey]
+        const plan = current.executionPlan
+        if (!current.isGeneratingSession || !plan || plan.currentStep >= EXECUTION_PLAN_ITEMS.length) {
+          return prev
+        }
+
+        const nextPlan = { ...plan, currentStep: plan.currentStep + 1 }
+        const nextHistoryItems = current.activeHistoryItemId
+          ? updateHistoryItemById(current.historyItems, current.activeHistoryItemId, (item) => ({
+              ...item,
+              executionPlan: nextPlan,
+            }))
+          : current.historyItems
+
+        return {
+          ...prev,
+          [activeSessionStateKey]: {
+            ...current,
+            historyItems: nextHistoryItems,
+            executionPlan: nextPlan,
+          },
+        }
+      })
+    }, EXECUTION_PLAN_STEP_INTERVAL_MS)
+
+    return () => window.clearInterval(timer)
+  }, [activeExecutionPlan?.id, activeSessionStateKey, isGeneratingSession, isMobileViewport])
+
+  useEffect(() => {
+    if (!isMobileViewport || !activeExecutionPlan?.expanded) return
+    const list = executionPlanListRef.current
+    if (!list) return
+    list.scrollTo({
+      top: Math.max(0, (activeExecutionPlan.currentStep - 3) * 26),
+      behavior: 'smooth',
+    })
+  }, [activeExecutionPlan?.currentStep, activeExecutionPlan?.expanded, isMobileViewport])
 
   const clearHistoryGenerationTimer = useCallback((scope, itemId) => {
     const timerKey = `${scope}:${itemId}`
@@ -4989,10 +5471,11 @@ export default function QuestionPage() {
   }
 
   const clearSessionTransitionTimer = (scope) => {
-    const timer = sessionTransitionTimersRef.current.get(scope)
+    const stateKey = resolveSessionStateKey(scope)
+    const timer = sessionTransitionTimersRef.current.get(stateKey)
     if (timer) {
       window.clearTimeout(timer)
-      sessionTransitionTimersRef.current.delete(scope)
+      sessionTransitionTimersRef.current.delete(stateKey)
     }
   }
 
@@ -5014,13 +5497,14 @@ export default function QuestionPage() {
   }
 
   const startComposerUpload = (scope, fileId, size) => {
+    const stateKey = resolveSessionStateKey(scope)
     const duration = getUploadDuration(size)
     const totalTicks = Math.max(1, Math.ceil(duration / UPLOAD_PROGRESS_INTERVAL_MS))
     const increment = 100 / totalTicks
 
     const tick = () => {
       setSessionStates((prev) => {
-        const current = prev[scope]
+        const current = prev[stateKey]
         const target = (current.composerFiles ?? []).find((file) => file.id === fileId)
         if (!target || target.status !== 'uploading') return prev
 
@@ -5033,7 +5517,7 @@ export default function QuestionPage() {
 
         return {
           ...prev,
-          [scope]: {
+          [stateKey]: {
             ...current,
             composerFiles: (current.composerFiles ?? []).map((file) =>
               file.id === fileId
@@ -5062,11 +5546,11 @@ export default function QuestionPage() {
     const files = Array.from(event.target.files ?? [])
     if (!files.length) return
 
-    const scope = activeSessionScope
+    const stateKey = activeSessionStateKey
     const newEntries = []
 
     setSessionStates((prev) => {
-      const current = prev[scope]
+      const current = prev[stateKey]
       const existing = current.composerFiles ?? []
       const deduped = files.filter(
         (file) => !existing.some((item) => item.name === file.name && item.source === 'local'),
@@ -5090,7 +5574,7 @@ export default function QuestionPage() {
 
       return {
         ...prev,
-        [scope]: {
+        [stateKey]: {
           ...current,
           composerFiles: [...existing, ...nextAttachments],
         },
@@ -5098,22 +5582,23 @@ export default function QuestionPage() {
     })
 
     window.setTimeout(() => {
-      newEntries.forEach((entry) => startComposerUpload(scope, entry.id, entry.size))
+      newEntries.forEach((entry) => startComposerUpload(stateKey, entry.id, entry.size))
     }, 0)
     event.target.value = ''
   }
 
   const retryComposerUpload = (scope, fileId) => {
-    const file = sessionStates[scope]?.composerFiles?.find((item) => item.id === fileId)
+    const stateKey = resolveSessionStateKey(scope)
+    const file = sessionStates[stateKey]?.composerFiles?.find((item) => item.id === fileId)
     if (!file) return
 
-    updateSessionScopeState(scope, (prev) => ({
+    updateSessionScopeState(stateKey, (prev) => ({
       ...prev,
       composerFiles: (prev.composerFiles ?? []).map((item) =>
         item.id === fileId ? { ...item, status: 'uploading', progress: 0 } : item,
       ),
     }))
-    window.setTimeout(() => startComposerUpload(scope, fileId, file.size), 0)
+    window.setTimeout(() => startComposerUpload(stateKey, fileId, file.size), 0)
   }
 
   const renderComposerFileMeta = (scope, file) => {
@@ -5140,7 +5625,7 @@ export default function QuestionPage() {
   }
 
   const renderSenderAttachments = (scope) => {
-    const attachments = sessionStates[scope]?.composerFiles ?? []
+    const attachments = getSessionStateForScope(scope).composerFiles ?? []
     if (!attachments.length) return null
 
     return (
@@ -5262,7 +5747,7 @@ export default function QuestionPage() {
       if (matched) return matched.id
     }
 
-    const scopeFiles = sessionStates[activeSessionScope]?.composerFiles ?? []
+    const scopeFiles = activeSessionState.composerFiles ?? []
     const composerFile = scopeFiles.find(
       (file) => `upload-${file.id}` === fileId || file.id === fileId || (label && file.name === label),
     )
@@ -5346,7 +5831,7 @@ export default function QuestionPage() {
   }
 
   const toggleSourceFileCitation = (scope, file) => {
-    const currentSegments = normalizeComposerSegments(sessionStates[scope])
+    const currentSegments = normalizeComposerSegments(getSessionStateForScope(scope))
     const existingRef = findSourceFileComposerRef(currentSegments, file)
 
     if (existingRef) {
@@ -5381,7 +5866,7 @@ export default function QuestionPage() {
     const editor = senderEditorRef.current
     if (!editor || !mentionPanel.open || mentionPanel.scope !== scope) return
 
-    const currentSegments = normalizeComposerSegments(sessionStates[scope])
+    const currentSegments = normalizeComposerSegments(getSessionStateForScope(scope))
     const cursor = getComposerSelectionOffset(editor)
     const mentionStart = mentionPanel.start
     const mentionEnd = cursor
@@ -5405,7 +5890,10 @@ export default function QuestionPage() {
       event.preventDefault()
       const tag = removeBtn.closest('.sender-ref-tag')
       if (!tag?.dataset.refId) return
-      const nextSegments = removeComposerRefSegment(normalizeComposerSegments(sessionStates[scope]), tag.dataset.refId)
+      const nextSegments = removeComposerRefSegment(
+        normalizeComposerSegments(getSessionStateForScope(scope)),
+        tag.dataset.refId,
+      )
       updateComposerSegments(scope, nextSegments)
       requestAnimationFrame(() => syncComposerEditorFromSegments(nextSegments))
       return
@@ -5536,22 +6024,83 @@ export default function QuestionPage() {
     })
   }
 
+  const getHistoryMenuPosition = useCallback((anchorEl, isMobile = false) => {
+    const rect = anchorEl.getBoundingClientRect()
+    if (!isMobile) return { top: rect.top, left: rect.right + 4 }
+
+    const panelWidth = 126
+    const panelHeight = 88
+    const viewportPadding = 8
+    return {
+      top: Math.min(rect.bottom - 6, window.innerHeight - panelHeight - viewportPadding),
+      left: Math.max(
+        viewportPadding,
+        Math.min(rect.right - panelWidth, window.innerWidth - panelWidth - viewportPadding),
+      ),
+    }
+  }, [])
+
   const updateHistoryMenuPosition = useCallback(() => {
     const anchor = historyMenuAnchorRef.current
     if (!anchor) return
-    const rect = anchor.getBoundingClientRect()
-    setHistoryMenuPos({ top: rect.top, left: rect.right + 4 })
-  }, [])
+    setHistoryMenuPos(getHistoryMenuPosition(anchor, mobileCatalogOpen))
+  }, [getHistoryMenuPosition, mobileCatalogOpen])
 
-  const toggleHistorySessionMenu = (itemId, anchorEl) => {
+  const openHistorySessionMenu = (itemId, anchorEl, isMobile = false) => {
+    const targetItem = historyItems.find((item) => item.id === itemId)
+    if (targetItem?.isGenerating) return false
+
+    historyMenuAnchorRef.current = anchorEl
+    setHistoryMenuPos(getHistoryMenuPosition(anchorEl, isMobile))
+    setHistoryMenuOpenId(itemId)
+    return true
+  }
+
+  const toggleHistorySessionMenu = (itemId, anchorEl, isMobile = false) => {
     if (historyMenuOpenId === itemId) {
       setHistoryMenuOpenId(null)
       return
     }
-    historyMenuAnchorRef.current = anchorEl
-    const rect = anchorEl.getBoundingClientRect()
-    setHistoryMenuPos({ top: rect.top, left: rect.right + 4 })
-    setHistoryMenuOpenId(itemId)
+    openHistorySessionMenu(itemId, anchorEl, isMobile)
+  }
+
+  const clearMobileHistoryLongPress = () => {
+    const current = mobileHistoryLongPressRef.current
+    if (current?.timer) window.clearTimeout(current.timer)
+    mobileHistoryLongPressRef.current = null
+  }
+
+  const handleMobileHistoryPointerDown = (event, itemId) => {
+    if (event.button !== 0 || event.target.closest('.mobile-catalog-history__more, input')) return
+
+    clearMobileHistoryLongPress()
+    const anchorEl = event.currentTarget
+    const startX = event.clientX
+    const startY = event.clientY
+    const timer = window.setTimeout(() => {
+      if (!openHistorySessionMenu(itemId, anchorEl, true)) {
+        mobileHistoryLongPressRef.current = null
+        return
+      }
+      mobileHistorySuppressClickRef.current = { itemId, until: Date.now() + 800 }
+      mobileHistoryLongPressRef.current = null
+    }, 500)
+
+    mobileHistoryLongPressRef.current = { itemId, startX, startY, timer }
+  }
+
+  const handleMobileHistoryPointerMove = (event, itemId) => {
+    const current = mobileHistoryLongPressRef.current
+    if (!current || current.itemId !== itemId) return
+    if (Math.hypot(event.clientX - current.startX, event.clientY - current.startY) > 8) {
+      clearMobileHistoryLongPress()
+    }
+  }
+
+  const shouldSuppressMobileHistoryClick = (itemId) => {
+    const current = mobileHistorySuppressClickRef.current
+    mobileHistorySuppressClickRef.current = null
+    return Boolean(current?.itemId === itemId && current.until > Date.now())
   }
 
   const deleteHistorySession = (itemId) => {
@@ -5580,6 +6129,7 @@ export default function QuestionPage() {
         activeSessionCompletedMeta: null,
         isTransitioningSession: false,
         isGeneratingSession: false,
+        executionPlan: null,
         inputText: '',
         inputFocused: false,
         composerFiles: [],
@@ -5634,7 +6184,62 @@ export default function QuestionPage() {
     setHistoryRenameDraft(item.label)
   }
 
+  const openMobileHistoryDialog = (type, itemId) => {
+    const item = historyItems.find((entry) => entry.id === itemId)
+    if (!item) return
+
+    setHistoryMenuOpenId(null)
+    setHistoryRenameDraft(type === 'rename' ? item.label : '')
+    setMobileHistoryDialog({ type, itemId })
+  }
+
+  const closeMobileHistoryDialog = () => {
+    setMobileHistoryDialog(null)
+    setHistoryRenameDraft('')
+  }
+
+  const confirmMobileHistoryRename = () => {
+    if (mobileHistoryDialog?.type !== 'rename') return
+
+    const itemId = mobileHistoryDialog.itemId
+    const trimmed = historyRenameDraft.trim()
+    const currentItem = historyItems.find((entry) => entry.id === itemId)
+    if (!trimmed || !currentItem) return
+
+    closeMobileHistoryDialog()
+    if (trimmed === currentItem.label) return
+
+    updateSessionScopeState(activeSessionScope, (prev) => {
+      const nextItems = prev.historyItems.map((entry) =>
+        entry.id === itemId ? { ...entry, label: trimmed } : entry,
+      )
+      if (prev.activeHistoryItemId !== itemId) {
+        return { ...prev, historyItems: nextItems }
+      }
+      return {
+        ...prev,
+        historyItems: nextItems,
+        activeSessionPrompt: trimmed,
+      }
+    })
+  }
+
+  const confirmMobileHistoryDelete = () => {
+    if (mobileHistoryDialog?.type !== 'delete') return
+    const itemId = mobileHistoryDialog.itemId
+    setMobileHistoryDialog(null)
+    deleteHistorySession(itemId)
+  }
+
   const handleHistorySessionMenuAction = (menuItemId) => {
+    if (mobileCatalogOpen && historyMenuOpenId) {
+      if (menuItemId === 'rename' || menuItemId === 'delete') {
+        openMobileHistoryDialog(menuItemId, historyMenuOpenId)
+        return
+      }
+      setHistoryMenuOpenId(null)
+      return
+    }
     if (menuItemId === 'rename' && historyMenuOpenId) {
       startHistorySessionRename(historyMenuOpenId)
       return
@@ -5700,16 +6305,20 @@ export default function QuestionPage() {
 
   const renderHistorySessionMenuPortal = () => {
     if (!historyMenuOpenId) return null
+    const isMobileMenu = mobileCatalogOpen
+    const menuItems = isMobileMenu
+      ? MOBILE_HISTORY_SESSION_MENU_ITEMS
+      : HISTORY_SESSION_MENU_ITEMS
 
     return createPortal(
       <div
         ref={historyMenuPanelRef}
-        className="inner-history-menu attach-menu inner-history-menu--portal"
+        className={`inner-history-menu attach-menu inner-history-menu--portal${isMobileMenu ? ' mobile-catalog-history-menu' : ''}`}
         role="menu"
         aria-label="会话操作"
         style={{ top: historyMenuPos.top, left: historyMenuPos.left }}
       >
-        {HISTORY_SESSION_MENU_ITEMS.map((menuItem) => (
+        {menuItems.map((menuItem) => (
           <button
             key={menuItem.id}
             type="button"
@@ -5728,6 +6337,82 @@ export default function QuestionPage() {
             <span className="attach-menu__label">{menuItem.label}</span>
           </button>
         ))}
+      </div>,
+      document.body,
+    )
+  }
+
+  const renderMobileHistoryDialogPortal = () => {
+    if (!mobileHistoryDialog) return null
+    const isRename = mobileHistoryDialog.type === 'rename'
+
+    return createPortal(
+      <div
+        className="mobile-history-dialog-layer"
+        role="presentation"
+        onClick={closeMobileHistoryDialog}
+      >
+        <section
+          className={`mobile-history-dialog ${isRename ? 'mobile-history-dialog--rename' : 'mobile-history-dialog--delete'}`}
+          role={isRename ? 'dialog' : 'alertdialog'}
+          aria-modal="true"
+          aria-labelledby="mobile-history-dialog-title"
+          aria-describedby={isRename ? undefined : 'mobile-history-dialog-description'}
+          onClick={(event) => event.stopPropagation()}
+        >
+          {isRename ? (
+            <>
+              <header className="mobile-history-dialog__header">
+                <h2 id="mobile-history-dialog-title">重命名</h2>
+                <button
+                  type="button"
+                  className="mobile-history-dialog__close"
+                  aria-label="关闭重命名弹窗"
+                  onClick={closeMobileHistoryDialog}
+                >
+                  <span className="dora-icon" aria-hidden="true">{ICONS.close}</span>
+                </button>
+              </header>
+              <div className="mobile-history-dialog__editor">
+                <textarea
+                  ref={mobileHistoryDialogInputRef}
+                  value={historyRenameDraft}
+                  rows={2}
+                  aria-label="新会话名称"
+                  onChange={(event) => setHistoryRenameDraft(event.target.value)}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="mobile-history-dialog__warning">
+              <span className="dora-icon mobile-history-dialog__warning-icon" aria-hidden="true">
+                {ICONS.toastWarningFilled}
+              </span>
+              <div className="mobile-history-dialog__warning-copy">
+                <h2 id="mobile-history-dialog-title">确定删除？</h2>
+                <p id="mobile-history-dialog-description">删除后不可恢复</p>
+              </div>
+            </div>
+          )}
+
+          <div className="mobile-history-dialog__actions">
+            <button
+              type="button"
+              className="mobile-history-dialog__button mobile-history-dialog__button--negative"
+              onClick={closeMobileHistoryDialog}
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              className={`mobile-history-dialog__button ${isRename ? 'mobile-history-dialog__button--primary' : 'mobile-history-dialog__button--danger'}`}
+              disabled={isRename && !historyRenameDraft.trim()}
+              onClick={isRename ? confirmMobileHistoryRename : confirmMobileHistoryDelete}
+            >
+              确定
+            </button>
+          </div>
+        </section>
       </div>,
       document.body,
     )
@@ -6569,6 +7254,184 @@ export default function QuestionPage() {
     )
   }
 
+  const showMobileModelSwitchToast = () => {
+    if (mobileModelToastTimerRef.current) {
+      window.clearTimeout(mobileModelToastTimerRef.current)
+    }
+    setMobileModelToast('切换成功')
+    mobileModelToastTimerRef.current = window.setTimeout(() => {
+      mobileModelToastTimerRef.current = null
+      setMobileModelToast('')
+    }, 1800)
+  }
+
+  const selectMobileModel = (modelId) => {
+    setMobileModelSettings((current) => ({
+      ...current,
+      [activeSessionScope]: {
+        ...current[activeSessionScope],
+        modelId,
+      },
+    }))
+    setMobileModelDrawerOpen(false)
+    showMobileModelSwitchToast()
+  }
+
+  const toggleMobileModelThinking = () => {
+    setMobileModelSettings((current) => ({
+      ...current,
+      [activeSessionScope]: {
+        ...current[activeSessionScope],
+        thinkingEnabled: !current[activeSessionScope]?.thinkingEnabled,
+      },
+    }))
+  }
+
+  const renderMobileModelDrawer = () => {
+    if (!isMobileViewport || !mobileModelDrawerOpen) return null
+
+    return createPortal(
+      <div className="mobile-model-drawer-layer" role="presentation">
+        <button
+          type="button"
+          className="mobile-model-drawer__backdrop"
+          aria-label="关闭模型切换"
+          onClick={() => setMobileModelDrawerOpen(false)}
+        />
+        <section
+          className="mobile-model-drawer"
+          role="dialog"
+          aria-modal="true"
+          aria-label="切换模型"
+        >
+          <button
+            type="button"
+            role="switch"
+            aria-checked={activeMobileModelSetting.thinkingEnabled}
+            className="mobile-model-drawer__thinking"
+            onClick={toggleMobileModelThinking}
+          >
+            <span className="mobile-model-drawer__thinking-label">
+              <span className="dora-icon mobile-model-drawer__thinking-icon" aria-hidden="true">
+                {ICONS.thinking}
+              </span>
+              <span>思考</span>
+            </span>
+            <span
+              className={`mobile-model-drawer__switch${
+                activeMobileModelSetting.thinkingEnabled ? ' is-on' : ''
+              }`}
+              aria-hidden="true"
+            >
+              <span className="mobile-model-drawer__switch-thumb" />
+            </span>
+          </button>
+          <span className="mobile-model-drawer__section-divider" aria-hidden="true" />
+          <div className="mobile-model-drawer__models" role="listbox" aria-label="可用模型">
+            {MOBILE_MODEL_OPTIONS.map((model, index) => (
+              <Fragment key={model.id}>
+                {index > 0 ? (
+                  <span className="mobile-model-drawer__model-divider" aria-hidden="true" />
+                ) : null}
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={activeMobileModel.id === model.id}
+                  className={`mobile-model-drawer__model${
+                    activeMobileModel.id === model.id ? ' is-selected' : ''
+                  }`}
+                  onClick={() => selectMobileModel(model.id)}
+                >
+                  <span className="mobile-model-drawer__model-main">
+                    <img src={model.icon} alt="" className="mobile-model-drawer__model-icon" />
+                    <span className="mobile-model-drawer__model-name">{model.label}</span>
+                    {model.supportsVision ? (
+                      <span className="mobile-model-drawer__vision-tag">图片理解</span>
+                    ) : null}
+                  </span>
+                  {activeMobileModel.id === model.id ? (
+                    <span className="dora-icon mobile-model-drawer__selected" aria-hidden="true">
+                      {ICONS.added}
+                    </span>
+                  ) : null}
+                </button>
+              </Fragment>
+            ))}
+          </div>
+        </section>
+      </div>,
+      document.body,
+    )
+  }
+
+  const renderExpertAlertsDrawer = () => {
+    if (!isMobileViewport || !expertAlertsDrawerOpen || !showExpertsAlerts) return null
+
+    return createPortal(
+      <div className="experts-mobile-alert-drawer-layer" role="presentation">
+        <button
+          type="button"
+          className="experts-mobile-alert-drawer__backdrop"
+          aria-label="关闭专家团新消息"
+          onClick={() => setExpertAlertsDrawerOpen(false)}
+        />
+        <section
+          className="experts-mobile-alert-drawer"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="experts-mobile-alert-drawer-title"
+        >
+          <header className="experts-mobile-alert-drawer__header">
+            <button
+              type="button"
+              className="experts-mobile-alert-drawer__close"
+              aria-label="关闭专家团新消息"
+              onClick={() => setExpertAlertsDrawerOpen(false)}
+            >
+              <span className="dora-icon" aria-hidden="true">{ICONS.close}</span>
+            </button>
+            <h2 id="experts-mobile-alert-drawer-title">
+              {expertAlertCards.length}个专家有新消息
+            </h2>
+            <button
+              type="button"
+              className="experts-mobile-alert-drawer__read-all"
+              onClick={dismissExpertsAlerts}
+            >
+              一键已读
+            </button>
+          </header>
+          <div className="experts-mobile-alert-drawer__list">
+            {expertAlertCards.map((card, index) => (
+              <Fragment key={`mobile-alert-${getExpertCardKey(card)}`}>
+                {index > 0 ? (
+                  <span className="experts-mobile-alert-drawer__divider" aria-hidden="true" />
+                ) : null}
+                <button
+                  type="button"
+                  className="experts-mobile-alert-drawer__item"
+                  onClick={() => {
+                    setExpertAlertsDrawerOpen(false)
+                    openExpertCard(card)
+                  }}
+                >
+                  <span className="experts-mobile-alert-drawer__avatar-wrap">
+                    <img src={card.mobileIcon ?? card.icon} alt="" />
+                  </span>
+                  <span className="experts-mobile-alert-drawer__label">{card.title}</span>
+                  <span className="experts-mobile-alert-drawer__badge" aria-hidden="true">
+                    {formatNavBadgeCount(card.alertCount)}
+                  </span>
+                </button>
+              </Fragment>
+            ))}
+          </div>
+        </section>
+      </div>,
+      document.body,
+    )
+  }
+
   const renderHistorySessionItem = (item) => {
     const isActive = activeHistoryItemId === item.id
     const isGenerating = Boolean(item.isGenerating)
@@ -6655,7 +7518,7 @@ export default function QuestionPage() {
 
   const renderHistorySessionGroups = () =>
     groupedHistoryItems.map((group) => {
-      const isCollapsed = Boolean(historyGroupsCollapsed[`${activeSessionScope}:${group.id}`])
+      const isCollapsed = Boolean(historyGroupsCollapsed[`${activeSessionStateKey}:${group.id}`])
 
       return (
         <section key={group.id} className="inner-history-section" aria-label={group.label}>
@@ -6680,7 +7543,7 @@ export default function QuestionPage() {
     if (!mobileCatalogOpen) return undefined
 
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') setMobileCatalogOpen(false)
+      if (event.key === 'Escape' && !mobileHistoryDialog) setMobileCatalogOpen(false)
     }
     const shouldLockPage = window.matchMedia('(max-width: 599px)').matches
     const previousOverflow = document.body.style.overflow
@@ -6688,15 +7551,21 @@ export default function QuestionPage() {
     window.addEventListener('keydown', handleKeyDown)
 
     return () => {
+      clearMobileHistoryLongPress()
       window.removeEventListener('keydown', handleKeyDown)
       if (shouldLockPage) document.body.style.overflow = previousOverflow
     }
-  }, [mobileCatalogOpen])
+  }, [mobileCatalogOpen, mobileHistoryDialog])
 
   const closeMobileCatalog = () => {
+    clearMobileHistoryLongPress()
+    setHistoryMenuOpenId(null)
+    setMobileHistoryDialog(null)
+    if (historyRenamingId) cancelHistorySessionRename()
     setMobileCatalogOpen(false)
     setMobileCatalogSearchOpen(false)
     setMobileCatalogSearch('')
+    setHistoryRenameDraft('')
   }
 
   const renderMobileCatalogDrawer = () => {
@@ -6707,6 +7576,77 @@ export default function QuestionPage() {
           .flatMap((group) => group.items)
           .filter((item) => item.label.toLowerCase().includes(keyword))
       : []
+    const renderMobileCatalogHistoryItem = (item, isSearchResult = false) => {
+      const isActive = item.id === activeHistoryItemId
+      const isGenerating = Boolean(item.isGenerating)
+      const isMenuOpen = !isGenerating && item.id === historyMenuOpenId
+      const showMore = !isGenerating && (isActive || isMenuOpen)
+
+      return (
+        <div
+          key={`${isSearchResult ? 'mobile-catalog-search' : 'mobile-catalog'}-item-${item.id}`}
+          className={[
+            'mobile-catalog-history__item',
+            isSearchResult ? 'mobile-catalog-search-results__item' : '',
+            isActive ? 'is-active' : '',
+            isMenuOpen ? 'is-menu-open' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          onPointerDown={(event) => handleMobileHistoryPointerDown(event, item.id)}
+          onPointerMove={(event) => handleMobileHistoryPointerMove(event, item.id)}
+          onPointerUp={clearMobileHistoryLongPress}
+          onPointerCancel={clearMobileHistoryLongPress}
+          onPointerLeave={clearMobileHistoryLongPress}
+          onContextMenu={(event) => event.preventDefault()}
+        >
+          <button
+            type="button"
+            className="mobile-catalog-history__item-main"
+            aria-current={isActive ? 'true' : undefined}
+            onClick={() => {
+              if (shouldSuppressMobileHistoryClick(item.id)) return
+              openHistorySession(item)
+              closeMobileCatalog()
+            }}
+          >
+            <span className="mobile-catalog-history__item-label">
+              {isSearchResult ? highlightSearchText(item.label, mobileCatalogSearch) : item.label}
+            </span>
+            {!showMore && !isGenerating && item.badge ? (
+              <span className="mobile-catalog-history__badge" aria-hidden="true">
+                {item.badge}
+              </span>
+            ) : null}
+          </button>
+          {isGenerating ? (
+            <span className="mobile-catalog-history__loading-slot">
+              <FourPointStarLoader
+                className="mobile-catalog-history__loader"
+                label="正在生成"
+              />
+            </span>
+          ) : showMore ? (
+            <button
+              type="button"
+              className="mobile-catalog-history__more"
+              aria-label="更多操作"
+              aria-expanded={isMenuOpen}
+              onClick={(event) => {
+                event.stopPropagation()
+                toggleHistorySessionMenu(
+                  item.id,
+                  event.currentTarget.closest('.mobile-catalog-history__item'),
+                  true,
+                )
+              }}
+            >
+              <span className="dora-icon" aria-hidden="true">{ICONS.more}</span>
+            </button>
+          ) : null}
+        </div>
+      )
+    }
 
     return createPortal(
       <div className="mobile-catalog-layer" role="presentation">
@@ -6783,31 +7723,13 @@ export default function QuestionPage() {
                 {groupedHistoryItems.map((group) => (
                   <section key={`mobile-catalog-${group.id}`} className="mobile-catalog-history__group" aria-label={group.label}>
                     <h3>{group.label}</h3>
-                    {group.items.map((item) => (
-                      <button
-                        key={`mobile-catalog-item-${item.id}`}
-                        type="button"
-                        className={`mobile-catalog-history__item${item.id === activeHistoryItemId ? ' is-active' : ''}`}
-                        onClick={() => { openHistorySession(item); closeMobileCatalog() }}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
+                    {group.items.map((item) => renderMobileCatalogHistoryItem(item))}
                   </section>
                 ))}
               </div>
             ) : keyword ? (
               <div className="mobile-catalog-history__scroll mobile-catalog-search-results">
-                {mobileCatalogSearchResults.map((item) => (
-                  <button
-                    key={`mobile-catalog-search-item-${item.id}`}
-                    type="button"
-                    className="mobile-catalog-history__item mobile-catalog-search-results__item"
-                    onClick={() => { openHistorySession(item); closeMobileCatalog() }}
-                  >
-                    {highlightSearchText(item.label, mobileCatalogSearch)}
-                  </button>
-                ))}
+                {mobileCatalogSearchResults.map((item) => renderMobileCatalogHistoryItem(item, true))}
                 {!mobileCatalogSearchResults.length ? <p className="mobile-catalog-search-page__empty">暂无搜索结果</p> : null}
               </div>
             ) : null}
@@ -6947,6 +7869,7 @@ export default function QuestionPage() {
           <span className="dora-icon" aria-hidden="true">
             {ICONS.catalog}
           </span>
+          {renderMobileActiveAlertBadge()}
         </button>
       </div>
     </div>
@@ -8117,7 +9040,11 @@ export default function QuestionPage() {
   const renderLibrarySessionFilesModal = () => renderSessionFilesModal(() => setLibrarySessionFilesModalOpen(false))
 
   const sessionAssistantName = isExpertDetailView ? activeExpertCard?.title ?? 'Agent' : 'Dora'
-  const sessionAssistantAvatar = isExpertDetailView ? activeExpertCard?.icon ?? agentDefaultAvatarImage : doraUploadedImage
+  const sessionAssistantAvatar = isExpertDetailView
+    ? activeExpertCard?.icon ?? agentDefaultAvatarImage
+    : isMobileViewport
+      ? doraAgentAvatarImage
+      : doraUploadedImage
 
   const renderPracticesBackButton = () => (
     <button type="button" className="practices-back practices-back--header" onClick={() => setPracticesPageOpen(false)}>
@@ -8324,6 +9251,108 @@ export default function QuestionPage() {
     </>
   )
 
+  const handleAssistantFollowUp = (text) => {
+    const nextText = text?.trim()
+    if (!nextText) return
+
+    updateActiveSessionState((prev) => ({
+      ...prev,
+      inputText: nextText,
+      inputFocused: true,
+      composerSegments: [{ type: 'text', value: nextText }],
+    }))
+    requestAnimationFrame(() => {
+      const editor = senderEditorRef.current
+      if (!editor) return
+      editor.focus()
+      setComposerSelectionToEnd(editor)
+      editor.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    })
+  }
+
+  const toggleExecutionPlan = () => {
+    updateActiveSessionState((prev) => {
+      if (!prev.executionPlan) return prev
+      const nextPlan = { ...prev.executionPlan, expanded: !prev.executionPlan.expanded }
+      return {
+        ...prev,
+        executionPlan: nextPlan,
+        historyItems: prev.activeHistoryItemId
+          ? updateHistoryItemById(prev.historyItems, prev.activeHistoryItemId, (item) => ({
+              ...item,
+              executionPlan: nextPlan,
+            }))
+          : prev.historyItems,
+      }
+    })
+  }
+
+  const renderExecutionPlan = () => {
+    if (!isMobileViewport || !isQuestionMode || !isSessionBusy || !activeExecutionPlan) return null
+
+    const currentStep = Math.min(
+      EXECUTION_PLAN_ITEMS.length,
+      Math.max(1, activeExecutionPlan.currentStep),
+    )
+    const currentTitle = EXECUTION_PLAN_ITEMS[currentStep - 1]
+    const planContentId = `${activeExecutionPlan.id}-content`
+
+    return (
+      <section
+        className={`session-execution-plan${activeExecutionPlan.expanded ? ' is-expanded' : ''}`}
+        aria-label="计划执行进度"
+      >
+        <button
+          type="button"
+          className="session-execution-plan__header"
+          aria-expanded={activeExecutionPlan.expanded}
+          aria-controls={planContentId}
+          onClick={toggleExecutionPlan}
+        >
+          <span className="session-execution-plan__title" title={activeExecutionPlan.expanded ? '正在执行计划' : currentTitle}>
+            <span>{activeExecutionPlan.expanded ? '正在执行计划' : currentTitle}</span>
+            <img src={EXECUTION_PLAN_ASSETS.titleFade} alt="" aria-hidden="true" />
+          </span>
+          <span className="session-execution-plan__progress" aria-live="polite">
+            步骤 {currentStep}/{EXECUTION_PLAN_ITEMS.length}
+          </span>
+          <span className="dora-icon session-execution-plan__chevron" aria-hidden="true">
+            {activeExecutionPlan.expanded ? ICONS.arrowDown : ICONS.arrowUp}
+          </span>
+        </button>
+
+        <div
+          ref={executionPlanListRef}
+          id={planContentId}
+          className="session-execution-plan__list"
+          role="list"
+          aria-hidden={!activeExecutionPlan.expanded}
+        >
+          {EXECUTION_PLAN_ITEMS.map((item, index) => {
+            const step = index + 1
+            const status = step < currentStep ? 'completed' : step === currentStep ? 'active' : 'pending'
+            return (
+              <div
+                key={`${activeExecutionPlan.id}-${step}`}
+                className={`session-execution-plan__item is-${status}`}
+                role="listitem"
+                aria-current={status === 'active' ? 'step' : undefined}
+              >
+                <img
+                  src={EXECUTION_PLAN_ASSETS[status]}
+                  alt=""
+                  aria-hidden="true"
+                  className="session-execution-plan__status-icon"
+                />
+                <span>{item}</span>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+    )
+  }
+
   const renderSessionThread = () => (
     <SessionThread
       turns={activeSessionTurns}
@@ -8337,6 +9366,8 @@ export default function QuestionPage() {
       isGenerating={isGeneratingSession}
       completedSessionMeta={activeSessionCompletedMeta}
       onGenerationComplete={handleSessionGenerationComplete}
+      onFollowUp={handleAssistantFollowUp}
+      isMobileViewport={isMobileViewport}
     />
   )
 
@@ -8366,6 +9397,7 @@ export default function QuestionPage() {
         activeHistoryItemId: id,
         isTransitioningSession: true,
         isGeneratingSession: false,
+        executionPlan: activeHistoryItem?.executionPlan ?? null,
         inputText: '',
         inputFocused: false,
         composerFiles: [],
@@ -8414,6 +9446,7 @@ export default function QuestionPage() {
         ...prev,
         isTransitioningSession: false,
         isGeneratingSession: false,
+        executionPlan: null,
         activeSessionPrompt: '',
         activeSessionUserFiles: [],
         activeHistoryItemId: null,
@@ -8470,6 +9503,14 @@ export default function QuestionPage() {
                 >
                   <span className="dora-icon" aria-hidden="true">{ICONS.mobileBack}</span>
                 </button>
+                {activeSessionHistoryItem?.isScheduledExecution ? (
+                  <img
+                    src={SCHEDULE_TASK_ICON_ASSET}
+                    alt=""
+                    className="mobile-session-header__schedule-icon"
+                    aria-hidden="true"
+                  />
+                ) : null}
                 <h2 title={activeSessionHistoryItem?.label ?? activeSessionPrompt}>
                   {activeSessionHistoryItem?.label ?? activeSessionPrompt}
                 </h2>
@@ -8483,6 +9524,7 @@ export default function QuestionPage() {
                 </button>
                 <button type="button" className="mobile-session-header__action" aria-label="目录" aria-expanded={mobileCatalogOpen} onClick={() => setMobileCatalogOpen(true)}>
                   <span className="dora-icon" aria-hidden="true">{ICONS.catalog}</span>
+                  {renderMobileActiveAlertBadge()}
                 </button>
               </div>
             </div>
@@ -8584,6 +9626,8 @@ export default function QuestionPage() {
               <div className="sender-combo">
                 <div
                   className={`sender ${inputFocused ? 'focused' : ''} ${canSend ? 'has-value' : ''} ${isSessionBusy ? 'is-sending' : ''} ${
+                    isQuestionMode && isSessionBusy && activeExecutionPlan ? 'has-execution-plan' : ''
+                  } ${
                     !isQuestionMode &&
                     (doraVisualScheme === 'scheme4' ||
                       doraVisualScheme === 'scheme5' ||
@@ -8593,6 +9637,7 @@ export default function QuestionPage() {
                       : ''
                   }`}
                 >
+                  {renderExecutionPlan()}
                   <div className="sender-inner">
                     {renderSenderInnerContent(activeSessionScope)}
                     {renderSenderToolbarBlock({ showStop: isSessionBusy })}
@@ -8909,11 +9954,17 @@ export default function QuestionPage() {
   }, [attachConnectSidebarDragging])
 
   useEffect(() => {
+    if (!historyMenuOpenId) return
+    const menuItem = historyItems.find((item) => item.id === historyMenuOpenId)
+    if (menuItem?.isGenerating) setHistoryMenuOpenId(null)
+  }, [historyItems, historyMenuOpenId])
+
+  useEffect(() => {
     if (!historyMenuOpenId) return undefined
 
     const handlePointerDown = (event) => {
       if (
-        event.target.closest('.inner-history-item__more') ||
+        event.target.closest('.inner-history-item__more, .mobile-catalog-history__more') ||
         historyMenuPanelRef.current?.contains(event.target)
       ) {
         return
@@ -8949,6 +10000,25 @@ export default function QuestionPage() {
 
     return () => cancelAnimationFrame(frame)
   }, [historyRenamingId])
+
+  useEffect(() => {
+    if (!mobileHistoryDialog) return undefined
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') closeMobileHistoryDialog()
+    }
+    const frame = requestAnimationFrame(() => {
+      if (mobileHistoryDialog.type !== 'rename') return
+      mobileHistoryDialogInputRef.current?.focus()
+      mobileHistoryDialogInputRef.current?.select()
+    })
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [mobileHistoryDialog])
 
   useEffect(() => {
     if (!avatarMenuOpen && !languageMenuOpen) return undefined
@@ -9021,16 +10091,54 @@ export default function QuestionPage() {
   }, [doraNavPopoverOpen])
 
   useEffect(() => {
-    if (expertAlertCount === 0) {
-      setExpertsAlertsDismissedSnapshot(null)
-    }
-  }, [expertAlertCount])
-
-  useEffect(() => {
     if (!showExpertsAlerts) {
       setExpertsNavPopoverOpen(false)
+      setExpertAlertsDrawerOpen(false)
     }
   }, [showExpertsAlerts])
+
+  useEffect(() => {
+    if (isMobileViewport) return
+    setMobileModelDrawerOpen(false)
+    setExpertAlertsDrawerOpen(false)
+    setMobileHistoryDialog(null)
+    setMobileModelToast('')
+  }, [isMobileViewport])
+
+  useEffect(() => {
+    if (!expertAlertsDrawerOpen) return undefined
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setExpertAlertsDrawerOpen(false)
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [expertAlertsDrawerOpen])
+
+  useEffect(() => {
+    if (!mobileModelDrawerOpen) return undefined
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setMobileModelDrawerOpen(false)
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [mobileModelDrawerOpen])
+
+  useEffect(() => {
+    setMobileModelDrawerOpen(false)
+  }, [activeSessionStateKey])
+
+  useEffect(
+    () => () => {
+      if (mobileModelToastTimerRef.current) {
+        window.clearTimeout(mobileModelToastTimerRef.current)
+      }
+    },
+    [],
+  )
 
   useEffect(() => {
     if (!showDoraAlerts) {
@@ -9315,8 +10423,32 @@ export default function QuestionPage() {
   }
 
   const dismissExpertsAlerts = () => {
-    setExpertsAlertsDismissedSnapshot(buildExpertAlertSnapshot())
+    setSessionStates((prev) => {
+      let changed = false
+      const next = { ...prev }
+
+      Object.entries(prev).forEach(([stateKey, state]) => {
+        if (!stateKey.startsWith('expert:')) return
+        let stateChanged = false
+        const nextHistoryItems = state.historyItems.map((item) => {
+          if (!item.badge) return item
+          changed = true
+          stateChanged = true
+          return { ...item, badge: '' }
+        })
+        if (stateChanged) {
+          next[stateKey] = { ...state, historyItems: nextHistoryItems }
+        }
+      })
+
+      return changed ? next : prev
+    })
+    setExpertAlertsDrawerOpen(false)
     closeExpertsNavPopover()
+  }
+
+  const handleViewExpertAlerts = () => {
+    if (showExpertsAlerts) setExpertAlertsDrawerOpen(true)
   }
 
   const openLibraryItem = (item, { trackRecent = false } = {}) => {
@@ -9459,6 +10591,44 @@ export default function QuestionPage() {
     )
   }
 
+  const renderMobileModelSwitch = () =>
+    isMobileViewport ? (
+      <button
+        type="button"
+        className={`mobile-model-switch${activeMobileModelSetting.thinkingEnabled ? ' has-thinking' : ''}`}
+        aria-label={`切换模型，当前 ${activeMobileModel.label}`}
+        aria-haspopup="dialog"
+        aria-expanded={mobileModelDrawerOpen}
+        onClick={() => setMobileModelDrawerOpen(true)}
+      >
+        <img src={activeMobileModel.icon} alt="" className="mobile-model-switch__icon" />
+        {activeMobileModelSetting.thinkingEnabled ? (
+          <span className="mobile-model-switch__thinking-tag">思考</span>
+        ) : null}
+        <span className="dora-icon mobile-model-switch__arrow" aria-hidden="true">
+          {ICONS.arrowDown}
+        </span>
+      </button>
+    ) : null
+
+  const renderSendButton = ({ showStop = false } = {}) => (
+    <button
+      type="button"
+      className="send-btn"
+      aria-label={showStop ? '停止生成' : '发送'}
+      disabled={!showStop && !canSend}
+      onClick={showStop ? handleStopGeneration : handleSend}
+    >
+      {showStop ? (
+        <span className="send-stop-icon" aria-hidden="true"></span>
+      ) : (
+        <span className="dora-icon send-icon" aria-hidden="true">
+          {ICONS.send}
+        </span>
+      )}
+    </button>
+  )
+
   const renderSenderToolbarBlock = ({ showStop = false } = {}) => (
     <div className="sender-toolbar">
       <div className="sender-toolbar__left">
@@ -9482,21 +10652,14 @@ export default function QuestionPage() {
           </button>
         ) : null}
       </div>
-      <button
-        type="button"
-        className="send-btn"
-        aria-label={showStop ? '停止生成' : '发送'}
-        disabled={!showStop && !canSend}
-        onClick={showStop ? handleStopGeneration : handleSend}
-      >
-        {showStop ? (
-          <span className="send-stop-icon" aria-hidden="true"></span>
-        ) : (
-          <span className="dora-icon send-icon" aria-hidden="true">
-            {ICONS.send}
-          </span>
-        )}
-      </button>
+      {isMobileViewport ? (
+        <div className="sender-toolbar__right">
+          {renderMobileModelSwitch()}
+          {renderSendButton({ showStop })}
+        </div>
+      ) : (
+        renderSendButton({ showStop })
+      )}
     </div>
   )
 
@@ -9834,6 +10997,150 @@ export default function QuestionPage() {
     })
   }, [])
 
+  const handleScheduleNaturalLanguageCommand = ({ command, label, sentUserFiles }) => {
+    const nextEnabled = command.action === 'disable' ? false : true
+    const taskSnapshot = {
+      ...command.task,
+      enabled: command.action === 'delete' ? command.task.enabled : nextEnabled,
+    }
+    const statusByAction = {
+      create: '已创建',
+      disable: '已关闭',
+      enable: '已开启',
+      delete: '已删除',
+    }
+    const actionLabelByAction = {
+      create: '创建了一个定时任务',
+      disable: '关闭了以下定时任务',
+      enable: '开启了以下定时任务',
+      delete: '删除了以下定时任务',
+    }
+    const resultMessage =
+      command.action === 'create'
+        ? `我${actionLabelByAction.create}，${taskSnapshot.scheduleText} 将给您发送到新会话`
+        : `我${actionLabelByAction[command.action]}：${taskSnapshot.title}`
+    const completedMeta = buildCompletedSessionMeta({
+      completedCount: 4,
+      durationMs: 4000,
+      summaryStatus: '已完成 4 个动作，耗时 0m 4s',
+    })
+    const nextTurn = createSessionTurn({
+      id: `schedule-action-turn-${Date.now()}`,
+      prompt: label,
+      userFiles: sentUserFiles,
+      sentAt: createSessionSentAt(),
+      completedSessionMeta: completedMeta,
+      scheduleAction: {
+        action: command.action,
+        status: statusByAction[command.action],
+        message: resultMessage,
+        task: taskSnapshot,
+      },
+      assistantSummary: resultMessage,
+    })
+
+    setScheduleTasksByScope((prev) => {
+      const tasks = prev[currentScheduleScope] ?? []
+      let nextTasks = tasks
+      if (command.action === 'create') {
+        nextTasks = [taskSnapshot, ...tasks.filter((task) => task.id !== taskSnapshot.id)]
+      } else if (command.action === 'delete') {
+        nextTasks = tasks.filter((task) => task.id !== taskSnapshot.id)
+      } else {
+        nextTasks = tasks.map((task) =>
+          task.id === taskSnapshot.id ? { ...task, enabled: nextEnabled } : task,
+        )
+      }
+      return { ...prev, [currentScheduleScope]: nextTasks }
+    })
+
+    updateSessionScopeState(activeSessionScope, (prev) => {
+      const currentHistoryItem = prev.historyItems.find(
+        (item) => item.id === prev.activeHistoryItemId,
+      )
+      const historyId = currentHistoryItem?.id ?? `history-schedule-${Date.now()}`
+      const nextTurns = currentHistoryItem
+        ? [...getSessionTurnsFromState(prev), nextTurn]
+        : [nextTurn]
+      const operationItem = {
+        ...(currentHistoryItem ?? {}),
+        id: historyId,
+        group: 'today',
+        label: currentHistoryItem?.label ?? label,
+        badge: '',
+        isGenerating: false,
+        sentAt: currentHistoryItem?.sentAt ?? nextTurn.sentAt,
+        sessionTurns: nextTurns,
+        completedSessionMeta: completedMeta,
+        executionPlan: null,
+      }
+
+      let nextHistoryItems = upsertHistoryItem(prev.historyItems, operationItem)
+
+      if (command.action === 'create') {
+        const executionCompletedMeta = buildCompletedSessionMeta({
+          completedCount: 5,
+          durationMs: 6000,
+          summaryStatus: '已完成 5 个动作，耗时 0m 6s',
+        })
+        const executionTurn = createSessionTurn({
+          id: `schedule-execution-turn-${taskSnapshot.id}`,
+          prompt: taskSnapshot.summary,
+          sentAt: createSessionSentAt(),
+          completedSessionMeta: executionCompletedMeta,
+          scheduleExecution: {
+            taskId: taskSnapshot.id,
+            taskTitle: taskSnapshot.title,
+            tagLabel: `定时任务_${taskSnapshot.title}`,
+          },
+          assistantSummary: `定时任务「${taskSnapshot.title}」已执行完成，结果已自动发送到本会话。`,
+        })
+        const executionItem = {
+          id: `schedule-execution-${taskSnapshot.id}`,
+          group: 'today',
+          label: `${taskSnapshot.title}·定时执行`,
+          badge: '1',
+          isGenerating: false,
+          isScheduledExecution: true,
+          scheduledTask: taskSnapshot,
+          sentAt: executionTurn.sentAt,
+          sessionTurns: [executionTurn],
+          completedSessionMeta: executionCompletedMeta,
+          executionPlan: null,
+        }
+        nextHistoryItems = [
+          operationItem,
+          executionItem,
+          ...nextHistoryItems.filter(
+            (item) => item.id !== operationItem.id && item.id !== executionItem.id,
+          ),
+        ]
+      }
+
+      return {
+        ...prev,
+        historyItems: nextHistoryItems,
+        activeSessionTurns: nextTurns,
+        activeSessionPrompt: nextTurn.prompt,
+        activeSessionUserFiles: nextTurn.userFiles,
+        activeSessionCompletedMeta: completedMeta,
+        activeHistoryItemId: historyId,
+        isTransitioningSession: false,
+        isGeneratingSession: false,
+        executionPlan: null,
+        inputText: '',
+        inputFocused: false,
+        composerFiles: [],
+        composerSegments: DEFAULT_COMPOSER_SEGMENTS,
+      }
+    })
+
+    setActiveInnerAction('new-chat')
+    setPracticesPageOpen(false)
+    setMobileNewChatPageOpen(false)
+    return true
+  }
+
   const handleSend = () => {
     const text = composerPlainText.trim()
     const readyFiles = composerFiles.filter((file) => file.status === 'done')
@@ -9857,12 +11164,28 @@ export default function QuestionPage() {
     readyFiles.forEach((file) => clearComposerUploadTimer(file.id))
 
     const sentUserFiles = mapComposerFilesToSessionUserFiles(readyFiles)
+    const scheduleCommand = isMobileViewport
+      ? parseScheduleNaturalLanguage(label, currentScheduleTasks)
+      : null
+    if (scheduleCommand) {
+      handleScheduleNaturalLanguageCommand({
+        command: scheduleCommand,
+        label,
+        sentUserFiles,
+      })
+      return
+    }
+
     const nextTurn = createSessionTurn({
       prompt: label,
       userFiles: sentUserFiles,
       sentAt: createSessionSentAt(),
       completedSessionMeta: null,
     })
+    const nextExecutionPlan =
+      isMobileViewport && Math.random() < EXECUTION_PLAN_TRIGGER_RATE
+        ? createExecutionPlanState(nextTurn.id)
+        : null
 
     if (isQuestionMode && activeHistoryItemId) {
       if (isLibraryDetailView) {
@@ -9876,6 +11199,7 @@ export default function QuestionPage() {
                   sessionTurns: [...getSessionTurnsFromHistoryItem(item), nextTurn],
                   isGenerating: true,
                   badge: '',
+                  executionPlan: nextExecutionPlan,
                 }
               : item,
           ),
@@ -9894,6 +11218,7 @@ export default function QuestionPage() {
                 sessionTurns: nextTurns,
                 isGenerating: true,
                 badge: '',
+                executionPlan: nextExecutionPlan,
               })
             : prev.historyItems,
           activeSessionTurns: nextTurns,
@@ -9902,6 +11227,7 @@ export default function QuestionPage() {
           activeSessionCompletedMeta: null,
           isTransitioningSession: true,
           isGeneratingSession: false,
+          executionPlan: nextExecutionPlan,
           inputText: '',
           composerFiles: [],
           composerSegments: DEFAULT_COMPOSER_SEGMENTS,
@@ -9920,6 +11246,7 @@ export default function QuestionPage() {
       isGenerating: true,
       sentAt: nextTurn.sentAt,
       sessionTurns: [nextTurn],
+      executionPlan: nextExecutionPlan,
     }
 
     if (isLibraryDetailView) {
@@ -9972,9 +11299,11 @@ export default function QuestionPage() {
     setInternalSidebarOpen(true)
 
     if (scope === 'experts') {
+      const sourceExpertCard = normalizeExpertCard(getLibrarySourceExpertCard(agentTitle))
+      const expertStateKey = getExpertSessionStateKey(sourceExpertCard)
       setActiveNav('experts')
-      setActiveExpertCard(normalizeExpertCard(getLibrarySourceExpertCard(agentTitle)))
-      updateSessionScopeState('experts', (prev) => {
+      setActiveExpertCard(sourceExpertCard)
+      updateSessionScopeState(expertStateKey, (prev) => {
         clearScopeComposerUploadTimers(prev.composerFiles)
         const nextHistoryItems = prepareHistoryItemsForSession(prev.historyItems, nextHistoryItem)
         const nextTurns = getSessionTurnsFromHistoryItem(
@@ -9994,13 +11323,14 @@ export default function QuestionPage() {
           activeHistoryItemId: id,
           isTransitioningSession: true,
           isGeneratingSession: false,
+          executionPlan: null,
           inputText: '',
           inputFocused: false,
           composerFiles: [],
           composerSegments: DEFAULT_COMPOSER_SEGMENTS,
         }
       })
-      beginSessionTransition('experts', userFiles)
+      beginSessionTransition(expertStateKey, userFiles)
       return
     }
 
@@ -10026,6 +11356,7 @@ export default function QuestionPage() {
         activeHistoryItemId: id,
         isTransitioningSession: true,
         isGeneratingSession: false,
+        executionPlan: null,
         inputText: '',
         inputFocused: false,
         composerFiles: [],
@@ -10049,6 +11380,7 @@ export default function QuestionPage() {
           ...prev,
           isTransitioningSession: false,
           isGeneratingSession: false,
+          executionPlan: null,
           activeSessionTurns: [],
           activeSessionPrompt: '',
           activeSessionUserFiles: [],
@@ -10075,6 +11407,7 @@ export default function QuestionPage() {
         ...prev,
         isTransitioningSession: false,
         isGeneratingSession: false,
+        executionPlan: null,
         activeSessionTurns: [],
         activeSessionPrompt: '',
         activeSessionUserFiles: [],
@@ -10104,6 +11437,7 @@ export default function QuestionPage() {
         activeHistoryItemId: item.id,
         isTransitioningSession: false,
         isGeneratingSession: false,
+        executionPlan: null,
         inputText: '',
         inputFocused: false,
         composerFiles: [],
@@ -10150,6 +11484,7 @@ export default function QuestionPage() {
           activeHistoryItemId: item.id,
           isTransitioningSession: true,
           isGeneratingSession: false,
+          executionPlan: item.executionPlan ?? null,
           inputText: '',
           inputFocused: false,
           composerFiles: [],
@@ -10174,6 +11509,7 @@ export default function QuestionPage() {
         activeHistoryItemId: item.id,
         isTransitioningSession: true,
         isGeneratingSession: false,
+        executionPlan: item.executionPlan ?? null,
         inputText: '',
         inputFocused: false,
         composerFiles: [],
@@ -10373,6 +11709,14 @@ export default function QuestionPage() {
       />
       {renderMobileAttachmentDrawer()}
       {renderMobileBiDrawer()}
+      {renderMobileModelDrawer()}
+      {renderExpertAlertsDrawer()}
+      {isMobileViewport && mobileModelToast ? (
+        <div className="mobile-model-toast" role="status" aria-live="polite">
+          <span className="dora-icon" aria-hidden="true">{ICONS.toastSuccessFilled}</span>
+          <span>{mobileModelToast}</span>
+        </div>
+      ) : null}
       <aside className={`sidebar${expertMobileSearchOpen || libraryMobileSearchOpen ? ' sidebar--mobile-search-hidden' : ''}`}>
         <nav className="sidebar-nav">
           {NAV_ITEMS.map((item) => {
@@ -10562,8 +11906,14 @@ export default function QuestionPage() {
                                     key={`${card.title}-${index}`}
                                     type="button"
                                     role="menuitemradio"
-                                    aria-checked={activeExpertCard === card}
-                                    className={`inner-sidebar__agent-option ${activeExpertCard === card ? 'active' : ''}`}
+                                    aria-checked={
+                                      getExpertCardKey(activeExpertCard) === getExpertCardKey(card)
+                                    }
+                                    className={`inner-sidebar__agent-option ${
+                                      getExpertCardKey(activeExpertCard) === getExpertCardKey(card)
+                                        ? 'active'
+                                        : ''
+                                    }`}
                                     onClick={() => {
                                       setActiveExpertCard(card)
                                       setInnerAgentMenuOpen(false)
@@ -10716,13 +12066,21 @@ export default function QuestionPage() {
                                     <article
                                       key={`mobile-search-${cardKey}-${card.desc}`}
                                       className="expert-card"
+                                      data-expert-alert={showExpertsAlerts && card.alertCount > 0 ? 'true' : undefined}
                                       role="button"
                                       tabIndex={0}
                                       onClick={() => openExpertCard(card)}
                                       onKeyDown={(e) => onEnterKey(e, () => openExpertCard(card))}
                                     >
                                       <div className="expert-card__mobile">
-                                        <img src={card.mobileIcon ?? card.icon} alt="" className="expert-card__mobile-avatar" />
+                                        <span className="expert-card__mobile-avatar-wrap">
+                                          <img src={card.mobileIcon ?? card.icon} alt="" className="expert-card__mobile-avatar" />
+                                          {showExpertsAlerts && card.alertCount > 0 ? (
+                                            <span className="expert-card__mobile-alert" aria-hidden="true">
+                                              {formatNavBadgeCount(card.alertCount)}
+                                            </span>
+                                          ) : null}
+                                        </span>
                                         <div className="expert-card__mobile-body">
                                           <div className="expert-card__mobile-top">
                                             <div className="expert-card__mobile-copy">
@@ -10768,7 +12126,10 @@ export default function QuestionPage() {
 
                     <div className={`experts-page__body ${expertsPageScrolled ? 'experts-page__body--scrolled' : ''}`}>
                       <div className={`experts-page__layout ${showExpertSidePanel ? 'has-side-panel' : ''}`}>
-                        <div className="experts-page__main" ref={expertsPageMainRef}>
+                        <div
+                          className={`experts-page__main${showExpertsAlerts ? ' experts-page__main--has-alert' : ''}`}
+                          ref={expertsPageMainRef}
+                        >
                           <div className="experts-main-sticky">
                             <div className="experts-toolbar">
                               <div className="experts-toolbar__filters">
@@ -10815,6 +12176,24 @@ export default function QuestionPage() {
                               </button>
                             </div>
 
+                            {showExpertsAlerts ? (
+                              <div className="experts-mobile-alert-banner" role="status">
+                                <span className="experts-mobile-alert-banner__art" aria-hidden="true">
+                                  <img src={EXPERT_ALERT_BANNER_IMAGE} alt="" />
+                                </span>
+                                <span className="experts-mobile-alert-banner__text">
+                                  {expertAlertCards.length}个专家有新消息
+                                </span>
+                                <button
+                                  type="button"
+                                  className="experts-mobile-alert-banner__action"
+                                  onClick={handleViewExpertAlerts}
+                                >
+                                  查看
+                                </button>
+                              </div>
+                            ) : null}
+
                             <div className="session-files-panel__tabs-shell experts-tabs experts-tabs--desktop" aria-label="专家分类">
                               <div className="session-files-panel__tabs experts-tabs__list" role="tablist" aria-label="专家分类">
                                 {EXPERT_BUSINESS_TABS.map((tab) => (
@@ -10848,11 +12227,18 @@ export default function QuestionPage() {
                                           className="experts-mobile-quick__item"
                                           onClick={() => openExpertCard(card)}
                                         >
-                                          <img
-                                            src={card.mobileIcon ?? card.icon}
-                                            alt=""
-                                          />
-                                          <span>{card.title}</span>
+                                          <span className="experts-mobile-quick__avatar-wrap">
+                                            <img
+                                              src={card.mobileIcon ?? card.icon}
+                                              alt=""
+                                            />
+                                            {showExpertsAlerts && card.alertCount > 0 ? (
+                                              <span className="experts-mobile-quick__alert" aria-hidden="true">
+                                                {formatNavBadgeCount(card.alertCount)}
+                                              </span>
+                                            ) : null}
+                                          </span>
+                                          <span className="experts-mobile-quick__label">{card.title}</span>
                                         </button>
                                       ))}
                                     </div>
@@ -10896,17 +12282,25 @@ export default function QuestionPage() {
                                   <article
                                     key={`${cardKey}-${card.desc}`}
                                     className="expert-card"
+                                    data-expert-alert={showExpertsAlerts && card.alertCount > 0 ? 'true' : undefined}
                                     role="button"
                                     tabIndex={0}
                                     onClick={() => openExpertCard(card)}
                                     onKeyDown={(e) => onEnterKey(e, () => openExpertCard(card))}
                                   >
                                     <div className="expert-card__mobile">
-                                      <img
-                                        src={card.mobileIcon ?? card.icon}
-                                        alt=""
-                                        className="expert-card__mobile-avatar"
-                                      />
+                                      <span className="expert-card__mobile-avatar-wrap">
+                                        <img
+                                          src={card.mobileIcon ?? card.icon}
+                                          alt=""
+                                          className="expert-card__mobile-avatar"
+                                        />
+                                        {showExpertsAlerts && card.alertCount > 0 ? (
+                                          <span className="expert-card__mobile-alert" aria-hidden="true">
+                                            {formatNavBadgeCount(card.alertCount)}
+                                          </span>
+                                        ) : null}
+                                      </span>
                                       <div className="expert-card__mobile-body">
                                         <div className="expert-card__mobile-top">
                                           <div className="expert-card__mobile-copy">
@@ -11009,14 +12403,14 @@ export default function QuestionPage() {
 
                         {showExpertSidePanel ? (
                           <aside className="experts-side-panel" aria-label="专家快捷入口">
-                            {expertRecentCards.length ? (
+                            {resolvedExpertRecentCards.length ? (
                               <section className="experts-side-section">
                                 <div className="experts-side-section__title">
                                   <span className="experts-side-section__accent"></span>
                                   <span>最近使用</span>
                                 </div>
                                 <div className="experts-side-grid">
-                                  {expertRecentCards.slice(0, 9).map((card) => (
+                                  {resolvedExpertRecentCards.slice(0, 9).map((card) => (
                                     <IconButton
                                       key={`recent-${getExpertCardKey(card)}`}
                                       className="experts-side-avatar"
@@ -11079,6 +12473,7 @@ export default function QuestionPage() {
                         </div>
                         <button type="button" className="expert-detail-page__mobile-action" aria-label="目录" aria-expanded={mobileCatalogOpen} onClick={() => setMobileCatalogOpen(true)}>
                           <span className="dora-icon" aria-hidden="true">{ICONS.catalog}</span>
+                          {renderMobileActiveAlertBadge()}
                         </button>
                       </div>
                     </header>
@@ -11087,6 +12482,7 @@ export default function QuestionPage() {
 
                     <div className="expert-detail-page__body">
                       <div
+                        key={`expert-welcome-${getExpertCardKey(activeExpertCard)}`}
                         className={`expert-detail-page__panel-wrap${
                           activeExpertPresentation.showWelcome
                             ? ' expert-detail-page__panel-wrap--has-welcome'
@@ -11127,6 +12523,9 @@ export default function QuestionPage() {
                                 tabIndex={0}
                                 data-practice-deck-variant="expert"
                                 data-practice-deck-scope="expert-question"
+                                style={{
+                                  '--expert-question-natural-height': `${expertQuestionNaturalHeight}px`,
+                                }}
                                 onKeyDown={(event) => {
                                   if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
                                   event.preventDefault()
@@ -11193,6 +12592,33 @@ export default function QuestionPage() {
                                             >
                                               {prompt}
                                             </button>
+                                          </Fragment>
+                                        ))}
+                                      </div>
+                                    </article>
+                                  ))}
+                                </div>
+                                <div
+                                  className="expert-question-carousel__measurements"
+                                  aria-hidden="true"
+                                >
+                                  {activeExpertRecommendationCards.map((card, cardIndex) => (
+                                    <article
+                                      key={`measure-${getExpertCardKey(activeExpertCard)}-${cardIndex}-${card.label}`}
+                                      className="expert-question-card expert-question-card--measure"
+                                    >
+                                      <header className="expert-question-card__header">
+                                        <h2 className="expert-question-card__title">
+                                          <span>{card.label}</span>
+                                        </h2>
+                                      </header>
+                                      <div className="expert-question-card__questions expert-question-card__questions--measure">
+                                        {card.prompts.map((prompt, promptIndex) => (
+                                          <Fragment key={`measure-${card.label}-${promptIndex}-${prompt}`}>
+                                            {promptIndex > 0 ? (
+                                              <span className="expert-question-card__divider" />
+                                            ) : null}
+                                            <div className="expert-question-card__question">{prompt}</div>
                                           </Fragment>
                                         ))}
                                       </div>
@@ -11267,14 +12693,7 @@ export default function QuestionPage() {
                         <div className={`sender ${inputFocused ? 'focused' : ''} ${canSend ? 'has-value' : ''}`}>
                           <div className="sender-inner">
                             {renderSenderInnerContent(activeSessionScope)}
-                            <div className="sender-toolbar">
-                              {renderAttachActions()}
-                              <button type="button" className="send-btn" aria-label="发送" disabled={!canSend} onClick={handleSend}>
-                                <span className="dora-icon send-icon" aria-hidden="true">
-                                  {ICONS.send}
-                                </span>
-                              </button>
-                            </div>
+                            {renderSenderToolbarBlock()}
                           </div>
                         </div>
                       </div>
@@ -11717,24 +13136,7 @@ export default function QuestionPage() {
                         >
                           <div className="sender-inner">
                             {renderSenderInnerContent(activeSessionScope)}
-                            <div className="sender-toolbar">
-                              {renderAttachActions()}
-                              <button
-                                type="button"
-                                className="send-btn"
-                                aria-label={isSessionBusy ? '停止生成' : '发送'}
-                                disabled={!canSend && !isSessionBusy}
-                                onClick={isSessionBusy ? handleStopGeneration : handleSend}
-                              >
-                                {isSessionBusy ? (
-                                  <span className="send-stop-icon" aria-hidden="true"></span>
-                                ) : (
-                                  <span className="dora-icon send-icon" aria-hidden="true">
-                                    {ICONS.send}
-                                  </span>
-                                )}
-                              </button>
-                            </div>
+                            {renderSenderToolbarBlock({ showStop: isSessionBusy })}
                           </div>
                         </div>
                         <p className="library-detail-chat__tip">内容均由AI生成, 仅供参考</p>
@@ -11904,6 +13306,7 @@ export default function QuestionPage() {
       {renderAttachConnectModal()}
       {renderLibraryChatSessionMenuPortal()}
       {renderHistorySessionMenuPortal()}
+      {renderMobileHistoryDialogPortal()}
       {renderAvatarMenuPortal()}
       {renderSessionFilePreviewFullscreenPortal()}
     </div>

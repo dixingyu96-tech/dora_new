@@ -6,6 +6,48 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "48208959",
+      "name": "已点赞",
+      "font_class": "yidianzan",
+      "unicode": "e838",
+      "unicode_decimal": 59448
+    },
+    {
+      "icon_id": "48208958",
+      "name": "已点踩",
+      "font_class": "yidiancai",
+      "unicode": "e839",
+      "unicode_decimal": 59449
+    },
+    {
+      "icon_id": "48208116",
+      "name": "选取文字（移动端）",
+      "font_class": "a-xuanquwenziyidongduan",
+      "unicode": "e837",
+      "unicode_decimal": 59447
+    },
+    {
+      "icon_id": "48208115",
+      "name": "思考",
+      "font_class": "sikao",
+      "unicode": "e836",
+      "unicode_decimal": 59446
+    },
+    {
+      "icon_id": "48194679",
+      "name": "维度值",
+      "font_class": "weiduzhi",
+      "unicode": "e835",
+      "unicode_decimal": 59445
+    },
+    {
+      "icon_id": "48189426",
+      "name": "原始尺寸",
+      "font_class": "yuanshichicun",
+      "unicode": "e834",
+      "unicode_decimal": 59444
+    },
+    {
       "icon_id": "48134175",
       "name": "已收藏（移动端）",
       "font_class": "a-yishoucangyidongduan",

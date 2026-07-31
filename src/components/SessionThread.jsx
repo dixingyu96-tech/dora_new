@@ -1,4 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import uploadExcelImage from '../assets/images/upload_excel.png'
 import uploadMdImage from '../assets/images/upload_md_new.png'
 import uploadHtmlImage from '../assets/images/upload_html.png'
@@ -13,6 +14,97 @@ const ICONS = {
   expand: '\ue7aa',
   shrink: '\ue7ad',
   arrowDown: '\ue797',
+  copy: '\ue792',
+  refresh: '\ue7a4',
+  like: '\ue7a6',
+  dislike: '\ue7a7',
+  added: '\ue806',
+  share: '\ue7a5',
+  followUp: '\ue836',
+  selectText: '\ue837',
+  liked: '\ue838',
+  disliked: '\ue839',
+  schedule: '\ue7ec',
+  toastSuccessFilled: '\ue7b4',
+}
+
+const SCHEDULE_TASK_ICON_ASSET =
+  'http://localhost:3845/assets/5bc447a2465a33e470ff994a4cafbfd714eb69ca.png'
+const SCHEDULE_TASK_DELETE_ICON_ASSET =
+  'http://localhost:3845/assets/a9cc2b8561d55f5e5e688b459c3baf62e45eb3c2.png'
+
+const RESULT_LONG_PRESS_MS = 520
+const RESULT_MENU_WIDTH = 108
+const RESULT_MENU_HEIGHT = 228
+const RESULT_SELECTION_BUBBLE_WIDTH = 136
+const RESULT_SELECTION_BUBBLE_HEIGHT = 40
+const RESULT_FLOATING_GAP = 8
+const RESULT_FLOATING_VIEWPORT_PADDING = 8
+
+const clampFloatingPosition = (value, min, max) => Math.min(Math.max(value, min), Math.max(min, max))
+
+const getResultMenuPosition = ({ clientX, clientY, targetRect }) => {
+  const maxLeft = window.innerWidth - RESULT_MENU_WIDTH - RESULT_FLOATING_VIEWPORT_PADDING
+  const maxTop = window.innerHeight - RESULT_MENU_HEIGHT - RESULT_FLOATING_VIEWPORT_PADDING
+  const horizontalRatio = targetRect.width
+    ? (clientX - targetRect.left) / targetRect.width
+    : 0.5
+
+  let left
+  if (horizontalRatio <= 1 / 3) {
+    left = targetRect.left
+  } else if (horizontalRatio >= 2 / 3) {
+    left = targetRect.right - RESULT_MENU_WIDTH
+  } else {
+    left = clientX - RESULT_MENU_WIDTH / 2
+  }
+
+  const downTop = clientY + RESULT_FLOATING_GAP
+  const upTop = clientY - RESULT_MENU_HEIGHT - RESULT_FLOATING_GAP
+  const canOpenDown = downTop <= maxTop
+  const canOpenUp = upTop >= RESULT_FLOATING_VIEWPORT_PADDING
+  const verticalRatio = targetRect.height
+    ? (clientY - targetRect.top) / targetRect.height
+    : 0.5
+
+  let top
+  if (verticalRatio <= 1 / 3 && canOpenDown) {
+    top = downTop
+  } else if (verticalRatio >= 2 / 3 && canOpenUp) {
+    top = upTop
+  } else if (canOpenDown && (!canOpenUp || verticalRatio < 0.5)) {
+    top = downTop
+  } else if (canOpenUp) {
+    top = upTop
+  } else {
+    top = clientY - RESULT_MENU_HEIGHT / 2
+  }
+
+  return {
+    left: clampFloatingPosition(left, RESULT_FLOATING_VIEWPORT_PADDING, maxLeft),
+    top: clampFloatingPosition(top, RESULT_FLOATING_VIEWPORT_PADDING, maxTop),
+  }
+}
+
+const getSelectionBubblePosition = (selectionRect) => {
+  const maxLeft = window.innerWidth - RESULT_SELECTION_BUBBLE_WIDTH - RESULT_FLOATING_VIEWPORT_PADDING
+  const maxTop = window.innerHeight - RESULT_SELECTION_BUBBLE_HEIGHT - RESULT_FLOATING_VIEWPORT_PADDING
+  const centerX = selectionRect.left + selectionRect.width / 2
+  const topAbove = selectionRect.top - RESULT_SELECTION_BUBBLE_HEIGHT - RESULT_FLOATING_GAP
+  const topBelow = selectionRect.bottom + RESULT_FLOATING_GAP
+
+  return {
+    left: clampFloatingPosition(
+      centerX - RESULT_SELECTION_BUBBLE_WIDTH / 2,
+      RESULT_FLOATING_VIEWPORT_PADDING,
+      maxLeft,
+    ),
+    top: clampFloatingPosition(
+      topAbove >= RESULT_FLOATING_VIEWPORT_PADDING ? topAbove : topBelow,
+      RESULT_FLOATING_VIEWPORT_PADDING,
+      maxTop,
+    ),
+  }
 }
 
 const STEP_PAUSE_MS = 220
@@ -650,6 +742,35 @@ const formatUserSentAt = (value) => {
   return `${year}年${month}月${day}日 ${hours}:${minutes}`
 }
 
+const getAssistantSummaryParts = (prompt = '') => {
+  const normalizedPrompt = prompt.trim()
+
+  if (/广东省.*潜量.*10个客户|潜量最高的10个客户/.test(normalizedPrompt)) {
+    return [
+      { text: '在广东省，潜量最高的10个客户中，' },
+      { text: '宝钢湛江钢铁有限公司以2386989.56 L 的估算2023用油潜量位居第一', strong: true },
+      {
+        text: '，其次是珠海格力电器股份有限公司（2050181.35 L）和广东中南钢铁股份有限公司（1528371.16 L）。前十名客户的潜量均超过92万升。',
+      },
+    ]
+  }
+
+  if (/江苏省.*销售额/.test(normalizedPrompt)) {
+    return [
+      { text: '已完成江苏省销售表现的汇总与核对，' },
+      { text: '核心销售额、趋势变化和主要贡献来源已完成梳理', strong: true },
+      { text: '。建议结合时间、区域及商品维度继续定位增长来源与异常波动。' },
+    ]
+  }
+
+  const focusText = normalizedPrompt || '本次任务'
+  return [
+    { text: '围绕「' },
+    { text: focusText, strong: true },
+    { text: '」已完成核心信息梳理与关键结论提炼。建议结合结果中的重点指标和异常信号继续下钻，并优先验证影响范围较大的问题。' },
+  ]
+}
+
 const fallbackCopyText = (text) => {
   if (typeof document === 'undefined') return false
 
@@ -703,6 +824,53 @@ function CopiedMessageIcon() {
     <span aria-hidden="true" className="dora-icon session-thread__user-copy-icon session-thread__user-copy-icon--glyph">
       {'\ue806'}
     </span>
+  )
+}
+
+function ScheduleTaskResultCard({ scheduleAction }) {
+  const task = scheduleAction?.task
+  if (!task) return null
+
+  const channelLabelMap = {
+    agent: '平台',
+    feishu: '飞书',
+    ding: '钉钉',
+    wechat: '企业微信',
+  }
+  const channelText = (task.channels ?? ['agent'])
+    .map((channel) => channelLabelMap[channel])
+    .filter(Boolean)
+    .join('；')
+  const state = scheduleAction.action ?? 'create'
+  const icon = state === 'delete' ? SCHEDULE_TASK_DELETE_ICON_ASSET : SCHEDULE_TASK_ICON_ASSET
+
+  return (
+    <section
+      className={`session-schedule-card session-schedule-card--${state}`}
+      aria-label={`${task.title}${scheduleAction.status}`}
+    >
+      <header className="session-schedule-card__header">
+        <span className="session-schedule-card__identity">
+          <img src={icon} alt="" className="session-schedule-card__icon" aria-hidden="true" />
+          <strong className="session-schedule-card__title">{task.title}</strong>
+        </span>
+        <span className="session-schedule-card__status">{scheduleAction.status}</span>
+      </header>
+      <div className="session-schedule-card__body">
+        <p className="session-schedule-card__summary">{task.summary}</p>
+        <span className="session-schedule-card__divider" aria-hidden="true" />
+        <dl className="session-schedule-card__meta">
+          <div>
+            <dt>执行频率</dt>
+            <dd>{task.scheduleText}</dd>
+          </div>
+          <div>
+            <dt>推送渠道</dt>
+            <dd>{channelText || '平台'}</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
   )
 }
 
@@ -1126,14 +1294,25 @@ export default function SessionThread({
   isGenerating,
   completedSessionMeta,
   onGenerationComplete,
+  onFollowUp,
+  isMobileViewport = false,
 }) {
   const [thinkingExpanded, setThinkingExpanded] = useState(false)
   const [thinkingCollapsed, setThinkingCollapsed] = useState(false)
   const [thinkingCollapsing, setThinkingCollapsing] = useState(false)
   const [showTopFade, setShowTopFade] = useState(false)
   const [frozenSummaryStatus, setFrozenSummaryStatus] = useState('')
-  const [copyLabel, setCopyLabel] = useState('复制')
-  const [isCopySuccess, setIsCopySuccess] = useState(false)
+  const [desktopCopyLabel, setDesktopCopyLabel] = useState('复制')
+  const [desktopCopySuccess, setDesktopCopySuccess] = useState(false)
+  const [activeUserMetaTurnId, setActiveUserMetaTurnId] = useState(null)
+  const [copiedUserTurnId, setCopiedUserTurnId] = useState(null)
+  const [activeAssistantResultTurnId, setActiveAssistantResultTurnId] = useState(null)
+  const [copiedAssistantTurnId, setCopiedAssistantTurnId] = useState(null)
+  const [assistantFeedbackByTurn, setAssistantFeedbackByTurn] = useState({})
+  const [copyToastVisible, setCopyToastVisible] = useState(false)
+  const [feedbackToast, setFeedbackToast] = useState(null)
+  const [resultContextMenu, setResultContextMenu] = useState(null)
+  const [resultSelectionBubble, setResultSelectionBubble] = useState(null)
   const [expandedTurnIds, setExpandedTurnIds] = useState({})
   const [senderFilesWidth, setSenderFilesWidth] = useState(0)
   const bodyRef = useRef(null)
@@ -1142,6 +1321,11 @@ export default function SessionThread({
   const completionNotifiedKeyRef = useRef('')
   const collapseTimerRef = useRef(null)
   const copyResetTimerRef = useRef(null)
+  const desktopCopyResetTimerRef = useRef(null)
+  const feedbackToastTimerRef = useRef(null)
+  const resultLongPressRef = useRef(null)
+  const selectedResultSummaryRef = useRef(null)
+  const suppressResultClickRef = useRef(false)
   const sessionTurns = useMemo(() => {
     if (turns.length) return turns
     if (!userPrompt && !userFiles.length) return []
@@ -1162,13 +1346,16 @@ export default function SessionThread({
   const currentUserSentAt = currentTurn?.sentAt ?? userSentAt
   const currentCompletedMeta = currentTurn?.completedSessionMeta ?? completedSessionMeta
   const streamKey = `${currentPrompt}:${currentUserFiles.map((file) => file.id ?? file.name).join('|')}`
-  const userMessageCopyText = useMemo(() => {
+  const desktopUserMessageCopyText = useMemo(() => {
     const fileNames = currentUserFiles.map((file) => file.name).filter(Boolean)
     if (currentPrompt && fileNames.length) return `${currentPrompt}\n${fileNames.join('\n')}`
     if (currentPrompt) return currentPrompt
     return fileNames.join('\n')
   }, [currentPrompt, currentUserFiles])
-  const formattedUserSentAt = useMemo(() => formatUserSentAt(currentUserSentAt), [currentUserSentAt])
+  const formattedCurrentUserSentAt = useMemo(
+    () => formatUserSentAt(currentUserSentAt),
+    [currentUserSentAt],
+  )
   const thinkingSteps = useMemo(
     () => createThinkingSteps({ userPrompt: currentPrompt, userFiles: currentUserFiles }),
     [currentPrompt, currentUserFiles],
@@ -1269,34 +1456,280 @@ export default function SessionThread({
     [clearCollapseTimer],
   )
 
-  const handleCopyUserMessage = useCallback(async () => {
-    if (!userMessageCopyText) return
+  const handleDesktopCopyUserMessage = useCallback(async () => {
+    if (!desktopUserMessageCopyText) return
 
     try {
-      const copied = await copyTextToClipboard(userMessageCopyText)
+      const copied = await copyTextToClipboard(desktopUserMessageCopyText)
       if (!copied) throw new Error('copy-failed')
-      setCopyLabel('已添加')
-      setIsCopySuccess(true)
-      if (copyResetTimerRef.current) {
-        window.clearTimeout(copyResetTimerRef.current)
+      setDesktopCopyLabel('已添加')
+      setDesktopCopySuccess(true)
+      if (desktopCopyResetTimerRef.current) {
+        window.clearTimeout(desktopCopyResetTimerRef.current)
       }
-      copyResetTimerRef.current = window.setTimeout(() => {
-        copyResetTimerRef.current = null
-        setCopyLabel('复制')
-        setIsCopySuccess(false)
+      desktopCopyResetTimerRef.current = window.setTimeout(() => {
+        desktopCopyResetTimerRef.current = null
+        setDesktopCopyLabel('复制')
+        setDesktopCopySuccess(false)
       }, 3000)
     } catch {
-      setCopyLabel('复制失败')
-      setIsCopySuccess(false)
+      setDesktopCopyLabel('复制失败')
+      setDesktopCopySuccess(false)
+      if (desktopCopyResetTimerRef.current) {
+        window.clearTimeout(desktopCopyResetTimerRef.current)
+      }
+      desktopCopyResetTimerRef.current = window.setTimeout(() => {
+        desktopCopyResetTimerRef.current = null
+        setDesktopCopyLabel('复制')
+      }, 3000)
+    }
+  }, [desktopUserMessageCopyText])
+
+  const handleCopyUserMessage = useCallback(async (turnId, copyText) => {
+    if (!copyText) return
+
+    try {
+      const copied = await copyTextToClipboard(copyText)
+      if (!copied) throw new Error('copy-failed')
+      setCopiedUserTurnId(turnId)
+      setCopiedAssistantTurnId(null)
+      setCopyToastVisible(true)
       if (copyResetTimerRef.current) {
         window.clearTimeout(copyResetTimerRef.current)
       }
       copyResetTimerRef.current = window.setTimeout(() => {
         copyResetTimerRef.current = null
-        setCopyLabel('复制')
+        setCopiedUserTurnId(null)
+        setCopiedAssistantTurnId(null)
+        setCopyToastVisible(false)
       }, 3000)
+    } catch {
+      setCopiedUserTurnId(null)
+      setCopyToastVisible(false)
+      if (copyResetTimerRef.current) {
+        window.clearTimeout(copyResetTimerRef.current)
+        copyResetTimerRef.current = null
+      }
     }
-  }, [userMessageCopyText])
+  }, [])
+
+  const handleCopyAssistantResult = useCallback(async (turnId, copyText) => {
+    if (!copyText) return
+
+    try {
+      const copied = await copyTextToClipboard(copyText)
+      if (!copied) throw new Error('copy-failed')
+      setCopiedUserTurnId(null)
+      setCopiedAssistantTurnId(turnId)
+      setCopyToastVisible(true)
+      if (copyResetTimerRef.current) {
+        window.clearTimeout(copyResetTimerRef.current)
+      }
+      copyResetTimerRef.current = window.setTimeout(() => {
+        copyResetTimerRef.current = null
+        setCopiedUserTurnId(null)
+        setCopiedAssistantTurnId(null)
+        setCopyToastVisible(false)
+      }, 3000)
+    } catch {
+      setCopiedAssistantTurnId(null)
+      setCopyToastVisible(false)
+      if (copyResetTimerRef.current) {
+        window.clearTimeout(copyResetTimerRef.current)
+        copyResetTimerRef.current = null
+      }
+    }
+  }, [])
+
+  const showFeedbackToast = useCallback((type) => {
+    if (feedbackToastTimerRef.current) {
+      window.clearTimeout(feedbackToastTimerRef.current)
+    }
+
+    setFeedbackToast({
+      id: `${type}-${Date.now()}`,
+      message: type === 'like' ? '感谢支持' : '感谢反馈，我们会继续改进',
+    })
+    feedbackToastTimerRef.current = window.setTimeout(() => {
+      feedbackToastTimerRef.current = null
+      setFeedbackToast(null)
+    }, 3000)
+  }, [])
+
+  const clearResultLongPress = useCallback(() => {
+    if (resultLongPressRef.current?.timer) {
+      window.clearTimeout(resultLongPressRef.current.timer)
+    }
+    resultLongPressRef.current = null
+  }, [])
+
+  const clearResultSelection = useCallback(() => {
+    if (typeof window === 'undefined') return
+    window.getSelection()?.removeAllRanges()
+  }, [])
+
+  const closeResultFloatingPanels = useCallback(
+    ({ clearSelection = true } = {}) => {
+      clearResultLongPress()
+      setResultContextMenu(null)
+      setResultSelectionBubble(null)
+      selectedResultSummaryRef.current = null
+      if (clearSelection) clearResultSelection()
+    },
+    [clearResultLongPress, clearResultSelection],
+  )
+
+  const applyAssistantFeedback = useCallback(
+    (turnKey, action) => {
+      const currentFeedback = assistantFeedbackByTurn[turnKey] ?? ''
+      const nextFeedback = currentFeedback === action ? '' : action
+      setAssistantFeedbackByTurn((current) => ({
+        ...current,
+        [turnKey]: nextFeedback,
+      }))
+      if (nextFeedback) showFeedbackToast(nextFeedback)
+    },
+    [assistantFeedbackByTurn, showFeedbackToast],
+  )
+
+  const openResultContextMenu = useCallback(
+    ({ clientX, clientY, target, turnKey, text }) => {
+      if (!target || typeof window === 'undefined') return
+      clearResultSelection()
+      selectedResultSummaryRef.current = target
+      setResultSelectionBubble(null)
+      setResultContextMenu({
+        turnKey,
+        text,
+        ...getResultMenuPosition({
+          clientX,
+          clientY,
+          targetRect: target.getBoundingClientRect(),
+        }),
+      })
+      suppressResultClickRef.current = true
+    },
+    [clearResultSelection],
+  )
+
+  const startResultLongPress = useCallback(
+    (event, turnKey, text) => {
+      if (event.button !== 0) return
+      clearResultLongPress()
+      const target = event.currentTarget
+      const startX = event.clientX
+      const startY = event.clientY
+      const timer = window.setTimeout(() => {
+        resultLongPressRef.current = null
+        openResultContextMenu({
+          clientX: startX,
+          clientY: startY,
+          target,
+          turnKey,
+          text,
+        })
+      }, RESULT_LONG_PRESS_MS)
+      resultLongPressRef.current = { timer, startX, startY }
+    },
+    [clearResultLongPress, openResultContextMenu],
+  )
+
+  const moveResultLongPress = useCallback(
+    (event) => {
+      const current = resultLongPressRef.current
+      if (!current) return
+      if (Math.hypot(event.clientX - current.startX, event.clientY - current.startY) > 8) {
+        clearResultLongPress()
+      }
+    },
+    [clearResultLongPress],
+  )
+
+  const selectResultText = useCallback(() => {
+    const target = selectedResultSummaryRef.current
+    if (!target || !resultContextMenu || typeof window === 'undefined') return
+
+    const selection = window.getSelection()
+    if (!selection) return
+    const range = document.createRange()
+    range.selectNodeContents(target)
+    selection.removeAllRanges()
+    selection.addRange(range)
+    const selectedText = selection.toString().trim() || resultContextMenu.text
+    const selectionRect = range.getBoundingClientRect()
+
+    setResultContextMenu(null)
+    setResultSelectionBubble({
+      turnKey: resultContextMenu.turnKey,
+      text: selectedText,
+      ...getSelectionBubblePosition(selectionRect),
+    })
+  }, [resultContextMenu])
+
+  const handleResultMenuAction = useCallback(
+    async (action, source = resultContextMenu) => {
+      if (!source) return
+      const { turnKey, text } = source
+
+      if (action === 'select') {
+        selectResultText()
+        return
+      }
+      if (action === 'follow-up') {
+        onFollowUp?.(text)
+      } else if (action === 'copy') {
+        await handleCopyAssistantResult(turnKey, text)
+      } else if (action === 'share') {
+        if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+          try {
+            await navigator.share({ text })
+          } catch {
+            // The native share sheet may be dismissed without taking action.
+          }
+        } else {
+          await handleCopyAssistantResult(turnKey, text)
+        }
+      } else if (action === 'like' || action === 'dislike') {
+        applyAssistantFeedback(turnKey, action)
+      }
+
+      closeResultFloatingPanels()
+    },
+    [
+      applyAssistantFeedback,
+      closeResultFloatingPanels,
+      handleCopyAssistantResult,
+      onFollowUp,
+      resultContextMenu,
+      selectResultText,
+    ],
+  )
+
+  useEffect(() => {
+    if (!resultContextMenu && !resultSelectionBubble) return undefined
+
+    const handleOutsidePointerDown = (event) => {
+      if (event.target.closest?.('.session-thread__result-context-menu, .session-thread__selection-bubble')) {
+        return
+      }
+      closeResultFloatingPanels()
+    }
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') closeResultFloatingPanels()
+    }
+    const handleViewportChange = () => closeResultFloatingPanels()
+
+    document.addEventListener('pointerdown', handleOutsidePointerDown, true)
+    document.addEventListener('keydown', handleEscape)
+    window.addEventListener('resize', handleViewportChange)
+    window.addEventListener('scroll', handleViewportChange, true)
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
+      document.removeEventListener('keydown', handleEscape)
+      window.removeEventListener('resize', handleViewportChange)
+      window.removeEventListener('scroll', handleViewportChange, true)
+    }
+  }, [closeResultFloatingPanels, resultContextMenu, resultSelectionBubble])
 
   useEffect(() => {
     clearCollapseTimer()
@@ -1363,11 +1796,21 @@ export default function SessionThread({
   useEffect(
     () => () => {
       clearCollapseTimer()
-      if (!copyResetTimerRef.current) return
-      window.clearTimeout(copyResetTimerRef.current)
-      copyResetTimerRef.current = null
+      if (copyResetTimerRef.current) {
+        window.clearTimeout(copyResetTimerRef.current)
+        copyResetTimerRef.current = null
+      }
+      if (desktopCopyResetTimerRef.current) {
+        window.clearTimeout(desktopCopyResetTimerRef.current)
+        desktopCopyResetTimerRef.current = null
+      }
+      if (feedbackToastTimerRef.current) {
+        window.clearTimeout(feedbackToastTimerRef.current)
+        feedbackToastTimerRef.current = null
+      }
+      clearResultLongPress()
     },
-    [clearCollapseTimer],
+    [clearCollapseTimer, clearResultLongPress],
   )
 
   useEffect(() => {
@@ -1389,7 +1832,16 @@ export default function SessionThread({
 
   useEffect(() => {
     setExpandedTurnIds({})
-  }, [resetExpandKey])
+    setDesktopCopyLabel('复制')
+    setDesktopCopySuccess(false)
+    setActiveUserMetaTurnId(null)
+    setCopiedUserTurnId(null)
+    setActiveAssistantResultTurnId(null)
+    setCopiedAssistantTurnId(null)
+    setAssistantFeedbackByTurn({})
+    setCopyToastVisible(false)
+    closeResultFloatingPanels()
+  }, [closeResultFloatingPanels, resetExpandKey])
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -1471,8 +1923,11 @@ export default function SessionThread({
   const renderUserTurn = (turn, { showMeta = false } = {}) => {
     const turnFiles = turn?.userFiles ?? []
     const turnPrompt = turn?.prompt ?? ''
-    const turnSentAt = showMeta ? formattedUserSentAt : ''
     const turnKey = getTurnKey(turn)
+    const turnSentAt = formatUserSentAt(turn?.sentAt)
+    const turnCopyText = turnPrompt
+    const isMetaVisible = activeUserMetaTurnId === turnKey
+    const isCopySuccess = copiedUserTurnId === turnKey
     const fileLayout = getTurnFileLayout(turn)
 
     return (
@@ -1521,21 +1976,65 @@ export default function SessionThread({
             </div>
           </div>
         ) : null}
-        {turnPrompt || turnSentAt || (showMeta && userMessageCopyText) ? (
+        {isMobileViewport ? (
+          turnPrompt || turnSentAt || turnCopyText ? (
+            <div className={`session-thread__user-entry ${isMetaVisible ? 'is-meta-visible' : ''}`}>
+              {turn?.scheduleExecution ? (
+                <span className="session-thread__schedule-tag">
+                  <img src={SCHEDULE_TASK_ICON_ASSET} alt="" aria-hidden="true" />
+                  <span>{turn.scheduleExecution.tagLabel}</span>
+                </span>
+              ) : null}
+              {turnPrompt ? (
+                <button
+                  type="button"
+                  className="session-thread__user"
+                  aria-expanded={isMetaVisible}
+                  aria-controls={`${turnKey}-user-meta`}
+                  onClick={() => setActiveUserMetaTurnId((currentId) => (currentId === turnKey ? null : turnKey))}
+                >
+                  {turnPrompt}
+                </button>
+              ) : null}
+              {turnSentAt || turnCopyText ? (
+                <div className="session-thread__user-meta" id={`${turnKey}-user-meta`} aria-hidden={!isMetaVisible}>
+                  {turnSentAt ? <span className="session-thread__user-time">{turnSentAt}</span> : null}
+                  {turnCopyText ? (
+                    <button
+                      type="button"
+                      className="session-thread__user-copy"
+                      aria-label={isCopySuccess ? '已添加' : '复制'}
+                      title={isCopySuccess ? '已添加' : '复制'}
+                      tabIndex={isMetaVisible ? 0 : -1}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        handleCopyUserMessage(turnKey, turnCopyText)
+                      }}
+                    >
+                      {isCopySuccess ? <CopiedMessageIcon /> : <CopyMessageIcon />}
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          ) : null
+        ) : turnPrompt || (showMeta && (formattedCurrentUserSentAt || desktopUserMessageCopyText)) ? (
           <div className="session-thread__user-entry">
             {turnPrompt ? <div className="session-thread__user">{turnPrompt}</div> : null}
-            {turnSentAt || (showMeta && userMessageCopyText) ? (
+            {showMeta && (formattedCurrentUserSentAt || desktopUserMessageCopyText) ? (
               <div className="session-thread__user-meta">
-                {turnSentAt ? <span className="session-thread__user-time">{turnSentAt}</span> : null}
-                {showMeta && userMessageCopyText ? (
+                {formattedCurrentUserSentAt ? (
+                  <span className="session-thread__user-time">{formattedCurrentUserSentAt}</span>
+                ) : null}
+                {desktopUserMessageCopyText ? (
                   <button
                     type="button"
                     className="session-thread__user-copy"
-                    aria-label={copyLabel}
-                    title={copyLabel}
-                    onClick={handleCopyUserMessage}
+                    aria-label={desktopCopyLabel}
+                    title={desktopCopyLabel}
+                    onClick={handleDesktopCopyUserMessage}
                   >
-                    {isCopySuccess ? <CopiedMessageIcon /> : <CopyMessageIcon />}
+                    {desktopCopySuccess ? <CopiedMessageIcon /> : <CopyMessageIcon />}
                   </button>
                 ) : null}
               </div>
@@ -1546,8 +2045,139 @@ export default function SessionThread({
     )
   }
 
+  const renderAssistantResult = (turn) => {
+    const turnKey = getTurnKey(turn)
+    const summaryParts = turn?.assistantSummary
+      ? [{ text: turn.assistantSummary }]
+      : getAssistantSummaryParts(turn?.prompt)
+    const summaryText = summaryParts.map((part) => part.text).join('')
+    const resultTime = formatUserSentAt(turn?.completedSessionMeta?.finishedAt ?? turn?.sentAt)
+    const isTimeVisible = activeAssistantResultTurnId === turnKey
+    const isCopySuccess = copiedAssistantTurnId === turnKey
+    const feedback = assistantFeedbackByTurn[turnKey] ?? ''
+
+    const handleResultActionClick = (event, action) => {
+      event.stopPropagation()
+      if (action === 'copy') {
+        handleCopyAssistantResult(turnKey, summaryText)
+        return
+      }
+      if (action === 'like' || action === 'dislike') {
+        applyAssistantFeedback(turnKey, action)
+      }
+    }
+
+    return (
+      <div
+        className={`session-thread__result ${isTimeVisible ? 'is-time-visible' : ''}`}
+        onClick={() => {
+          if (suppressResultClickRef.current) {
+            suppressResultClickRef.current = false
+            return
+          }
+          setActiveAssistantResultTurnId((currentId) => (currentId === turnKey ? null : turnKey))
+        }}
+      >
+        <div className="session-thread__result-divider" aria-hidden="true" />
+        <p
+          className="session-thread__result-summary"
+          onPointerDown={(event) => startResultLongPress(event, turnKey, summaryText)}
+          onPointerMove={moveResultLongPress}
+          onPointerUp={clearResultLongPress}
+          onPointerCancel={clearResultLongPress}
+          onPointerLeave={clearResultLongPress}
+          onContextMenu={(event) => {
+            event.preventDefault()
+            clearResultLongPress()
+            openResultContextMenu({
+              clientX: event.clientX,
+              clientY: event.clientY,
+              target: event.currentTarget,
+              turnKey,
+              text: summaryText,
+            })
+          }}
+        >
+          {summaryParts.map((part, index) =>
+            part.strong ? (
+              <strong key={`${turnKey}-summary-${index}`}>{part.text}</strong>
+            ) : (
+              <span key={`${turnKey}-summary-${index}`}>{part.text}</span>
+            ),
+          )}
+        </p>
+        {turn?.scheduleAction ? (
+          <ScheduleTaskResultCard scheduleAction={turn.scheduleAction} />
+        ) : null}
+        <div className="session-thread__result-actions">
+          <div className="session-thread__result-action-group" aria-label="反馈操作">
+            <button
+              type="button"
+              className={`session-thread__result-action ${isCopySuccess ? 'is-active' : ''}`}
+              aria-label={isCopySuccess ? '已添加' : '复制结果'}
+              title={isCopySuccess ? '已添加' : '复制'}
+              onClick={(event) => handleResultActionClick(event, 'copy')}
+            >
+              <span className="dora-icon" aria-hidden="true">{isCopySuccess ? ICONS.added : ICONS.copy}</span>
+            </button>
+            <button
+              type="button"
+              className="session-thread__result-action"
+              aria-label="重新生成"
+              title="重新生成"
+              onClick={(event) => handleResultActionClick(event, 'refresh')}
+            >
+              <span className="dora-icon" aria-hidden="true">{ICONS.refresh}</span>
+            </button>
+            <button
+              type="button"
+              className={`session-thread__result-action ${feedback === 'like' ? 'is-active' : ''}`}
+              aria-label="点赞"
+              aria-pressed={feedback === 'like'}
+              title="点赞"
+              onClick={(event) => handleResultActionClick(event, 'like')}
+            >
+              {feedback === 'like' ? (
+                <span
+                  className="dora-icon session-thread__result-feedback-icon"
+                  aria-hidden="true"
+                >
+                  {ICONS.liked}
+                </span>
+              ) : (
+                <span className="dora-icon" aria-hidden="true">{ICONS.like}</span>
+              )}
+            </button>
+            <button
+              type="button"
+              className={`session-thread__result-action ${feedback === 'dislike' ? 'is-active' : ''}`}
+              aria-label="点踩"
+              aria-pressed={feedback === 'dislike'}
+              title="点踩"
+              onClick={(event) => handleResultActionClick(event, 'dislike')}
+            >
+              {feedback === 'dislike' ? (
+                <span
+                  className="dora-icon session-thread__result-feedback-icon"
+                  aria-hidden="true"
+                >
+                  {ICONS.disliked}
+                </span>
+              ) : (
+                <span className="dora-icon" aria-hidden="true">{ICONS.dislike}</span>
+              )}
+            </button>
+          </div>
+          {isTimeVisible && resultTime ? (
+            <time className="session-thread__result-time" dateTime={turn?.sentAt}>{resultTime}</time>
+          ) : null}
+        </div>
+      </div>
+    )
+  }
+
   const renderHistoricalAssistant = (turn) => {
-    const summary =
+    const thinkingSummary =
       turn?.completedSessionMeta?.summaryStatus ||
       formatThinkingSummary(turn?.completedSessionMeta?.completedCount ?? 0, turn?.completedSessionMeta?.durationMs ?? 0)
 
@@ -1560,10 +2190,11 @@ export default function SessionThread({
         <div className="session-thinking is-collapsed is-stopped session-thinking--history">
           <div className="session-thinking__card">
             <div className="session-thinking__header">
-              <ThinkingStatus text={summary} />
+              <ThinkingStatus text={thinkingSummary} />
             </div>
           </div>
         </div>
+        {isMobileViewport ? renderAssistantResult(turn) : null}
       </div>
     )
   }
@@ -1578,8 +2209,129 @@ export default function SessionThread({
       ))}
 
       {currentTurn ? (
-        <Fragment key={getTurnKey(currentTurn)}>{renderUserTurn(currentTurn, { showMeta: true })}</Fragment>
+        <Fragment key={getTurnKey(currentTurn)}>
+          {renderUserTurn(currentTurn, { showMeta: true })}
+        </Fragment>
       ) : null}
+
+      {isMobileViewport && copyToastVisible && typeof document !== 'undefined'
+        ? createPortal(
+            <div className="session-thread__copy-toast" role="status" aria-live="polite">
+              <span aria-hidden="true" className="dora-icon session-thread__copy-toast-icon">
+                {ICONS.toastSuccessFilled}
+              </span>
+              <span>复制成功</span>
+            </div>,
+            document.body,
+          )
+        : null}
+
+      {isMobileViewport && feedbackToast && typeof document !== 'undefined'
+        ? createPortal(
+            <div
+              key={feedbackToast.id}
+              className="session-thread__feedback-toast"
+              role="status"
+              aria-live="polite"
+            >
+              {feedbackToast.message}
+            </div>,
+            document.body,
+          )
+        : null}
+
+      {isMobileViewport && resultContextMenu && typeof document !== 'undefined'
+        ? createPortal(
+            <div
+              className="session-thread__result-context-menu"
+              role="menu"
+              aria-label="返回内容操作"
+              style={{ top: resultContextMenu.top, left: resultContextMenu.left }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button type="button" role="menuitem" onClick={() => handleResultMenuAction('follow-up')}>
+                <span className="dora-icon" aria-hidden="true">{ICONS.followUp}</span>
+                <span>追问</span>
+              </button>
+              <button type="button" role="menuitem" onClick={() => handleResultMenuAction('share')}>
+                <span className="dora-icon" aria-hidden="true">{ICONS.share}</span>
+                <span>分享</span>
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="has-divider"
+                onClick={() => handleResultMenuAction('copy')}
+              >
+                <span className="dora-icon" aria-hidden="true">{ICONS.copy}</span>
+                <span>复制</span>
+              </button>
+              <button type="button" role="menuitem" onClick={() => handleResultMenuAction('select')}>
+                <span className="dora-icon" aria-hidden="true">{ICONS.selectText}</span>
+                <span>选取文字</span>
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className={`has-divider ${
+                  assistantFeedbackByTurn[resultContextMenu.turnKey] === 'like' ? 'is-active' : ''
+                }`}
+                onClick={() => handleResultMenuAction('like')}
+              >
+                <span className="dora-icon" aria-hidden="true">
+                  {assistantFeedbackByTurn[resultContextMenu.turnKey] === 'like' ? ICONS.liked : ICONS.like}
+                </span>
+                <span>喜欢</span>
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className={assistantFeedbackByTurn[resultContextMenu.turnKey] === 'dislike' ? 'is-active' : ''}
+                onClick={() => handleResultMenuAction('dislike')}
+              >
+                <span className="dora-icon" aria-hidden="true">
+                  {assistantFeedbackByTurn[resultContextMenu.turnKey] === 'dislike'
+                    ? ICONS.disliked
+                    : ICONS.dislike}
+                </span>
+                <span>不喜欢</span>
+              </button>
+            </div>,
+            document.body,
+          )
+        : null}
+
+      {isMobileViewport && resultSelectionBubble && typeof document !== 'undefined'
+        ? createPortal(
+            <div
+              className="session-thread__selection-bubble"
+              role="menu"
+              aria-label="选中文字操作"
+              style={{ top: resultSelectionBubble.top, left: resultSelectionBubble.left }}
+              onPointerDown={(event) => event.preventDefault()}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => handleResultMenuAction('follow-up', resultSelectionBubble)}
+              >
+                <span className="dora-icon" aria-hidden="true">{ICONS.followUp}</span>
+                <span>追问</span>
+              </button>
+              <span className="session-thread__selection-bubble-divider" aria-hidden="true" />
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => handleResultMenuAction('copy', resultSelectionBubble)}
+              >
+                <span className="dora-icon" aria-hidden="true">{ICONS.copy}</span>
+                <span>复制</span>
+              </button>
+            </div>,
+            document.body,
+          )
+        : null}
 
       {currentTurn && showAssistantThinking ? (
         <div className="session-thread__assistant">
@@ -1634,6 +2386,9 @@ export default function SessionThread({
               <ThinkingWait active={stream.showWait && isGenerating} lastActivityAt={stream.lastActivityAt} />
             ) : null}
           </div>
+          {isMobileViewport && (stream.phase === 'done' || isStaticCompletedView)
+            ? renderAssistantResult(currentTurn)
+            : null}
         </div>
       ) : null}
     </div>
