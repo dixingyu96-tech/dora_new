@@ -14,6 +14,7 @@ const ICONS = {
   expand: '\ue7aa',
   shrink: '\ue7ad',
   arrowDown: '\ue797',
+  arrowRight: '\ue798',
   copy: '\ue792',
   refresh: '\ue7a4',
   like: '\ue7a6',
@@ -26,6 +27,16 @@ const ICONS = {
   disliked: '\ue839',
   schedule: '\ue7ec',
   toastSuccessFilled: '\ue7b4',
+  chainThought: '\ue844',
+  chainSearch: '\ue83f',
+  chainView: '\ue840',
+  chainExecute: '\ue83e',
+  chainGenerate: '\ue83d',
+  chainTool: '\ue845',
+  chainChart: '\ue841',
+  chainQueryTable: '\ue843',
+  chainAnalysisTable: '\ue842',
+  close: '\ue7ab',
 }
 
 const SCHEDULE_TASK_ICON_ASSET =
@@ -350,7 +361,7 @@ const buildStepFrame = ({ scenario, prompt = '', signals }) => {
     return {
       id: 'frame',
       title: '明确归因口径与优先级',
-      description: `我会先确认「${focusText}」到底更偏向解释满意度、投诉集中点还是复购风险，再决定后面是按问题主题、客户阶段还是服务触点来拆因果链，避免看上去分析很完整，但没有回答最关键的归因问题。`,
+      description: `先想清楚「${focusText}」更想弄明白的是满意度、投诉，还是复购风险，后面再按这个重点往下拆。`,
     }
   }
 
@@ -358,7 +369,7 @@ const buildStepFrame = ({ scenario, prompt = '', signals }) => {
     return {
       id: 'frame',
       title: '明确比较基线与判断标准',
-      description: `这一步会先锁定谁是主比较对象、谁是参照组、最后要得出的是“差多少”还是“为什么差”，并把时间窗、样本规模和判断标准先讲清楚，这样后面每个差异结论才不会失焦。`,
+      description: '先定好比的是谁、跟谁比、要看差多少还是为什么差，时间范围和判断标准也一并说清楚。',
     }
   }
 
@@ -366,7 +377,7 @@ const buildStepFrame = ({ scenario, prompt = '', signals }) => {
     return {
       id: 'frame',
       title: '明确汇报视角与管理关注点',
-      description: `我会先按管理层阅读习惯判断这次更该突出结果波动、异常原因还是后续动作，把“需要被解释的部分”和“只需要快速带过的部分”区分开，后面思路会更像真实汇报而不是流水账。`,
+      description: '先判断这次更该讲结果变化、异常原因，还是下一步动作，别把流水账和重点混在一起。',
     }
   }
 
@@ -374,14 +385,14 @@ const buildStepFrame = ({ scenario, prompt = '', signals }) => {
     return {
       id: 'frame',
       title: signals.sales ? '明确增长目标与判断标准' : '明确经营目标与判断标准',
-      description: `在正式拆指标前，我会先把「${focusText}」里真正想回答的管理问题锁定下来，比如更关注规模增长、效率变化还是结构改善，并同步确定哪些指标只是辅助信号，哪些指标会直接影响最终判断。`,
+      description: `拆指标前，先抓住「${focusText}」真正想回答的问题，比如看增长、看效率，还是看结构变化。`,
     }
   }
 
   return {
     id: 'frame',
     title: '明确问题边界与输出预期',
-    description: `我会先判断「${focusText}」到底是在追求解释、总结、对比还是直接产出结果，同时把回答需要覆盖到的边界、证据深度和交付形式先对齐，这样后面每个动作都围绕同一个目标推进。`,
+    description: `先弄清「${focusText}」是要解释、总结、对比，还是直接给出结果，后面每一步都围着这个目标走。`,
   }
 }
 
@@ -391,33 +402,33 @@ const buildCrossCheckStep = ({ scenario, prompt = '' }) => {
   return {
     id: 'cross-check',
     title: scenario === 'comparison' ? '交叉验证差异与反例' : '交叉验证结论与反例',
-    description: `在进入最终输出前，我会专门回看一遍「${focusText}」对应的关键结论，确认有没有被异常样本、短期波动、维度缺失或口径偏差带偏；如果发现有反例会先解释清楚，再决定它是需要纳入结论，还是只作为风险提示保留。`,
+    description: `出结果前再回头看一眼「${focusText}」的关键结论，确认有没有被异常值或口径问题带偏。`,
   }
 }
 
-const buildStepDescriptionTail = (step, { scenario }) => {
+const buildStepDescriptionTail = (step) => {
   if (step.id === 'scene') {
-    return '我会优先把问题里的业务对象、时间范围、关键结果和隐含目标拆开看，确保后续每一步都真的在回答用户此刻最关心的判断。'
+    return '我会先把对象、时间范围和关键目标拆开看，保证后面每一步都在回答眼下最关心的问题。'
   }
 
   if (['read-feedback', 'kpi', 'scope', 'targets', 'read-table', 'read'].includes(step.id)) {
-    return '同时会顺手记录数据粒度、字段缺失、样本覆盖范围和可继续下钻的维度，这样后面引用结论时能分清哪些是确定事实，哪些只是需要继续验证的线索。'
+    return '顺便记下数据粒度、缺了哪些字段、还能往哪下钻，后面引用时不容易说混。'
   }
 
   if (step.id === 'calibrate') {
-    return '如果发现同一个指标在不同资料里的定义不一致，我会优先回到最基础的业务口径重新确认，而不是直接沿用表层字段，避免后面所有判断都建立在错误口径上。'
+    return '要是发现同一指标在不同资料里说法不一致，我会先回到基础业务口径再确认。'
   }
 
   if (['pattern', 'anomaly', 'review', 'gap', 'framework', 'reason'].includes(step.id)) {
-    return '这一步不会只看表面的结果变化，我会同时留意结构变化、反常样本和潜在反例，尽量把“看起来像趋势”和“真正能解释趋势”的部分区分开。'
+    return '不只看表面涨跌，也会留意结构变化和反常样本，尽量把真趋势和假象分开。'
   }
 
   if (['evidence', 'outline'].includes(step.id)) {
-    return '整理时我会尽量把结论、证据、影响范围和可以被追问的细节放在一起，这样输出出来的不只是观点，也能保留继续深挖的抓手。'
+    return '整理时会把结论、依据和影响范围放在一起，方便后面继续追问。'
   }
 
   if (step.id === 'report') {
-    return '最后会把这些判断重新组织成更接近真实分析汇报的节奏，让结论、原因和动作之间有顺承关系，而不是简单把模板段落拼接在一起。'
+    return '最后按“结论 → 原因 → 动作”的顺序收束，读起来更顺。'
   }
 
   return ''
@@ -433,7 +444,7 @@ const enrichThinkingSteps = (steps, context) => {
         : ['evidence', 'outline'].includes(step.id)
         ? buildEvidenceCode(context)
         : undefined),
-    description: `${step.description ?? ''}${buildStepDescriptionTail(step, context) ? ` ${buildStepDescriptionTail(step, context)}` : ''}`,
+    description: `${step.description ?? ''}${buildStepDescriptionTail(step) ? ` ${buildStepDescriptionTail(step)}` : ''}`,
   }))
 
   const readIndex = expanded.findIndex((step) =>
@@ -465,7 +476,7 @@ const createThinkingSteps = ({ userPrompt = '', userFiles = [] }) => {
         id: 'scene',
         title: '识别任务场景',
         skill: { label: '技能：场景识别', tone: 'purple' },
-        description: `已识别为客户反馈归因类任务，我会围绕“问题表现、影响范围、原因归属、改进行动”来拆解「${focusText}」。`,
+        description: `这是客户反馈归因类任务。接下来我会围着「${focusText}」，把问题表现、影响范围、原因和可改的动作拆开看。`,
       },
       {
         id: 'read-feedback',
@@ -504,7 +515,7 @@ const createThinkingSteps = ({ userPrompt = '', userFiles = [] }) => {
         id: 'scene',
         title: '识别周报目标',
         skill: { label: '技能：场景识别', tone: 'purple' },
-        description: `这是一类经营周报生成任务，我会围绕「${focusText}」先确认核心 KPI、异常波动和管理层最关心的变化。`,
+        description: `这是经营周报类任务。我会先围着「${focusText}」看清核心 KPI、异常波动，以及管理层最想知道的变化。`,
       },
       {
         id: 'kpi',
@@ -543,37 +554,37 @@ const createThinkingSteps = ({ userPrompt = '', userFiles = [] }) => {
         id: 'scene',
         title: '识别复盘任务',
         skill: { label: '技能：场景识别', tone: 'purple' },
-        description: `这是一类月度复盘 / 大纲整理任务，我会围绕「${focusText}」优先梳理结果、原因和后续动作三层结构。`,
+        description: `这是月度复盘 / 大纲整理任务。我会先围着「${focusText}」把结果、原因和后续动作理清楚。`,
       },
       {
         id: 'scope',
         title: '读取月度结果与背景',
-        description: '先确认本月时间范围、目标值、核心业务对象和关键事件，复盘才有上下文。',
+        description: '先确认本月时间范围、目标值、核心业务对象和关键事件，后面复盘才有上下文。',
         reads: primaryRead,
       },
       {
         id: 'calibrate',
         title: '校准复盘口径',
         skill: { label: '技能：Code', tone: 'teal' },
-        description: '把同比、环比、目标达成、渠道贡献和异常因素统一到一个分析口径里，避免复盘内容散乱。',
+        description: '把同比、环比、目标达成这些口径先统一，避免后面越讲越散。',
         reads: secondaryReads,
       },
       {
         id: 'review',
         title: '拆解亮点、问题与原因',
-        description: '我会把结果分成“做得好的、偏离预期的、需要继续跟踪的”三类，形成更像管理复盘的表达方式。',
+        description: '我会把结果分成“做得好的、偏了的、还要继续盯的”三类，读起来更像真实复盘。',
       },
       {
         id: 'outline',
         title: '组织复盘大纲结构',
         skill: { label: '技能：分析主题数据查询', tone: 'blue' },
-        description: '这一轮会把核心结论整理成章节骨架，让后续无论输出 Markdown、HTML 还是 PPT 都能直接复用。',
+        description: '这一轮先把核心结论收成章节骨架，后面不管输出成文档还是 PPT 都能接着用。',
         outputs,
       },
       {
         id: 'report',
         title: '生成汇报版本',
-        description: '最终输出会按“结果回顾 → 指标拆解 → 原因分析 → 改进动作 → 下月关注”的顺序展开。',
+        description: '最终按“结果回顾 → 指标拆解 → 原因分析 → 改进动作 → 下月关注”的顺序展开。',
         code: DEFAULT_REPORT_CODE(outputFileName),
       },
     ],
@@ -582,7 +593,7 @@ const createThinkingSteps = ({ userPrompt = '', userFiles = [] }) => {
         id: 'scene',
         title: '识别对比任务',
         skill: { label: '技能：场景识别', tone: 'purple' },
-        description: `这是一个差异对比类问题，我会先拆清楚「${focusText}」里的比较对象、比较维度和要得出的管理判断。`,
+        description: `这是差异对比类问题。我会先把「${focusText}」里要比的对象、维度和最终要下的判断拆开。`,
       },
       {
         id: 'targets',
@@ -621,7 +632,7 @@ const createThinkingSteps = ({ userPrompt = '', userFiles = [] }) => {
         id: 'scene',
         title: '识别经营分析任务',
         skill: { label: '技能：场景识别', tone: 'purple' },
-        description: `已识别为经营 / 销售分析问题，我会围绕「${focusText}」先拆目标，再拆指标和异常。`,
+        description: `这是经营 / 销售分析问题。我会围着「${focusText}」先定目标，再拆指标和异常。`,
       },
       {
         id: 'read-table',
@@ -721,12 +732,11 @@ const INITIAL_STREAM = {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-const formatThinkingSummary = (completedCount, durationMs) => {
-  const safeCount = Math.max(0, completedCount)
+const formatThinkingSummary = (_completedCount, durationMs) => {
   const totalSeconds = Math.max(1, Math.round(durationMs / 1000))
   const minutes = Math.floor(totalSeconds / 60)
   const seconds = totalSeconds % 60
-  return `已完成 ${safeCount} 个动作，耗时 ${minutes}m ${seconds}s`
+  return `任务耗时 ${minutes}m ${seconds}s`
 }
 
 const formatUserSentAt = (value) => {
@@ -1022,135 +1032,400 @@ function ThinkingWait({ active = false, lastActivityAt = 0 }) {
   )
 }
 
-function ThinkingStepIcon({ status }) {
-  if (status === 'done') {
-    return (
-      <svg className="session-thinking-step__icon-svg" viewBox="0 0 16 16" aria-hidden="true">
-        <circle cx="8" cy="8" r="7" fill="#c4cbd6" />
-        <path
-          d="M5.05 8.2 7 10.15l3.95-4.1"
-          fill="none"
-          stroke="#fff"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="1.6"
-        />
-      </svg>
-    )
-  }
-
-  if (status === 'active') {
-    return (
-      <svg className="session-thinking-step__icon-svg" viewBox="0 0 16 16" aria-hidden="true">
-        <defs>
-          <linearGradient id="session-thinking-active-gradient" x1="2" y1="2" x2="14" y2="14">
-            <stop offset="0%" stopColor="#7aa7ff" />
-            <stop offset="55%" stopColor="#64c8ff" />
-            <stop offset="100%" stopColor="#6f7cff" />
-          </linearGradient>
-        </defs>
-        <circle
-          className="session-thinking-step__spinner-track"
-          cx="8"
-          cy="8"
-          r="5.5"
-          fill="none"
-          stroke="rgba(96, 132, 255, 0.18)"
-          strokeWidth="2"
-        />
-        <circle
-          className="session-thinking-step__spinner-ring"
-          cx="8"
-          cy="8"
-          r="5.5"
-          fill="none"
-          stroke="url(#session-thinking-active-gradient)"
-          strokeLinecap="round"
-          strokeWidth="2"
-        />
-      </svg>
-    )
-  }
-
-  return <span className="session-thinking-step__icon-dot" aria-hidden="true" />
+const getStepVisibleDescription = (step, descriptionLength = 0, status = 'done') => {
+  const description = step.description ?? ''
+  if (!description) return ''
+  if (status === 'done') return description
+  return description.slice(0, descriptionLength)
 }
 
-function ThinkingStep({
-  step,
-  order = 0,
-  status,
-  descriptionLength = 0,
-  codeLength = 0,
-  showExtras = false,
-  showCode = false,
-  isStreamingText = false,
-  isStreamingCode = false,
-}) {
-  const codeRef = useRef(null)
-  const description = step.description ?? ''
-  const code = step.code ?? ''
-  const visibleDescription = description.slice(0, descriptionLength)
-  const visibleCode = code.slice(0, codeLength)
-  const hasBody = description || step.reads?.length || step.outputs?.length || code
+const getToolDisplayName = (step) => {
+  if (step?.skill?.label) {
+    return step.skill.label.replace(/^技能[：:]/, '').trim() || step.title
+  }
+  return step?.title || '工具'
+}
 
-  useEffect(() => {
-    if (!showCode || !code) return undefined
+const buildThinkingStreamItems = (visibleSteps = []) => {
+  const items = []
+  if (!visibleSteps.length) return items
 
-    const node = codeRef.current
-    if (!node) return undefined
+  let intro = null
+  const thoughtChildren = []
+  const opsChildren = []
+  let fileOps = 0
+  let toolCalls = 0
+  let activeTail = null
 
-    const frame = window.requestAnimationFrame(() => {
-      node.scrollTop = node.scrollHeight
+  visibleSteps.forEach((entry) => {
+    const { step, status, descriptionLength = 0, isStreamingText = false } = entry
+    const visibleDescription = getStepVisibleDescription(step, descriptionLength, status)
+    const fileCount = (step.reads?.length || 0) + (step.outputs?.length || 0)
+    const isToolStep = Boolean(step.skill)
+    const isPureThought = !isToolStep && fileCount === 0
+
+    if (!intro && visibleDescription) {
+      intro = {
+        type: 'narrative',
+        id: `intro-${step.id}`,
+        text: visibleDescription,
+        streaming: Boolean(isStreamingText && status === 'active'),
+      }
+      if (status === 'active') return
+    }
+
+    if (status === 'active') {
+      if (isToolStep) {
+        activeTail = {
+          type: 'tool',
+          id: `tool-${step.id}`,
+          label: '调用工具：',
+          toolName: getToolDisplayName(step),
+          shimmer: true,
+          expandable: true,
+          actions: buildThinkingActionItems(visibleSteps),
+        }
+      } else if (visibleDescription && intro?.id !== `intro-${step.id}`) {
+        activeTail = {
+          type: 'narrative',
+          id: `active-${step.id}`,
+          text: visibleDescription,
+          streaming: Boolean(isStreamingText),
+        }
+      }
+      return
+    }
+
+    if (status !== 'done') return
+
+    if (isPureThought) {
+      thoughtChildren.push({
+        type: 'action',
+        id: `thought-action-${step.id}`,
+        icon: ICONS.chainThought,
+        label: '思考过程',
+        narrative: visibleDescription || step.description || '',
+        reads: step.reads ?? [],
+        outputs: step.outputs ?? [],
+        code: step.code ?? '',
+        title: step.title || '思考过程',
+        detailOpenable: true,
+      })
+      return
+    }
+
+    if (isToolStep) toolCalls += 1
+    if (fileCount) fileOps += fileCount
+    opsChildren.push(buildThinkingActionFromStep(step, status))
+  })
+
+  if (intro) items.push(intro)
+
+  if (thoughtChildren.length) {
+    items.push({
+      type: 'meta',
+      id: 'meta-thought',
+      kind: 'thought',
+      label: `已进行 ${thoughtChildren.length} 次思考`,
+      children: thoughtChildren,
     })
+  }
 
-    return () => window.cancelAnimationFrame(frame)
-  }, [code, showCode, status, visibleCode])
+  if (opsChildren.length) {
+    const lastItem = items[items.length - 1]
+    // 节点与节点之间必须夹一段推理，不允许两个节点紧挨着
+    if (lastItem?.type === 'meta') {
+      const bridgeSource = opsChildren.find((child) => child.narrative)?.narrative || ''
+      const bridgeText =
+        bridgeSource && bridgeSource !== intro?.text
+          ? bridgeSource
+          : '接下来我会处理相关文件，并按需要调用工具继续往下做。'
+      items.push({
+        type: 'narrative',
+        id: 'bridge-before-ops',
+        text: bridgeText,
+      })
+    }
+
+    items.push({
+      type: 'meta',
+      id: 'meta-ops',
+      kind: 'ops',
+      label: `已操作 ${fileOps} 次文件，调用 ${toolCalls} 个工具`,
+      children: opsChildren,
+    })
+  }
+
+  if (activeTail) {
+    const lastItem = items[items.length - 1]
+    if (activeTail.type === 'tool' && lastItem?.type === 'meta') {
+      items.push({
+        type: 'narrative',
+        id: `bridge-before-${activeTail.id}`,
+        text: '我接着往下做，先把这一步需要的工具跑起来。',
+        streaming: true,
+      })
+    }
+    items.push(activeTail)
+  }
+
+  return items
+}
+
+function buildThinkingActionFromStep(step, status = 'done') {
+  const readFile = step.reads?.[0]
+  const outputFile = step.outputs?.[0]
+  const isActive = status === 'active'
+  const title = step.title || ''
+  const skillLabel = step.skill?.label || ''
+  const description = step.description ?? ''
+
+  const withDetail = (action) => ({
+    type: 'action',
+    ...action,
+    narrative: description,
+    reads: step.reads ?? [],
+    outputs: step.outputs ?? [],
+    code: step.code ?? '',
+    title: step.title || action.label,
+    detailOpenable: true,
+  })
+
+  if (/定时/.test(title)) {
+    return withDetail({
+      id: `action-${step.id}`,
+      icon: ICONS.chainView,
+      label: title || '查看定时任务',
+      loading: isActive,
+      shimmer: isActive,
+    })
+  }
+
+  if (readFile) {
+    return withDetail({
+      id: `action-${step.id}`,
+      icon: ICONS.chainSearch,
+      label: '查找数据',
+      chip: {
+        icon: ICONS.chainQueryTable,
+        name: readFile.name,
+      },
+      loading: isActive,
+      shimmer: isActive,
+    })
+  }
+
+  if (outputFile || /分析|报告|大纲|证据/.test(title)) {
+    const isChart = /可视|图表|chart/i.test(`${title}${skillLabel}${outputFile?.name || ''}`)
+    return withDetail({
+      id: `action-${step.id}`,
+      icon: isActive ? null : isChart ? ICONS.chainGenerate : ICONS.chainExecute,
+      label: isChart ? title || '生成可视化图表' : title || '执行数据分析',
+      chip: outputFile
+        ? {
+            icon: isChart ? ICONS.chainChart : ICONS.chainAnalysisTable,
+            name: outputFile.name,
+          }
+        : null,
+      loading: isActive,
+      shimmer: isActive,
+    })
+  }
+
+  if (step.skill) {
+    return withDetail({
+      id: `action-${step.id}`,
+      icon: isActive ? null : ICONS.chainTool,
+      label: getToolDisplayName(step),
+      loading: isActive,
+      shimmer: isActive,
+    })
+  }
+
+  return withDetail({
+    id: `action-${step.id}`,
+    icon: ICONS.chainThought,
+    label: '思考过程',
+    loading: isActive,
+    shimmer: isActive,
+  })
+}
+
+function buildThinkingActionItems(visibleSteps = []) {
+  return visibleSteps.map(({ step, status }) => buildThinkingActionFromStep(step, status))
+}
+
+function ThinkingMetaRow({ label, open, onToggle, tone = 'tertiary' }) {
+  const className = `session-thinking__meta session-thinking__meta--${tone}${open ? ' is-open' : ''}${
+    onToggle ? '' : ' is-static'
+  }`
+  const content = (
+    <>
+      <span className="session-thinking__meta-label">{label}</span>
+      {onToggle ? (
+        <span className="dora-icon icon-16 session-thinking__meta-chevron" aria-hidden="true">
+          {ICONS.arrowRight}
+        </span>
+      ) : null}
+    </>
+  )
+
+  if (!onToggle) {
+    return <div className={className}>{content}</div>
+  }
 
   return (
-    <section
-      className={`session-thinking-step session-thinking-step--${status}`}
-      style={{ '--thinking-step-order': order }}
-    >
-      <div className="session-thinking-step__head">
-        <span className={`session-thinking-step__icon session-thinking-step__icon--${status}`} aria-hidden="true">
-          <ThinkingStepIcon status={status} />
-        </span>
-        <div className="session-thinking-step__title-row">
-          <span className="session-thinking-step__title">{step.title}</span>
-          {step.skill ? (
-            <span className={`session-thinking-step__skill session-thinking-step__skill--${step.skill.tone}`}>
-              {step.skill.label}
+    <button type="button" className={className} aria-expanded={open} onClick={onToggle}>
+      {content}
+    </button>
+  )
+}
+
+function ThinkingToolRow({ label, toolName, shimmer = false, open = false, expandable = false, onToggle }) {
+  const className = `session-thinking__tool${shimmer ? ' is-shining' : ''}${open ? ' is-open' : ''}${
+    expandable ? ' is-expandable' : ''
+  }`
+  const content = (
+    <>
+      <span className="session-thinking__tool-copy">
+        <span className="session-thinking__tool-prefix">{label}</span>
+        <span className="session-thinking__tool-name">{toolName}</span>
+      </span>
+      <span className="dora-icon icon-16 session-thinking__meta-chevron" aria-hidden="true">
+        {ICONS.arrowRight}
+      </span>
+    </>
+  )
+
+  if (!expandable) {
+    return <div className={className}>{content}</div>
+  }
+
+  return (
+    <button type="button" className={className} aria-expanded={open} onClick={onToggle}>
+      {content}
+    </button>
+  )
+}
+
+function ThinkingActionRow({
+  icon,
+  label,
+  chip = null,
+  loading = false,
+  shimmer = false,
+  open = false,
+  expandable = false,
+  onToggle,
+  narrative = '',
+}) {
+  const className = `session-thinking__action${shimmer ? ' is-shining' : ''}${loading ? ' is-loading' : ''}${
+    open ? ' is-open' : ''
+  }${expandable ? ' is-expandable' : ''}`
+  const content = (
+    <>
+      <span className="session-thinking__action-main">
+        {loading ? (
+          <span className="session-thinking__action-spinner" aria-hidden="true" />
+        ) : (
+          <span className="dora-icon icon-16 session-thinking__action-icon" aria-hidden="true">
+            {icon}
+          </span>
+        )}
+        <span className="session-thinking__action-label">{label}</span>
+        {chip ? (
+          <span className="session-thinking__action-chip">
+            <span className="dora-icon icon-16 session-thinking__action-chip-icon" aria-hidden="true">
+              {chip.icon}
             </span>
+            <span className="session-thinking__action-chip-name">{chip.name}</span>
+          </span>
+        ) : null}
+      </span>
+      <span className="dora-icon icon-16 session-thinking__meta-chevron" aria-hidden="true">
+        {ICONS.arrowRight}
+      </span>
+    </>
+  )
+
+  const row = expandable ? (
+    <button type="button" className={className} aria-expanded={open} onClick={onToggle}>
+      {content}
+    </button>
+  ) : (
+    <div className={className}>{content}</div>
+  )
+
+  return (
+    <Fragment>
+      {row}
+      {open && narrative ? <p className="session-thinking__narrative session-thinking__narrative--child">{narrative}</p> : null}
+    </Fragment>
+  )
+}
+
+function ThinkingDetailDrawer({ detail, onClose }) {
+  if (!detail) return null
+
+  return createPortal(
+    <div className="session-thinking-drawer-layer" role="presentation">
+      <button
+        type="button"
+        className="session-thinking-drawer-backdrop"
+        aria-label="关闭详情"
+        onClick={onClose}
+      />
+      <div
+        className="session-thinking-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label={detail.label || detail.title || '节点详情'}
+      >
+        <div className="session-thinking-drawer__grabber" aria-hidden="true" />
+        <header className="session-thinking-drawer__header">
+          <button
+            type="button"
+            className="session-thinking-drawer__close"
+            aria-label="关闭"
+            onClick={onClose}
+          >
+            <span className="dora-icon" aria-hidden="true">
+              {ICONS.close}
+            </span>
+          </button>
+          <h2>{detail.label || detail.title || '节点详情'}</h2>
+          <span className="session-thinking-drawer__header-spacer" aria-hidden="true" />
+        </header>
+        <div className="session-thinking-drawer__body">
+          {detail.chip ? (
+            <div className="session-thinking-drawer__chip">
+              <span className="dora-icon icon-16" aria-hidden="true">
+                {detail.chip.icon}
+              </span>
+              <span>{detail.chip.name}</span>
+            </div>
+          ) : null}
+          {detail.narrative ? (
+            <p className="session-thinking-drawer__narrative">{detail.narrative}</p>
+          ) : null}
+          {detail.reads?.length || detail.outputs?.length ? (
+            <div className="session-thinking-drawer__refs">
+              <ThinkingFileRefs label="读取：" files={detail.reads} />
+              <ThinkingFileRefs label="产物：" files={detail.outputs} />
+            </div>
+          ) : null}
+          {detail.code ? (
+            <pre className="session-thinking-drawer__code">
+              <code>{detail.code}</code>
+            </pre>
+          ) : null}
+          {!detail.narrative && !detail.reads?.length && !detail.outputs?.length && !detail.code ? (
+            <p className="session-thinking-drawer__empty">暂无更多详情</p>
           ) : null}
         </div>
       </div>
-
-      {hasBody ? (
-        <div className="session-thinking-step__body">
-          <span className="session-thinking-step__rail" aria-hidden="true" />
-          <div className="session-thinking-step__content">
-            {description ? (
-              <p className="session-thinking-step__desc">
-                {visibleDescription}
-              </p>
-            ) : null}
-            {showExtras ? (
-              <div className="session-thinking-step__extras session-thinking-step__reveal">
-                <ThinkingFileRefs label="读取：" files={step.reads} />
-                <ThinkingFileRefs label="产物：" files={step.outputs} />
-              </div>
-            ) : null}
-            {showCode && code ? (
-              <pre className="session-thinking-step__code session-thinking-step__reveal" ref={codeRef}>
-                <code>
-                  {visibleCode}
-                </code>
-              </pre>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-    </section>
+    </div>,
+    document.body,
   )
 }
 
@@ -1300,7 +1575,14 @@ export default function SessionThread({
   const [thinkingExpanded, setThinkingExpanded] = useState(false)
   const [thinkingCollapsed, setThinkingCollapsed] = useState(false)
   const [thinkingCollapsing, setThinkingCollapsing] = useState(false)
-  const [showTopFade, setShowTopFade] = useState(false)
+  const [openThinkingMeta, setOpenThinkingMeta] = useState(() =>
+    isMobileViewport
+      ? {}
+      : {
+          'meta-thought': true,
+          'meta-ops': true,
+        },
+  )
   const [frozenSummaryStatus, setFrozenSummaryStatus] = useState('')
   const [desktopCopyLabel, setDesktopCopyLabel] = useState('复制')
   const [desktopCopySuccess, setDesktopCopySuccess] = useState(false)
@@ -1314,8 +1596,9 @@ export default function SessionThread({
   const [resultContextMenu, setResultContextMenu] = useState(null)
   const [resultSelectionBubble, setResultSelectionBubble] = useState(null)
   const [expandedTurnIds, setExpandedTurnIds] = useState({})
+  const [expandedHistoryThinkingIds, setExpandedHistoryThinkingIds] = useState({})
+  const [thinkingDetailDrawer, setThinkingDetailDrawer] = useState(null)
   const [senderFilesWidth, setSenderFilesWidth] = useState(0)
-  const bodyRef = useRef(null)
   const threadRef = useRef(null)
   const autoCollapsedKeyRef = useRef('')
   const completionNotifiedKeyRef = useRef('')
@@ -1424,6 +1707,11 @@ export default function SessionThread({
     return items
   }, [isGenerating, isStaticCompletedView, stream, thinkingSteps])
 
+  const thinkingStreamItems = useMemo(
+    () => buildThinkingStreamItems(visibleSteps),
+    [visibleSteps],
+  )
+
   const headerStatus =
     isStaticCompletedView
       ? staticCompletedSummary
@@ -1431,8 +1719,12 @@ export default function SessionThread({
       ? '已停止生成'
       : stream.headerStatus || (currentUserFiles.length ? '正在接收文件...' : '正在工作...')
 
-  const showStatusShimmer = isGenerating && stream.phase !== 'done' && stream.phase !== 'stopped'
-  const displayStatus = thinkingCollapsed && stream.phase === 'done' ? frozenSummaryStatus : headerStatus
+  const isThinkingComplete =
+    isStaticCompletedView || stream.phase === 'done' || stream.phase === 'stopped'
+  const displayStatus =
+    isThinkingComplete && !isGenerating
+      ? frozenSummaryStatus || staticCompletedSummary || headerStatus
+      : headerStatus
 
   const clearCollapseTimer = useCallback(() => {
     if (!collapseTimerRef.current) return
@@ -1445,6 +1737,9 @@ export default function SessionThread({
       clearCollapseTimer()
       setThinkingExpanded(false)
       setThinkingCollapsing(true)
+      if (isMobileViewport) {
+        setOpenThinkingMeta({})
+      }
 
       collapseTimerRef.current = window.setTimeout(() => {
         collapseTimerRef.current = null
@@ -1453,7 +1748,7 @@ export default function SessionThread({
         onComplete?.()
       }, MANUAL_COLLAPSE_TRANSITION_MS)
     },
-    [clearCollapseTimer],
+    [clearCollapseTimer, isMobileViewport],
   )
 
   const handleDesktopCopyUserMessage = useCallback(async () => {
@@ -1832,6 +2127,8 @@ export default function SessionThread({
 
   useEffect(() => {
     setExpandedTurnIds({})
+    setExpandedHistoryThinkingIds({})
+    setThinkingDetailDrawer(null)
     setDesktopCopyLabel('复制')
     setDesktopCopySuccess(false)
     setActiveUserMetaTurnId(null)
@@ -1854,56 +2151,232 @@ export default function SessionThread({
   }, [resetExpandKey])
 
   useEffect(() => {
-    const body = bodyRef.current
-    if (!body || thinkingExpanded || thinkingCollapsed || !isGenerating) return
-    body.scrollTop = body.scrollHeight
-    setShowTopFade(body.scrollTop > 0)
-  }, [
-    isGenerating,
-    visibleSteps,
-    stream.descriptionLength,
-    stream.codeLength,
-    stream.showExtras,
-    thinkingCollapsed,
-    thinkingExpanded,
-  ])
+    if (!isMobileViewport) return
+    setOpenThinkingMeta({})
+  }, [isMobileViewport, streamKey])
 
   useEffect(() => {
-    const body = bodyRef.current
-    if (!body || thinkingExpanded || thinkingCollapsed) {
-      setShowTopFade(false)
-      return undefined
-    }
+    if (!isMobileViewport || !isGenerating || thinkingCollapsed || thinkingCollapsing) return undefined
 
-    const updateTopFade = () => {
-      setShowTopFade(body.scrollTop > 0)
-    }
+    const scroller =
+      threadRef.current?.closest('.session-generating') ||
+      threadRef.current?.closest('.library-detail-chat__thread')
+    if (!scroller) return undefined
 
-    updateTopFade()
-    body.addEventListener('scroll', updateTopFade, { passive: true })
-    return () => body.removeEventListener('scroll', updateTopFade)
-  }, [thinkingCollapsed, thinkingExpanded, visibleSteps, stream.descriptionLength, stream.codeLength, stream.showExtras])
+    const frame = window.requestAnimationFrame(() => {
+      scroller.scrollTop = scroller.scrollHeight
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [
+    isGenerating,
+    isMobileViewport,
+    openThinkingMeta,
+    stream.codeLength,
+    stream.descriptionLength,
+    stream.showWait,
+    thinkingCollapsed,
+    thinkingCollapsing,
+    thinkingStreamItems,
+  ])
 
   const showAssistantThinking = visibleSteps.length > 0 || isGenerating || isStaticCompletedView
+  const showThinkingStream = !thinkingCollapsed && !thinkingCollapsing
+  const showThinkingSummaryRow = isMobileViewport
+    ? isThinkingComplete &&
+      !isGenerating &&
+      (thinkingCollapsed || thinkingCollapsing || thinkingExpanded)
+    : thinkingCollapsed || thinkingCollapsing
+  const summaryRowOpen = Boolean(
+    isMobileViewport && showThinkingSummaryRow && showThinkingStream && thinkingExpanded,
+  )
+  const isThinkingNodeOpen = useCallback(
+    (nodeId, openState = openThinkingMeta) => {
+      if (!nodeId) return true
+      if (isMobileViewport) return openState[nodeId] === true
+      return openState[nodeId] !== false
+    },
+    [isMobileViewport, openThinkingMeta],
+  )
   const handleToggleThinking = () => {
     if (thinkingCollapsed) {
       clearCollapseTimer()
       setThinkingCollapsed(false)
       setThinkingCollapsing(false)
       setThinkingExpanded(true)
-      return
-    }
-
-    if (thinkingExpanded) {
-      if (stream.phase === 'done' || isStaticCompletedView) {
-        startCollapseTransition()
-      } else {
-        setThinkingExpanded(false)
+      if (isMobileViewport) {
+        setOpenThinkingMeta({})
       }
       return
     }
 
-    setThinkingExpanded(true)
+    if (stream.phase === 'done' || stream.phase === 'stopped' || isStaticCompletedView) {
+      startCollapseTransition()
+      return
+    }
+
+    setThinkingExpanded((prev) => !prev)
+  }
+
+  const handleToggleThinkingMeta = (metaId) => {
+    setOpenThinkingMeta((prev) => {
+      const currentlyOpen = isMobileViewport ? prev[metaId] === true : prev[metaId] !== false
+      return {
+        ...prev,
+        [metaId]: !currentlyOpen,
+      }
+    })
+  }
+
+  const handleToggleHistoryThinking = (turnKey) => {
+    setExpandedHistoryThinkingIds((prev) => ({
+      ...prev,
+      [turnKey]: !prev[turnKey],
+    }))
+  }
+
+  const closeThinkingDetailDrawer = useCallback(() => {
+    setThinkingDetailDrawer(null)
+  }, [])
+
+  const openThinkingDetailDrawer = useCallback((detail) => {
+    if (!detail) return
+    setThinkingDetailDrawer(detail)
+  }, [])
+
+  const renderThinkingStreamItems = (items, { openState = openThinkingMeta, keepStreamingVisible = false } = {}) => {
+    const renderChildItem = (child) => {
+      if (child.type === 'action') {
+        const childOpen = !isMobileViewport && isThinkingNodeOpen(child.id, openState)
+        const showStreamingNarrative =
+          keepStreamingVisible && child.streaming && child.narrative && !childOpen
+        const canOpenDetail = Boolean(child.detailOpenable)
+        return (
+          <Fragment key={child.id}>
+            <ThinkingActionRow
+              icon={child.icon}
+              label={child.label}
+              chip={child.chip}
+              loading={child.loading}
+              shimmer={child.shimmer}
+              open={childOpen}
+              expandable={canOpenDetail}
+              onToggle={() => {
+                if (isMobileViewport) {
+                  openThinkingDetailDrawer(child)
+                  return
+                }
+                handleToggleThinkingMeta(child.id)
+              }}
+              narrative={isMobileViewport ? '' : child.narrative}
+            />
+            {showStreamingNarrative ? (
+              <p className="session-thinking__narrative session-thinking__narrative--child">{child.narrative}</p>
+            ) : null}
+          </Fragment>
+        )
+      }
+
+      if (child.type === 'narrative') {
+        return (
+          <p key={child.id} className="session-thinking__narrative session-thinking__narrative--child">
+            {child.text}
+          </p>
+        )
+      }
+
+      if (child.type === 'extras') {
+        return (
+          <div key={child.id} className="session-thinking__extras">
+            <ThinkingFileRefs label="读取：" files={child.reads} />
+            <ThinkingFileRefs label="产物：" files={child.outputs} />
+          </div>
+        )
+      }
+
+      return null
+    }
+
+    return (
+      <div className="session-thinking__stream">
+        {items.map((item) => {
+          if (item.type === 'narrative') {
+            return (
+              <p key={item.id} className="session-thinking__narrative">
+                {item.text}
+              </p>
+            )
+          }
+
+          if (item.type === 'meta') {
+            const metaOpen = isThinkingNodeOpen(item.id, openState)
+            const streamingChild = item.children?.find((child) => child.streaming && child.narrative)
+            const showChildren = metaOpen || (keepStreamingVisible && Boolean(streamingChild))
+            return (
+              <div key={item.id} className="session-thinking__node">
+                <ThinkingMetaRow
+                  label={item.label}
+                  open={metaOpen}
+                  onToggle={() => handleToggleThinkingMeta(item.id)}
+                />
+                {showChildren && item.children?.length ? (
+                  <div className="session-thinking__node-children">
+                    {metaOpen
+                      ? item.children.map((child) => renderChildItem(child))
+                      : streamingChild
+                        ? (
+                          <p className="session-thinking__narrative session-thinking__narrative--child">
+                            {streamingChild.narrative}
+                          </p>
+                          )
+                        : null}
+                  </div>
+                ) : null}
+              </div>
+            )
+          }
+
+          if (item.type === 'tool') {
+            const toolOpen = isMobileViewport && isThinkingNodeOpen(item.id, openState)
+            const toolExpandable = Boolean(isMobileViewport && item.expandable)
+            return (
+              <Fragment key={item.id}>
+                <ThinkingToolRow
+                  label={item.label}
+                  toolName={item.toolName}
+                  shimmer={item.shimmer}
+                  open={toolOpen}
+                  expandable={toolExpandable}
+                  onToggle={() => handleToggleThinkingMeta(item.id)}
+                />
+                {toolOpen && item.actions?.length ? (
+                  <div className="session-thinking__node-children">
+                    {item.actions.map((action) => (
+                      <ThinkingActionRow
+                        key={action.id}
+                        icon={action.icon}
+                        label={action.label}
+                        chip={action.chip}
+                        loading={action.loading}
+                        shimmer={action.shimmer}
+                        expandable={Boolean(action.detailOpenable)}
+                        onToggle={() => {
+                          if (isMobileViewport) {
+                            openThinkingDetailDrawer(action)
+                          }
+                        }}
+                      />
+                    ))}
+                  </div>
+                ) : null}
+              </Fragment>
+            )
+          }
+
+          return null
+        })}
+        {isMobileViewport ? <div className="session-thinking__stream-anchor" aria-hidden="true" /> : null}
+      </div>
+    )
   }
 
   const getTurnKey = (turn) => turn?.id ?? `${turn?.prompt ?? ''}-${turn?.sentAt ?? 'turn'}`
@@ -2177,9 +2650,23 @@ export default function SessionThread({
   }
 
   const renderHistoricalAssistant = (turn) => {
+    const turnKey = getTurnKey(turn)
     const thinkingSummary =
       turn?.completedSessionMeta?.summaryStatus ||
       formatThinkingSummary(turn?.completedSessionMeta?.completedCount ?? 0, turn?.completedSessionMeta?.durationMs ?? 0)
+    const historySteps = createThinkingSteps({
+      userPrompt: turn?.prompt ?? '',
+      userFiles: turn?.userFiles ?? [],
+    }).map((step) => ({
+      step,
+      status: 'done',
+      descriptionLength: step.description?.length ?? 0,
+      codeLength: step.code?.length ?? 0,
+      showExtras: Boolean(step.reads?.length || step.outputs?.length),
+      showCode: Boolean(step.code),
+    }))
+    const historyStreamItems = buildThinkingStreamItems(historySteps)
+    const isHistoryExpanded = Boolean(expandedHistoryThinkingIds[turnKey])
 
     return (
       <div className="session-thread__assistant">
@@ -2187,12 +2674,29 @@ export default function SessionThread({
           <img src={assistantAvatar} alt="" className="session-thread__assistant-avatar" />
           <span>{assistantName}</span>
         </div>
-        <div className="session-thinking is-collapsed is-stopped session-thinking--history">
-          <div className="session-thinking__card">
-            <div className="session-thinking__header">
-              <ThinkingStatus text={thinkingSummary} />
-            </div>
-          </div>
+        <div
+          className={`session-thinking is-stopped session-thinking--history ${
+            isHistoryExpanded ? 'is-expanded' : 'is-collapsed'
+          }`}
+        >
+          <ThinkingMetaRow
+            label={thinkingSummary}
+            open={isMobileViewport && isHistoryExpanded}
+            tone="summary"
+            onToggle={
+              isMobileViewport
+                ? () => {
+                    handleToggleHistoryThinking(turnKey)
+                    if (!isHistoryExpanded) {
+                      setOpenThinkingMeta({})
+                    }
+                  }
+                : null
+            }
+          />
+          {isMobileViewport && isHistoryExpanded
+            ? renderThinkingStreamItems(historyStreamItems)
+            : null}
         </div>
         {isMobileViewport ? renderAssistantResult(turn) : null}
       </div>
@@ -2239,6 +2743,10 @@ export default function SessionThread({
             document.body,
           )
         : null}
+
+      {isMobileViewport && thinkingDetailDrawer && typeof document !== 'undefined' ? (
+        <ThinkingDetailDrawer detail={thinkingDetailDrawer} onClose={closeThinkingDetailDrawer} />
+      ) : null}
 
       {isMobileViewport && (resultContextMenu || resultSelectionBubble) && typeof document !== 'undefined'
         ? createPortal(
@@ -2355,46 +2863,28 @@ export default function SessionThread({
           <div
             className={`session-thinking ${thinkingExpanded ? 'is-expanded' : ''} ${
               thinkingCollapsing ? 'is-collapsing' : ''
-            } ${
-              thinkingCollapsed ? 'is-collapsed' : ''
-            } ${
-              !isGenerating ? 'is-stopped' : ''
-            }`}
+            } ${thinkingCollapsed ? 'is-collapsed' : ''} ${!isGenerating ? 'is-stopped' : ''}`}
           >
-            <div className="session-thinking__card">
-              <div className="session-thinking__header">
-                <ThinkingStatus
-                  text={displayStatus}
-                  shimmering={showStatusShimmer && !thinkingCollapsed}
-                />
-                <button
-                  type="button"
-                  className="session-thinking__toggle"
-                  aria-label={thinkingExpanded ? '收起思考过程' : '展开思考过程'}
-                  aria-expanded={thinkingCollapsed ? false : thinkingExpanded}
-                  onClick={handleToggleThinking}
-                >
-                  <span className="dora-icon icon-16" aria-hidden="true">
-                    {thinkingExpanded ? ICONS.shrink : ICONS.expand}
-                  </span>
-                </button>
-              </div>
+            {showThinkingSummaryRow ? (
+              <ThinkingMetaRow
+                label={displayStatus}
+                open={summaryRowOpen}
+                tone="summary"
+                onToggle={handleToggleThinking}
+              />
+            ) : null}
 
-              <div className="session-thinking__body" ref={bodyRef}>
-                {showTopFade ? <div className="session-thinking__fade-top" aria-hidden="true" /> : null}
-                <div className="session-thinking__steps">
-                  {visibleSteps.map(({ step, ...renderState }, index) => (
-                    <ThinkingStep key={step.id} step={step} order={index} {...renderState} />
-                  ))}
-                </div>
-              </div>
-            </div>
+            {showThinkingStream
+              ? renderThinkingStreamItems(thinkingStreamItems, {
+                  keepStreamingVisible: Boolean(isMobileViewport && isGenerating),
+                })
+              : null}
 
-            {stream.showFootnote && stream.phase !== 'done' ? (
+            {stream.showFootnote && stream.phase !== 'done' && showThinkingStream ? (
               <p className="session-thinking__footnote">用户上传了一份文件，正在读取</p>
             ) : null}
 
-            {stream.showWait && isGenerating && stream.phase !== 'done' ? (
+            {stream.showWait && isGenerating && stream.phase !== 'done' && showThinkingStream ? (
               <ThinkingWait active={stream.showWait && isGenerating} lastActivityAt={stream.lastActivityAt} />
             ) : null}
           </div>

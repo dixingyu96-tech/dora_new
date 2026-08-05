@@ -6,6 +6,90 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "48260400",
+      "name": "会话链路_其他工具",
+      "font_class": "huihualianlu_qitagongju",
+      "unicode": "e845",
+      "unicode_decimal": 59461
+    },
+    {
+      "icon_id": "48260404",
+      "name": "会话链路_思考",
+      "font_class": "huihualianlu_sikao",
+      "unicode": "e844",
+      "unicode_decimal": 59460
+    },
+    {
+      "icon_id": "48260422",
+      "name": "会话链路_可视化图表",
+      "font_class": "huihualianlu_keshihuatubiao",
+      "unicode": "e841",
+      "unicode_decimal": 59457
+    },
+    {
+      "icon_id": "48260421",
+      "name": "会话链路_数据分析表",
+      "font_class": "huihualianlu_shujufenxibiao",
+      "unicode": "e842",
+      "unicode_decimal": 59458
+    },
+    {
+      "icon_id": "48260420",
+      "name": "会话链路_查询表",
+      "font_class": "huihualianlu_chaxunbiao",
+      "unicode": "e843",
+      "unicode_decimal": 59459
+    },
+    {
+      "icon_id": "48260402",
+      "name": "会话链路_生成",
+      "font_class": "huihualianlu_shengcheng",
+      "unicode": "e83d",
+      "unicode_decimal": 59453
+    },
+    {
+      "icon_id": "48260401",
+      "name": "会话链路_执行",
+      "font_class": "huihualianlu_zhihang",
+      "unicode": "e83e",
+      "unicode_decimal": 59454
+    },
+    {
+      "icon_id": "48260397",
+      "name": "会话链路_查找",
+      "font_class": "huihualianlu_chazhao",
+      "unicode": "e83f",
+      "unicode_decimal": 59455
+    },
+    {
+      "icon_id": "48260396",
+      "name": "会话链路_查看",
+      "font_class": "huihualianlu_chakan",
+      "unicode": "e840",
+      "unicode_decimal": 59456
+    },
+    {
+      "icon_id": "48250465",
+      "name": "计算字段_文本",
+      "font_class": "jisuanziduan_wenben",
+      "unicode": "e83a",
+      "unicode_decimal": 59450
+    },
+    {
+      "icon_id": "48250464",
+      "name": "计算字段_数值",
+      "font_class": "jisuanziduan_shuzhi",
+      "unicode": "e83b",
+      "unicode_decimal": 59451
+    },
+    {
+      "icon_id": "48250463",
+      "name": "计算字段_时间",
+      "font_class": "jisuanziduan_shijian",
+      "unicode": "e83c",
+      "unicode_decimal": 59452
+    },
+    {
       "icon_id": "48208959",
       "name": "已点赞",
       "font_class": "yidianzan",

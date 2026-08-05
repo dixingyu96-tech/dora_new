@@ -11029,7 +11029,7 @@ export default function QuestionPage() {
     const completedMeta = buildCompletedSessionMeta({
       completedCount: 4,
       durationMs: 4000,
-      summaryStatus: '已完成 4 个动作，耗时 0m 4s',
+      summaryStatus: '任务耗时 0m 4s',
     })
     const nextTurn = createSessionTurn({
       id: `schedule-action-turn-${Date.now()}`,
@@ -11088,7 +11088,7 @@ export default function QuestionPage() {
         const executionCompletedMeta = buildCompletedSessionMeta({
           completedCount: 5,
           durationMs: 6000,
-          summaryStatus: '已完成 5 个动作，耗时 0m 6s',
+          summaryStatus: '任务耗时 0m 6s',
         })
         const executionTurn = createSessionTurn({
           id: `schedule-execution-turn-${taskSnapshot.id}`,

@@ -10149,7 +10149,7 @@ select {
 .session-thread__assistant {
   display: flex;
   flex-direction: column;
-  gap: var(--fd-gap-sm);
+  gap: var(--fd-gap-xl);
   width: 100%;
 }
 
@@ -10217,7 +10217,7 @@ select {
 .session-thread__assistant-avatar {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: var(--fd-border-radius, 6px);
   object-fit: cover;
 }
 
@@ -10687,30 +10687,299 @@ select {
 .session-thinking {
   display: flex;
   flex-direction: column;
-  gap: var(--fd-gap);
+  gap: var(--fd-gap-xl);
   width: 100%;
   transition: gap 0.22s ease;
 }
 
-.session-thinking__card {
+.session-thinking__stream {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--fd-color-split);
-  border-radius: var(--fd-border-radius-xl);
-  background: var(--fd-color-bg-container);
-  transition:
-    border-color 0.28s ease,
-    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  gap: var(--fd-gap);
+  width: 100%;
 }
 
-.session-thinking__header {
+.session-thinking__node {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-gap);
+  width: 100%;
+}
+
+.session-thinking__narrative {
+  margin: 0;
+  width: 100%;
+  color: var(--fd-color-text);
+  font-size: var(--fd-font-size);
+  line-height: var(--fd-line-height);
+  word-break: break-word;
+  animation: session-thinking-content-in 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.session-thinking__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-gap-sm);
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fd-color-text-tertiary);
+  font-size: var(--fd-font-size);
+  line-height: var(--fd-line-height);
+  text-align: left;
+  cursor: pointer;
+}
+
+.session-thinking__meta:hover,
+.session-thinking__meta:focus-visible {
+  outline: none;
+  color: var(--fd-color-text-secondary);
+}
+
+.session-thinking__meta--summary {
+  align-self: flex-start;
+}
+
+.session-thinking__meta.is-static {
+  cursor: default;
+}
+
+.session-thinking.is-expanded:not(.is-collapsed) {
+  gap: var(--fd-gap-xl);
+}
+
+.session-thinking__meta-label {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.session-thinking__meta-chevron {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: inherit;
+  font-size: 16px;
+  line-height: 16px;
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+}
+
+.session-thinking__meta.is-open .session-thinking__meta-chevron {
+  transform: rotate(90deg);
+}
+
+.session-thinking__tool {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-gap-sm);
+  max-width: 100%;
+  color: var(--fd-color-text-secondary);
+  font-size: var(--fd-font-size);
+  line-height: var(--fd-line-height);
+}
+
+.session-thinking__tool-copy {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.session-thinking__tool-prefix,
+.session-thinking__tool-name {
+  color: inherit;
+}
+
+.session-thinking__tool.is-shining .session-thinking__tool-name {
+  background-image: linear-gradient(
+    112deg,
+    rgba(9, 30, 64, 0.78) 0%,
+    rgba(9, 30, 64, 0.78) 42%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(9, 30, 64, 0.78) 58%,
+    rgba(9, 30, 64, 0.78) 100%
+  );
+  background-size: 190% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: session-thinking-status-shine 4.6s linear infinite;
+}
+
+.session-thinking__tool.is-expandable {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.session-thinking__tool.is-expandable:focus-visible {
+  outline: none;
+}
+
+.session-thinking__tool.is-open .session-thinking__meta-chevron {
+  transform: rotate(90deg);
+}
+
+.session-thinking__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-gap);
+  width: 100%;
+  animation: session-thinking-reveal 0.18s ease-out both;
+}
+
+.session-thinking__node-children {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-gap);
+  width: 100%;
+  animation: session-thinking-reveal 0.18s ease-out both;
+}
+
+.session-thinking__node-children .session-thinking__action-main {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.session-thinking__action {
   display: flex;
   align-items: center;
-  gap: var(--fd-gap);
-  min-height: 40px;
-  padding: var(--fd-padding-layout-xs) var(--fd-padding-layout-sm);
-  background: var(--fd-color-bg-container);
+  justify-content: flex-start;
+  gap: var(--fd-gap-sm);
+  width: 100%;
+  min-width: 0;
+  color: var(--fd-color-text-tertiary);
+  font-size: var(--fd-font-size);
+  line-height: var(--fd-line-height);
+}
+
+.session-thinking__action.is-expandable {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.session-thinking__action.is-expandable:focus-visible {
+  outline: none;
+}
+
+.session-thinking__action.is-open .session-thinking__meta-chevron {
+  transform: rotate(90deg);
+}
+
+.session-thinking__narrative--child {
+  color: var(--fd-color-text);
+}
+
+.session-thinking__action-main {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-gap-sm);
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.session-thinking__action-icon,
+.session-thinking__action-chip-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  line-height: 16px;
+  color: inherit;
+}
+
+.session-thinking__action-label {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.session-thinking__action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fd-gap-xs, 2px);
+  min-width: 0;
+  max-width: 100%;
+  padding: 0 var(--fd-padding-layout-2xs, 4px);
+  border-radius: var(--fd-border-radius-sm, 4px);
+  background: var(--fd-color-fill-quaternary);
+  color: var(--fd-color-text-tertiary);
+}
+
+.session-thinking__action-chip-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-thinking__action-spinner {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  margin: 1px;
+  border: 1.5px solid rgba(96, 132, 255, 0.22);
+  border-top-color: #7aa7ff;
+  border-radius: 50%;
+  animation: session-thinking-spinner-rotate 0.9s linear infinite;
+}
+
+.session-thinking__action.is-shining .session-thinking__action-label {
+  background-image: linear-gradient(
+    112deg,
+    rgba(9, 30, 64, 0.66) 0%,
+    rgba(9, 30, 64, 0.66) 42%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(9, 30, 64, 0.66) 58%,
+    rgba(9, 30, 64, 0.66) 100%
+  );
+  background-size: 190% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: session-thinking-status-shine 4.6s linear infinite;
+}
+
+.session-thinking__stream-anchor {
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.session-thinking__extras {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-gap-xs);
+  width: 100%;
+  animation: session-thinking-reveal 0.18s ease-out both;
+}
+
+.session-thinking.is-collapsing {
+  gap: var(--fd-gap-sm);
+}
+
+.session-thinking.is-collapsed {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 0;
+  width: max-content;
+  max-width: 100%;
+}
+
+.session-thinking.is-collapsed .session-thinking__stream {
+  display: none;
 }
 
 .session-thinking__status {
@@ -10794,357 +11063,11 @@ select {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .session-thinking__status-shine {
+  .session-thinking__status-shine,
+  .session-thinking__tool.is-shining .session-thinking__tool-name {
     animation: none;
     background-position: 50% 50%;
   }
-}
-
-.session-thinking__toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: var(--fd-border-radius);
-  color: var(--fd-color-text-tertiary);
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.session-thinking__toggle:hover,
-.session-thinking__toggle:focus-visible {
-  outline: none;
-  background: var(--fd-color-fill-quaternary);
-  color: var(--fd-color-text-secondary);
-}
-
-.session-thinking__body {
-  position: relative;
-  display: flex;
-  flex: 0 1 auto;
-  flex-direction: column;
-  justify-content: flex-start;
-  height: auto;
-  max-height: 210px;
-  padding: 0 var(--fd-padding-layout-sm) var(--fd-gap-xl);
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  opacity: 1;
-  transition:
-    max-height 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-    padding 0.24s ease,
-    opacity 0.2s ease;
-}
-
-.session-thinking__body::-webkit-scrollbar {
-  display: none;
-}
-
-.session-thinking__fade-top {
-  position: sticky;
-  top: 0;
-  right: 0;
-  left: 0;
-  z-index: 1;
-  flex: 0 0 24px;
-  height: 24px;
-  margin-bottom: -24px;
-  background: linear-gradient(
-    180deg,
-    var(--fd-color-bg-container) 0%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  pointer-events: none;
-}
-
-.session-thinking.is-expanded .session-thinking__body {
-  height: auto;
-  max-height: 1200px;
-  overflow: visible;
-  justify-content: flex-start;
-}
-
-.session-thinking.is-collapsing {
-  gap: 0;
-}
-
-.session-thinking.is-collapsing .session-thinking__card {
-  transform: none;
-}
-
-.session-thinking.is-collapsing .session-thinking__body {
-  max-height: 0;
-  padding-bottom: 0;
-  overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.session-thinking.is-collapsed {
-  display: inline-flex;
-  align-self: flex-start;
-  gap: 0;
-  width: max-content;
-  max-width: 100%;
-}
-
-.session-thinking.is-collapsed .session-thinking__card {
-  position: relative;
-  display: inline-flex;
-  align-self: flex-start;
-  box-shadow: none;
-  width: max-content;
-  max-width: 100%;
-}
-
-.session-thinking.is-collapsed .session-thinking__header {
-  display: inline-flex;
-  align-self: flex-start;
-  width: max-content;
-  max-width: 100%;
-}
-
-.session-thinking.is-collapsed .session-thinking__status {
-  flex: 0 1 auto;
-  min-width: auto;
-}
-
-.session-thinking.is-collapsed .session-thinking__body {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 0;
-  min-width: 0;
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
-}
-
-.session-thinking__steps {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fd-gap);
-  width: 100%;
-  padding-bottom: 2px;
-}
-
-.session-thinking-step {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fd-gap-sm);
-  transform-origin: top left;
-  will-change: transform, opacity;
-}
-
-.session-thinking-step--active {
-  animation: session-thinking-step-in 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.session-thinking-step--done {
-  animation: none;
-}
-
-.session-thinking-step__head {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.session-thinking-step__icon {
-  width: 16px;
-  height: 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: opacity 0.24s ease;
-}
-
-.session-thinking-step__icon-svg {
-  display: block;
-  width: 16px;
-  height: 16px;
-}
-
-.session-thinking-step__icon--active {
-  animation: none;
-}
-
-.session-thinking-step__icon--active .session-thinking-step__icon-svg {
-  animation: session-thinking-spinner-rotate 1s linear infinite;
-}
-
-.session-thinking-step__spinner-ring {
-  stroke-dasharray: 22 12;
-  transform-origin: center;
-}
-
-.session-thinking-step__icon-dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 1px solid var(--fd-color-split);
-  background: var(--fd-color-bg-container);
-}
-
-.session-thinking-step__icon--pending {
-  border: 1.5px solid var(--fd-color-split);
-  background: var(--fd-color-bg-container);
-}
-
-.session-thinking-step__title-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--fd-gap-xs);
-  min-width: 0;
-}
-
-.session-thinking-step__title {
-  color: var(--fd-color-text);
-  font-size: var(--fd-font-size-sm);
-  line-height: var(--fd-line-height-sm);
-}
-
-.session-thinking-step--pending .session-thinking-step__title {
-  color: var(--fd-color-text-tertiary);
-}
-
-.session-thinking-step__skill {
-  display: inline-flex;
-  align-items: center;
-  padding: 0 var(--fd-padding-layout-2xs);
-  border-radius: var(--fd-border-radius-sm);
-  font-size: var(--fd-font-size-sm);
-  line-height: var(--fd-line-height-sm);
-  white-space: nowrap;
-}
-
-.session-thinking-step__skill--purple {
-  background: rgba(122, 73, 228, 0.1);
-  color: #46399d;
-}
-
-.session-thinking-step__skill--teal {
-  background: rgba(0, 152, 128, 0.1);
-  color: #009880;
-}
-
-.session-thinking-step__skill--blue {
-  background: rgba(0, 71, 253, 0.1);
-  color: #1c4bba;
-}
-
-.session-thinking-step__body {
-  display: flex;
-  gap: 4px;
-  padding-left: 0;
-  align-items: flex-start;
-}
-
-.session-thinking-step__rail {
-  position: relative;
-  width: 16px;
-  flex-shrink: 0;
-  align-self: stretch;
-}
-
-.session-thinking-step__rail::before,
-.session-thinking-step__rail::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  width: 1px;
-  border-radius: 999px;
-  transform: translateX(-50%);
-}
-
-.session-thinking-step__rail::before {
-  top: -2px;
-  bottom: -2px;
-  background: rgba(230, 233, 239, 0.96);
-}
-
-.session-thinking-step__rail::after {
-  top: -2px;
-  bottom: -2px;
-  background: linear-gradient(180deg, rgba(122, 167, 255, 0.9) 0%, rgba(100, 200, 255, 0.24) 100%);
-  opacity: 0;
-  transform: translateX(-50%) scaleY(0.75);
-  transform-origin: top center;
-  transition:
-    opacity 0.18s ease,
-    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.session-thinking-step--active .session-thinking-step__rail::after {
-  opacity: 1;
-  transform: translateX(-50%) scaleY(1);
-}
-
-.session-thinking-step:last-child .session-thinking-step__rail::before,
-.session-thinking-step:last-child .session-thinking-step__rail::after {
-  bottom: 8px;
-}
-
-.session-thinking-step__content {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: var(--fd-gap-xs);
-  min-width: 0;
-}
-
-.session-thinking-step--active .session-thinking-step__content {
-  animation: session-thinking-content-in 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.session-thinking-step__extras {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fd-gap-xs);
-}
-
-.session-thinking-step__reveal {
-  animation: session-thinking-reveal 0.18s ease-out both;
-}
-
-.session-thinking-step__desc {
-  margin: 0;
-  min-height: 20px;
-  color: var(--fd-color-text-secondary);
-  font-size: var(--fd-font-size-sm);
-  line-height: var(--fd-line-height-sm);
-}
-
-.session-thinking-step__cursor {
-  display: inline-block;
-  width: 2px;
-  height: 1em;
-  margin-left: 1px;
-  border-radius: 1px;
-  background: #5285ea;
-  vertical-align: text-bottom;
-  animation: session-thinking-cursor 1.15s ease-in-out infinite;
-}
-
-.session-thinking-step__code .session-thinking-step__cursor {
-  display: inline-block;
-  width: 6px;
-  height: 14px;
-  margin-left: 2px;
-  border-radius: 1px;
-  background: #5285ea;
-  vertical-align: middle;
 }
 
 .session-thinking-step__refs {
@@ -11189,27 +11112,6 @@ select {
   white-space: nowrap;
 }
 
-.session-thinking-step__code {
-  margin: 0;
-  padding: 4px 8px;
-  max-height: 72px;
-  border-radius: var(--fd-border-radius);
-  background: #f7f8fa;
-  color: var(--fd-color-text-quaternary);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12px;
-  line-height: 20px;
-  white-space: pre-wrap;
-  word-break: break-word;
-  overflow: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.session-thinking-step__code::-webkit-scrollbar {
-  display: none;
-}
-
 .session-thinking__footnote {
   margin: 0;
   color: var(--fd-color-text);
@@ -11221,8 +11123,8 @@ select {
   display: flex;
   align-items: center;
   gap: var(--fd-gap-sm);
-  font-size: var(--fd-font-size-sm);
-  line-height: var(--fd-line-height-sm);
+  font-size: var(--fd-font-size);
+  line-height: var(--fd-line-height);
   animation: session-thinking-wait-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -11479,30 +11381,20 @@ select {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .session-thinking-step--active,
-  .session-thinking-step--done,
-  .session-thinking-step__reveal,
-  .session-thinking-step--active .session-thinking-step__content,
+  .session-thinking__narrative,
+  .session-thinking__extras,
+  .session-thinking__actions,
   .session-thinking__wait,
+  .session-thinking__tool.is-shining .session-thinking__tool-name,
+  .session-thinking__action.is-shining .session-thinking__action-label,
   .session-transition__card,
   .session-transition__card::after {
     animation: none;
   }
 
-  .session-thinking-step__cursor {
+  .session-thinking__meta-chevron,
+  .session-thinking__action-spinner {
     animation: none;
-    opacity: 0.7;
-  }
-
-  .session-thinking-step__icon--active {
-    animation: none;
-  }
-
-  .session-thinking-step__icon--active .session-thinking-step__icon-svg {
-    animation: none;
-  }
-
-  .session-thinking-step__rail::after {
     transition: none;
   }
 }
@@ -16682,12 +16574,196 @@ select {
   }
 }
 @media (max-width: 599px) {
-  .session-thinking__card {
-    border: 0;
+  .session-thinking__tool {
+    color: var(--fd-color-text-tertiary);
   }
 
-  .session-thinking__header {
-    padding: 0 0px;
+  .session-thinking__tool-prefix,
+  .session-thinking__tool-name {
+    color: var(--fd-color-text-tertiary);
+  }
+
+  .session-thinking__tool.is-expandable {
+    width: 100%;
+  }
+
+  .session-thinking__actions {
+    gap: var(--fd-gap);
+  }
+
+  .session-thinking__action {
+    width: 100%;
+  }
+
+  .session-thinking__meta--summary {
+    color: var(--fd-color-text-tertiary);
+    font-size: var(--fd-font-size);
+    line-height: var(--fd-line-height);
+  }
+
+  .session-thinking.is-expanded:not(.is-collapsed) {
+    width: 100%;
+  }
+
+  .session-thinking-drawer-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .session-thinking-drawer-backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(9, 30, 64, 0.45);
+    animation: mobile-attachment-backdrop-in 0.2s ease-out both;
+  }
+
+  .session-thinking-drawer {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+    max-height: min(78vh, 640px);
+    overflow: hidden;
+    border-radius: 20px 20px 0 0;
+    background: var(--fd-color-bg-container);
+    animation: mobile-attachment-drawer-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .session-thinking-drawer__grabber {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    width: 58px;
+    height: 4px;
+    border-radius: 100px;
+    background: var(--fd-color-fill-tertiary, #ccc);
+    transform: translateX(-50%);
+  }
+
+  .session-thinking-drawer__header {
+    display: grid;
+    flex: 0 0 auto;
+    grid-template-columns: 56px minmax(0, 1fr) 56px;
+    align-items: center;
+    gap: var(--fd-gap-xl);
+    width: 100%;
+    min-height: 56px;
+    padding: var(--fd-padding-layout) var(--fd-padding-layout) var(--fd-padding-layout-xs);
+    box-sizing: border-box;
+  }
+
+  .session-thinking-drawer__close {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 56px;
+    height: 36px;
+    padding: var(--fd-padding-layout-xs);
+    border: 0;
+    background: transparent;
+    color: var(--fd-color-icon-normal);
+  }
+
+  .session-thinking-drawer__close .dora-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+    line-height: 22px;
+  }
+
+  .session-thinking-drawer__header h2 {
+    margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--fd-color-text-heading);
+    font-size: var(--fd-font-size-lg);
+    font-weight: 600;
+    line-height: var(--fd-line-height-lg);
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .session-thinking-drawer__header-spacer {
+    width: 56px;
+    height: 36px;
+  }
+
+  .session-thinking-drawer__body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--fd-gap-xl);
+    min-height: 0;
+    padding: var(--fd-padding-layout-xs) var(--fd-padding-layout) max(var(--fd-padding-layout-xl), env(safe-area-inset-bottom));
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .session-thinking-drawer__chip {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: var(--fd-gap-xs, 2px);
+    max-width: 100%;
+    padding: 0 var(--fd-padding-layout-2xs, 4px);
+    border-radius: var(--fd-border-radius-sm, 4px);
+    background: var(--fd-color-fill-quaternary);
+    color: var(--fd-color-text-tertiary);
+    font-size: var(--fd-font-size);
+    line-height: var(--fd-line-height);
+  }
+
+  .session-thinking-drawer__chip span:last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .session-thinking-drawer__narrative {
+    margin: 0;
+    color: var(--fd-color-text);
+    font-size: var(--fd-font-size);
+    line-height: var(--fd-line-height);
+    word-break: break-word;
+  }
+
+  .session-thinking-drawer__refs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fd-gap-xs);
+    width: 100%;
+  }
+
+  .session-thinking-drawer__code {
+    margin: 0;
+    padding: var(--fd-padding-layout-xs);
+    overflow: auto;
+    border-radius: var(--fd-border-radius-sm, 4px);
+    background: var(--fd-color-bg-container-grey, #f8f9fc);
+    color: var(--fd-color-text-secondary);
+    font-size: 12px;
+    line-height: 18px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .session-thinking-drawer__empty {
+    margin: 0;
+    color: var(--fd-color-text-tertiary);
+    font-size: var(--fd-font-size);
+    line-height: var(--fd-line-height);
   }
 
   .mobile-model-switch {
