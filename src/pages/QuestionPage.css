@@ -10232,6 +10232,8 @@ select {
 .session-thread__result-divider {
   width: 100%;
   height: 1px;
+  /* 分割线到结果文案需要 12px，容器 gap 只给了 8px */
+  margin-bottom: var(--fd-gap-sm, 4px);
   background: var(--fd-color-border-secondary, #e6e9ef);
 }
 
@@ -10750,7 +10752,14 @@ select {
 }
 
 .session-thinking.is-expanded:not(.is-collapsed) {
-  gap: var(--fd-gap-xl);
+  /* 展开后是「总标题 + 分割线 + 思考内容」三段，彼此间距 8px */
+  gap: var(--fd-gap);
+}
+
+.session-thinking__divider {
+  width: 100%;
+  height: 1px;
+  background: var(--fd-color-border-secondary, #e6e9ef);
 }
 
 .session-thinking__meta-label {
@@ -10959,13 +10968,6 @@ select {
   color: transparent;
   -webkit-text-fill-color: transparent;
   animation: session-thinking-status-shine 4.6s linear infinite;
-}
-
-.session-thinking__stream-anchor {
-  width: 100%;
-  height: 0;
-  overflow: hidden;
-  pointer-events: none;
 }
 
 .session-thinking__extras {

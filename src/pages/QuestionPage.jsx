@@ -2965,10 +2965,17 @@ const completeHistoryItemGeneration = (items, itemId, { incrementUnread } = {}) 
     }
   })
 
+const formatCompletedSessionSummary = (durationMs = 0) => {
+  const totalSeconds = Math.max(1, Math.round(durationMs / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `任务耗时 ${minutes}m ${seconds}s`
+}
+
 const buildCompletedSessionMeta = ({ completedCount, durationMs, summaryStatus } = {}) => ({
   completedCount: completedCount ?? 0,
   durationMs: durationMs ?? 0,
-  summaryStatus: summaryStatus ?? '',
+  summaryStatus: summaryStatus || formatCompletedSessionSummary(durationMs ?? 0),
 })
 
 const createSessionSentAt = (date = new Date()) => date.toISOString()
@@ -5322,6 +5329,10 @@ export default function QuestionPage() {
   const updateActiveSessionState = (updater) => {
     updateSessionScopeState(activeSessionScope, updater)
   }
+
+  // 稳定回调里必须走最新引用，否则会把状态写到进入页面时的旧会话作用域上
+  const updateActiveSessionStateRef = useRef(updateActiveSessionState)
+  updateActiveSessionStateRef.current = updateActiveSessionState
 
   useEffect(() => {
     if (!isMobileViewport || !isGeneratingSession || !activeExecutionPlan?.id) return undefined
@@ -10982,7 +10993,7 @@ export default function QuestionPage() {
   }
 
   const handleSessionGenerationComplete = useCallback(({ completedCount, durationMs, streamKey } = {}) => {
-    updateActiveSessionState((prev) => {
+    updateActiveSessionStateRef.current((prev) => {
       const completedMeta = buildCompletedSessionMeta({
         completedCount,
         durationMs,
@@ -11008,7 +11019,9 @@ export default function QuestionPage() {
                 completedSessionMeta: buildCompletedSessionMeta({
                   completedCount,
                   durationMs,
-                  summaryStatus: item.completedSessionMeta?.summaryStatus ?? '',
+                  summaryStatus:
+                    item.completedSessionMeta?.summaryStatus ||
+                    formatCompletedSessionSummary(durationMs),
                   streamKey,
                 }),
               }),

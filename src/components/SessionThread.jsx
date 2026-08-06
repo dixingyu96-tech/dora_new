@@ -394,6 +394,41 @@ const inferPromptContext = (userPrompt = '', userFiles = []) => {
   }
 }
 
+// 各场景的检索命中量，用来覆盖“单个结果 / 多个结果”两种节点样式
+const RETRIEVAL_HINTS = Object.freeze({
+  feedback: { web: 12, dashboard: 1 },
+  'weekly-report': { web: 18, dashboard: 6 },
+  'monthly-review': { web: 21, dashboard: 4 },
+  comparison: { web: 26, dashboard: 3 },
+  operations: { web: 21, dashboard: 8 },
+  generic: { web: 15, dashboard: 1 },
+})
+
+const buildRetrievalSteps = ({ scenario, reads = [] }) => {
+  const hints = RETRIEVAL_HINTS[scenario] ?? RETRIEVAL_HINTS.generic
+
+  return [
+    {
+      id: 'search-tables',
+      title: '查找可用数据表',
+      description: '先把能用的业务表捞出来，确认字段、粒度和更新时间够不够支撑这次分析。',
+      reads,
+    },
+    {
+      id: 'search-dashboard',
+      title: '查找相关仪表板',
+      description: '看看已有仪表板里是不是已经沉淀过同类口径，能复用就不重复搭一遍。',
+      resultCount: hints.dashboard,
+    },
+    {
+      id: 'search-web',
+      title: '查找网页资料',
+      description: '再补一轮公开资料，用来交叉验证行业口径和外部参照。',
+      resultCount: hints.web,
+    },
+  ]
+}
+
 const buildStepFrame = ({ scenario, prompt = '', signals }) => {
   const focusText = prompt || '当前问题'
 
@@ -492,7 +527,7 @@ const enrichThinkingSteps = (steps, context) => {
   )
 
   if (readIndex >= 0) {
-    expanded.splice(readIndex + 1, 0, buildStepFrame(context))
+    expanded.splice(readIndex + 1, 0, buildStepFrame(context), ...buildRetrievalSteps(context))
   }
 
   const evidenceIndex = expanded.findIndex((step) => ['evidence', 'outline', 'report'].includes(step.id))
@@ -1125,16 +1160,19 @@ const getThinkingSearchResultCount = (step) => {
   return Number.isFinite(Number(count)) ? Number(count) : null
 }
 
-const buildThinkingStreamItems = (visibleSteps = []) => {
+const buildThinkingStreamItems = (visibleSteps = [], { activeAsNode = false } = {}) => {
   const items = []
   if (!visibleSteps.length) return items
 
   let intro = null
   const thoughtChildren = []
   const opsChildren = []
+  let thoughtCount = 0
   let fileOps = 0
   let toolCalls = 0
   let activeTail = null
+  let activeGroupKind = ''
+  let activeChild = null
 
   visibleSteps.forEach((entry) => {
     const { step, status, descriptionLength = 0, isStreamingText = false } = entry
@@ -1155,6 +1193,18 @@ const buildThinkingStreamItems = (visibleSteps = []) => {
     }
 
     if (status === 'active') {
+      if (activeAsNode && intro) {
+        // 生成过程中当前步骤归到所属节点里，由节点标题行实时呈现它的加载状态
+        activeChild = buildThinkingActionFromStep(step, 'active')
+        activeGroupKind = isPureThought ? 'thought' : 'ops'
+        if (isPureThought) {
+          thoughtChildren.push(activeChild)
+        } else {
+          opsChildren.push(activeChild)
+        }
+        return
+      }
+
       if (isToolStep) {
         activeTail = {
           type: 'tool',
@@ -1179,6 +1229,7 @@ const buildThinkingStreamItems = (visibleSteps = []) => {
     if (status !== 'done') return
 
     if (isPureThought) {
+      thoughtCount += 1
       thoughtChildren.push({
         type: 'action',
         id: `thought-action-${step.id}`,
@@ -1201,40 +1252,49 @@ const buildThinkingStreamItems = (visibleSteps = []) => {
 
   if (intro) items.push(intro)
 
+  const groups = []
   if (thoughtChildren.length) {
-    items.push({
+    groups.push({
       type: 'meta',
       id: 'meta-thought',
       kind: 'thought',
-      label: `已进行 ${thoughtChildren.length} 次思考`,
+      label: `已进行 ${thoughtCount} 次思考`,
       children: thoughtChildren,
+      activeChild: activeGroupKind === 'thought' ? activeChild : null,
+    })
+  }
+  if (opsChildren.length) {
+    groups.push({
+      type: 'meta',
+      id: 'meta-ops',
+      kind: 'ops',
+      label: `已操作 ${fileOps} 次文件，调用 ${toolCalls} 个工具`,
+      children: opsChildren,
+      activeChild: activeGroupKind === 'ops' ? activeChild : null,
     })
   }
 
-  if (opsChildren.length) {
+  // 正在加载的节点必须排在最后，否则加载态会跑到已完成节点上面
+  groups.sort((a, b) => Number(Boolean(a.activeChild)) - Number(Boolean(b.activeChild)))
+
+  groups.forEach((group) => {
     const lastItem = items[items.length - 1]
     // 节点与节点之间必须夹一段推理，不允许两个节点紧挨着
     if (lastItem?.type === 'meta') {
-      const bridgeSource = opsChildren.find((child) => child.narrative)?.narrative || ''
+      const bridgeSource = group.children.find((child) => child.narrative)?.narrative || ''
       const bridgeText =
         bridgeSource && bridgeSource !== intro?.text
           ? bridgeSource
           : '接下来我会处理相关文件，并按需要调用工具继续往下做。'
       items.push({
         type: 'narrative',
-        id: 'bridge-before-ops',
+        id: `bridge-before-${group.id}`,
         text: bridgeText,
       })
     }
 
-    items.push({
-      type: 'meta',
-      id: 'meta-ops',
-      kind: 'ops',
-      label: `已操作 ${fileOps} 次文件，调用 ${toolCalls} 个工具`,
-      children: opsChildren,
-    })
-  }
+    items.push(group)
+  })
 
   if (activeTail) {
     // 当前步骤直接承接已完成节点，避免插入额外的过渡文案；
@@ -1252,8 +1312,13 @@ function buildThinkingActionFromStep(step, status = 'done') {
   const title = step.title || ''
   const description = step.description ?? ''
   const actionType = getThinkingActionType(step)
-  const isWebSearch = /网页|网络|web/i.test(`${step.id ?? ''} ${title}`)
+  const semanticText = `${step.id ?? ''} ${title}`
+  const isDashboardSearch = /仪表板|看板|dashboard/i.test(semanticText)
+  const isWebSearch = !isDashboardSearch && /网页|网络|web/i.test(semanticText)
   const searchResultCount = getThinkingSearchResultCount(step)
+  // tag 和结果数量都要等这一步跑完才知道，加载中一律不展示
+  const settledChip = (file, icon) => (isActive || !file ? null : { icon, name: file.name })
+  const settledText = (text) => (isActive ? '' : text)
 
   const withDetail = (action) => ({
     type: 'action',
@@ -1278,17 +1343,34 @@ function buildThinkingActionFromStep(step, status = 'done') {
   }
 
   if (actionType === THINKING_ACTION_TYPES.search) {
+    if (isDashboardSearch) {
+      return withDetail({
+        id: `action-${step.id}`,
+        label: '查找仪表板',
+        // 命中多个仪表板才标注数量，单个结果不带后缀
+        secondaryText: settledText(searchResultCount > 1 ? `${searchResultCount}个结果` : ''),
+        loading: isActive,
+        shimmer: isActive,
+      })
+    }
+
+    if (isWebSearch) {
+      return withDetail({
+        id: `action-${step.id}`,
+        label: '查找网页',
+        secondaryText: settledText(searchResultCount !== null ? `${searchResultCount}个结果` : ''),
+        loading: isActive,
+        shimmer: isActive,
+      })
+    }
+
+    const tableCount = searchResultCount ?? step.reads?.length ?? 0
     return withDetail({
       id: `action-${step.id}`,
-      label: isWebSearch ? '查找网页' : '查找数据',
-      secondaryText:
-        isWebSearch && searchResultCount !== null ? `${searchResultCount}个结果` : '',
-      chip: readFile
-        ? {
-            icon: ICONS.chainQueryTable,
-            name: readFile.name,
-          }
-        : null,
+      label: '查找数据',
+      // 命中一张表就展示表名 tag，多张表只报数量
+      secondaryText: settledText(tableCount > 1 ? `${tableCount}张表` : ''),
+      chip: tableCount > 1 ? null : settledChip(readFile, ICONS.chainQueryTable),
       loading: isActive,
       shimmer: isActive,
     })
@@ -1298,12 +1380,7 @@ function buildThinkingActionFromStep(step, status = 'done') {
     return withDetail({
       id: `action-${step.id}`,
       label: /^生成/.test(title) ? title : '生成可视化图表',
-      chip: outputFile
-        ? {
-            icon: ICONS.chainChart,
-            name: outputFile.name,
-          }
-        : null,
+      chip: settledChip(outputFile, ICONS.chainChart),
       loading: isActive,
       shimmer: isActive,
     })
@@ -1313,12 +1390,7 @@ function buildThinkingActionFromStep(step, status = 'done') {
     return withDetail({
       id: `action-${step.id}`,
       label: '执行数据分析',
-      chip: outputFile
-        ? {
-            icon: ICONS.chainAnalysisTable,
-            name: outputFile.name,
-          }
-        : null,
+      chip: settledChip(outputFile, ICONS.chainAnalysisTable),
       loading: isActive,
       shimmer: isActive,
     })
@@ -1419,11 +1491,11 @@ function ThinkingActionRow({
       <span className="session-thinking__action-main">
         {loading ? (
           <span className="session-thinking__action-spinner" aria-hidden="true" />
-        ) : (
+        ) : icon ? (
           <span className="dora-icon icon-16 session-thinking__action-icon" aria-hidden="true">
             {icon}
           </span>
-        )}
+        ) : null}
         <span className="session-thinking__action-label">{label}</span>
         {secondaryText ? (
           <span className="session-thinking__action-secondary">{secondaryText}</span>
@@ -1672,14 +1744,8 @@ export default function SessionThread({
   const [thinkingExpanded, setThinkingExpanded] = useState(false)
   const [thinkingCollapsed, setThinkingCollapsed] = useState(false)
   const [thinkingCollapsing, setThinkingCollapsing] = useState(false)
-  const [openThinkingMeta, setOpenThinkingMeta] = useState(() =>
-    isMobileViewport
-      ? {}
-      : {
-          'meta-thought': true,
-          'meta-ops': true,
-        },
-  )
+  // 空对象即默认态：移动端全部收起，PC 端仍是全部展开
+  const [openThinkingMeta, setOpenThinkingMeta] = useState({})
   const [frozenSummaryStatus, setFrozenSummaryStatus] = useState('')
   const [desktopCopyLabel, setDesktopCopyLabel] = useState('复制')
   const [desktopCopySuccess, setDesktopCopySuccess] = useState(false)
@@ -1722,7 +1788,10 @@ export default function SessionThread({
   const currentUserFiles = currentTurn?.userFiles ?? userFiles
   const currentUserSentAt = currentTurn?.sentAt ?? userSentAt
   const currentCompletedMeta = currentTurn?.completedSessionMeta ?? completedSessionMeta
-  const streamKey = `${currentPrompt}:${currentUserFiles.map((file) => file.id ?? file.name).join('|')}`
+  // 带上轮次 id，重复提问同一个问题时也要按新一轮重置链路
+  const streamKey = `${currentTurn?.id ?? 'current'}:${currentPrompt}:${currentUserFiles
+    .map((file) => file.id ?? file.name)
+    .join('|')}`
   const desktopUserMessageCopyText = useMemo(() => {
     const fileNames = currentUserFiles.map((file) => file.name).filter(Boolean)
     if (currentPrompt && fileNames.length) return `${currentPrompt}\n${fileNames.join('\n')}`
@@ -1802,8 +1871,8 @@ export default function SessionThread({
   }, [isGenerating, isStaticCompletedView, stream, thinkingSteps])
 
   const thinkingStreamItems = useMemo(
-    () => buildThinkingStreamItems(visibleSteps),
-    [visibleSteps],
+    () => buildThinkingStreamItems(visibleSteps, { activeAsNode: isMobileViewport }),
+    [isMobileViewport, visibleSteps],
   )
 
   const headerStatus =
@@ -1815,10 +1884,9 @@ export default function SessionThread({
 
   const isThinkingComplete =
     isStaticCompletedView || stream.phase === 'done' || stream.phase === 'stopped'
-  const displayStatus =
-    isThinkingComplete && !isGenerating
-      ? frozenSummaryStatus || staticCompletedSummary || headerStatus
-      : headerStatus
+  const displayStatus = isThinkingComplete
+    ? frozenSummaryStatus || staticCompletedSummary || headerStatus
+    : headerStatus
 
   const clearCollapseTimer = useCallback(() => {
     if (!collapseTimerRef.current) return
@@ -2151,30 +2219,40 @@ export default function SessionThread({
   useEffect(() => {
     clearCollapseTimer()
     setThinkingExpanded(false)
-    setThinkingCollapsed(isStaticCompletedView)
     setThinkingCollapsing(false)
-    setFrozenSummaryStatus(isStaticCompletedView ? staticCompletedSummary : '')
-    autoCollapsedKeyRef.current = ''
-  }, [clearCollapseTimer, isStaticCompletedView, staticCompletedSummary, streamKey])
+    // 仅随会话切换重置：已完成会话进摘要，新会话展开链路
+    const shouldStartCollapsed = Boolean(currentCompletedMeta) && !isGenerating && !isTransitioning
+    setThinkingCollapsed(shouldStartCollapsed)
+    setFrozenSummaryStatus(shouldStartCollapsed ? staticCompletedSummary : '')
+    autoCollapsedKeyRef.current = shouldStartCollapsed ? streamKey : ''
+    // 刻意只在 streamKey 变化时重置，避免生成结束瞬间强制折叠
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [streamKey])
 
   useEffect(() => {
-    if (isStaticCompletedView) return
+    if (!isStaticCompletedView) return
+    // 生成刚结束时只同步摘要文案，收起交给自动收起定时器
+    setFrozenSummaryStatus((prev) => staticCompletedSummary || prev)
+  }, [isStaticCompletedView, staticCompletedSummary])
+
+  useEffect(() => {
     if (stream.phase !== 'running') return
     clearCollapseTimer()
     setThinkingCollapsed(false)
     setThinkingCollapsing(false)
+    // 每轮生成开始都清空展开态，思考中的子节点必须重新由用户手动展开
+    setOpenThinkingMeta({})
     setFrozenSummaryStatus('')
     autoCollapsedKeyRef.current = ''
-  }, [clearCollapseTimer, isStaticCompletedView, stream.phase])
+  }, [clearCollapseTimer, stream.phase])
 
   useEffect(() => {
-    if (isStaticCompletedView) return
     if (stream.phase !== 'done' || !stream.finishedAt || !stream.startedAt) return
 
     setFrozenSummaryStatus(
       formatThinkingSummary(stream.completedCount, Math.max(0, stream.finishedAt - stream.startedAt)),
     )
-  }, [isStaticCompletedView, stream.completedCount, stream.finishedAt, stream.phase, stream.startedAt])
+  }, [stream.completedCount, stream.finishedAt, stream.phase, stream.startedAt])
 
   useEffect(() => {
     if (isStaticCompletedView) return
@@ -2189,15 +2267,18 @@ export default function SessionThread({
   }, [completionRunKey, isStaticCompletedView, onGenerationComplete, stream.completedCount, stream.finishedAt, stream.phase, stream.startedAt])
 
   useEffect(() => {
-    if (isStaticCompletedView) return undefined
     if (
-      stream.phase !== 'done' ||
       autoCollapsedKeyRef.current === streamKey ||
       thinkingCollapsed ||
       thinkingCollapsing
     ) {
       return undefined
     }
+
+    const shouldAutoCollapse =
+      stream.phase === 'done' || (isStaticCompletedView && !isGenerating)
+
+    if (!shouldAutoCollapse) return undefined
 
     const timer = window.setTimeout(() => {
       startCollapseTransition({
@@ -2208,7 +2289,15 @@ export default function SessionThread({
     }, AUTO_COLLAPSE_DELAY_MS)
 
     return () => window.clearTimeout(timer)
-  }, [isStaticCompletedView, startCollapseTransition, stream.phase, streamKey, thinkingCollapsed, thinkingCollapsing])
+  }, [
+    isGenerating,
+    isStaticCompletedView,
+    startCollapseTransition,
+    stream.phase,
+    streamKey,
+    thinkingCollapsed,
+    thinkingCollapsing,
+  ])
 
   useEffect(
     () => () => {
@@ -2268,9 +2357,8 @@ export default function SessionThread({
   }, [resetExpandKey])
 
   useEffect(() => {
-    if (!isMobileViewport) return
     setOpenThinkingMeta({})
-  }, [isMobileViewport, streamKey])
+  }, [isMobileViewport, resetExpandKey, streamKey])
 
   useEffect(() => {
     if (!isMobileViewport || !isGenerating || thinkingCollapsed || thinkingCollapsing) return undefined
@@ -2298,10 +2386,9 @@ export default function SessionThread({
 
   const showAssistantThinking = visibleSteps.length > 0 || isGenerating || isStaticCompletedView
   const showThinkingStream = !thinkingCollapsed && !thinkingCollapsing
+  // 收起态必须保留摘要标题，否则思考区会变成空白块
   const showThinkingSummaryRow = isMobileViewport
-    ? isThinkingComplete &&
-      !isGenerating &&
-      (thinkingCollapsed || thinkingCollapsing || thinkingExpanded)
+    ? thinkingCollapsed || thinkingCollapsing || thinkingExpanded
     : thinkingCollapsed || thinkingCollapsing
   const summaryRowOpen = Boolean(
     isMobileViewport && showThinkingSummaryRow && showThinkingStream && thinkingExpanded,
@@ -2360,12 +2447,10 @@ export default function SessionThread({
     setThinkingDetailDrawer(detail)
   }, [])
 
-  const renderThinkingStreamItems = (items, { openState = openThinkingMeta, keepStreamingVisible = false } = {}) => {
+  const renderThinkingStreamItems = (items, { openState = openThinkingMeta } = {}) => {
     const renderChildItem = (child) => {
       if (child.type === 'action') {
         const childOpen = !isMobileViewport && isThinkingNodeOpen(child.id, openState)
-        const showStreamingNarrative =
-          keepStreamingVisible && child.streaming && child.narrative && !childOpen
         const canOpenDetail = Boolean(child.detailOpenable)
         return (
           <Fragment key={child.id}>
@@ -2388,9 +2473,6 @@ export default function SessionThread({
               }}
               narrative={isMobileViewport ? '' : child.narrative}
             />
-            {showStreamingNarrative ? (
-              <p className="session-thinking__narrative session-thinking__narrative--child">{child.narrative}</p>
-            ) : null}
           </Fragment>
         )
       }
@@ -2428,26 +2510,29 @@ export default function SessionThread({
 
           if (item.type === 'meta') {
             const metaOpen = isThinkingNodeOpen(item.id, openState)
-            const streamingChild = item.children?.find((child) => child.streaming && child.narrative)
-            const showChildren = metaOpen || (keepStreamingVisible && Boolean(streamingChild))
+            const active = item.activeChild
             return (
               <div key={item.id} className="session-thinking__node">
-                <ThinkingMetaRow
-                  label={item.label}
-                  open={metaOpen}
-                  onToggle={() => handleToggleThinkingMeta(item.id)}
-                />
-                {showChildren && item.children?.length ? (
+                {active ? (
+                  // 该节点还在产出子内容时，标题行只呈现当前节点的文案：结果要等跑完才知道
+                  <ThinkingActionRow
+                    actionType={active.actionType}
+                    label={active.label}
+                    shimmer={active.shimmer}
+                    open={metaOpen}
+                    expandable
+                    onToggle={() => handleToggleThinkingMeta(item.id)}
+                  />
+                ) : (
+                  <ThinkingMetaRow
+                    label={item.label}
+                    open={metaOpen}
+                    onToggle={() => handleToggleThinkingMeta(item.id)}
+                  />
+                )}
+                {metaOpen && item.children?.length ? (
                   <div className="session-thinking__node-children">
-                    {metaOpen
-                      ? item.children.map((child) => renderChildItem(child))
-                      : streamingChild
-                        ? (
-                          <p className="session-thinking__narrative session-thinking__narrative--child">
-                            {streamingChild.narrative}
-                          </p>
-                          )
-                        : null}
+                    {item.children.map((child) => renderChildItem(child))}
                   </div>
                 ) : null}
               </div>
@@ -2495,7 +2580,6 @@ export default function SessionThread({
 
           return null
         })}
-        {isMobileViewport ? <div className="session-thinking__stream-anchor" aria-hidden="true" /> : null}
       </div>
     )
   }
@@ -2969,11 +3053,11 @@ export default function SessionThread({
               />
             ) : null}
 
-            {showThinkingStream
-              ? renderThinkingStreamItems(thinkingStreamItems, {
-                  keepStreamingVisible: Boolean(isMobileViewport && isGenerating),
-                })
-              : null}
+            {summaryRowOpen ? (
+              <div className="session-thinking__divider" aria-hidden="true" />
+            ) : null}
+
+            {showThinkingStream ? renderThinkingStreamItems(thinkingStreamItems) : null}
 
             {stream.showFootnote && stream.phase !== 'done' && showThinkingStream ? (
               <p className="session-thinking__footnote">用户上传了一份文件，正在读取</p>
