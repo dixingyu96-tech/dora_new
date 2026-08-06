@@ -39,6 +39,46 @@ const ICONS = {
   close: '\ue7ab',
 }
 
+const THINKING_ACTION_TYPES = Object.freeze({
+  thought: 'thought',
+  search: 'search',
+  view: 'view',
+  execute: 'execute',
+  generate: 'generate',
+  other: 'other',
+})
+
+const THINKING_ACTION_ICONS = Object.freeze({
+  [THINKING_ACTION_TYPES.thought]: ICONS.chainThought,
+  [THINKING_ACTION_TYPES.search]: ICONS.chainSearch,
+  [THINKING_ACTION_TYPES.view]: ICONS.chainView,
+  [THINKING_ACTION_TYPES.execute]: ICONS.chainExecute,
+  [THINKING_ACTION_TYPES.generate]: ICONS.chainGenerate,
+  [THINKING_ACTION_TYPES.other]: ICONS.chainTool,
+})
+
+const THINKING_ACTION_TYPE_ALIASES = Object.freeze({
+  thought: THINKING_ACTION_TYPES.thought,
+  thinking: THINKING_ACTION_TYPES.thought,
+  '思考': THINKING_ACTION_TYPES.thought,
+  search: THINKING_ACTION_TYPES.search,
+  find: THINKING_ACTION_TYPES.search,
+  lookup: THINKING_ACTION_TYPES.search,
+  '查找': THINKING_ACTION_TYPES.search,
+  view: THINKING_ACTION_TYPES.view,
+  preview: THINKING_ACTION_TYPES.view,
+  '查看': THINKING_ACTION_TYPES.view,
+  execute: THINKING_ACTION_TYPES.execute,
+  run: THINKING_ACTION_TYPES.execute,
+  '执行': THINKING_ACTION_TYPES.execute,
+  generate: THINKING_ACTION_TYPES.generate,
+  create: THINKING_ACTION_TYPES.generate,
+  '生成': THINKING_ACTION_TYPES.generate,
+  other: THINKING_ACTION_TYPES.other,
+  tool: THINKING_ACTION_TYPES.other,
+  '其他': THINKING_ACTION_TYPES.other,
+})
+
 const SCHEDULE_TASK_ICON_ASSET =
   'http://localhost:3845/assets/5bc447a2465a33e470ff994a4cafbfd714eb69ca.png'
 const SCHEDULE_TASK_DELETE_ICON_ASSET =
@@ -1041,9 +1081,48 @@ const getStepVisibleDescription = (step, descriptionLength = 0, status = 'done')
 
 const getToolDisplayName = (step) => {
   if (step?.skill?.label) {
-    return step.skill.label.replace(/^技能[：:]/, '').trim() || step.title
+    const skillName = step.skill.label.replace(/^技能[：:]/, '').trim()
+    // “Code”是内部执行器名称，移动端实时节点应优先展示用户可理解的当前步骤。
+    if (!skillName || /^code$/i.test(skillName)) return step.title || '工具'
+    return skillName
   }
   return step?.title || '工具'
+}
+
+const normalizeThinkingActionType = (value) => {
+  if (!value) return null
+  return THINKING_ACTION_TYPE_ALIASES[String(value).trim().toLowerCase()] ?? null
+}
+
+const getThinkingActionType = (step) => {
+  const explicitType = normalizeThinkingActionType(step?.actionType ?? step?.actionKind)
+  if (explicitType) return explicitType
+
+  const title = step?.title ?? ''
+  const skillLabel = step?.skill?.label ?? ''
+  const semanticText = `${step?.id ?? ''} ${title} ${skillLabel}`
+  const hasReadFile = Boolean(step?.reads?.length)
+  const hasOutputFile = Boolean(step?.outputs?.length)
+
+  if (/定时|查看|预览|打开/.test(semanticText)) return THINKING_ACTION_TYPES.view
+  if (hasReadFile) return THINKING_ACTION_TYPES.search
+  if (/生成|创建|绘制|渲染|可视|图表|chart/i.test(semanticText)) {
+    return THINKING_ACTION_TYPES.generate
+  }
+  if (hasOutputFile || step?.code) return THINKING_ACTION_TYPES.execute
+  if (step?.skill) return THINKING_ACTION_TYPES.other
+  if (/查找|搜索|检索|查询|读取|网页|web/i.test(semanticText)) {
+    return THINKING_ACTION_TYPES.search
+  }
+  if (/执行|分析|计算|处理|校准|验证|提炼|汇总/.test(semanticText)) {
+    return THINKING_ACTION_TYPES.execute
+  }
+  return THINKING_ACTION_TYPES.thought
+}
+
+const getThinkingSearchResultCount = (step) => {
+  const count = step?.resultCount ?? step?.results?.length ?? step?.result?.count
+  return Number.isFinite(Number(count)) ? Number(count) : null
 }
 
 const buildThinkingStreamItems = (visibleSteps = []) => {
@@ -1062,7 +1141,8 @@ const buildThinkingStreamItems = (visibleSteps = []) => {
     const visibleDescription = getStepVisibleDescription(step, descriptionLength, status)
     const fileCount = (step.reads?.length || 0) + (step.outputs?.length || 0)
     const isToolStep = Boolean(step.skill)
-    const isPureThought = !isToolStep && fileCount === 0
+    const actionType = getThinkingActionType(step)
+    const isPureThought = actionType === THINKING_ACTION_TYPES.thought
 
     if (!intro && visibleDescription) {
       intro = {
@@ -1102,12 +1182,12 @@ const buildThinkingStreamItems = (visibleSteps = []) => {
       thoughtChildren.push({
         type: 'action',
         id: `thought-action-${step.id}`,
-        icon: ICONS.chainThought,
+        actionType,
+        icon: THINKING_ACTION_ICONS[actionType],
         label: '思考过程',
         narrative: visibleDescription || step.description || '',
         reads: step.reads ?? [],
         outputs: step.outputs ?? [],
-        code: step.code ?? '',
         title: step.title || '思考过程',
         detailOpenable: true,
       })
@@ -1157,15 +1237,8 @@ const buildThinkingStreamItems = (visibleSteps = []) => {
   }
 
   if (activeTail) {
-    const lastItem = items[items.length - 1]
-    if (activeTail.type === 'tool' && lastItem?.type === 'meta') {
-      items.push({
-        type: 'narrative',
-        id: `bridge-before-${activeTail.id}`,
-        text: '我接着往下做，先把这一步需要的工具跑起来。',
-        streaming: true,
-      })
-    }
+    // 当前步骤直接承接已完成节点，避免插入额外的过渡文案；
+    // 移动端需要把“调用工具：...”作为实时状态展示在汇总节点之后。
     items.push(activeTail)
   }
 
@@ -1177,11 +1250,15 @@ function buildThinkingActionFromStep(step, status = 'done') {
   const outputFile = step.outputs?.[0]
   const isActive = status === 'active'
   const title = step.title || ''
-  const skillLabel = step.skill?.label || ''
   const description = step.description ?? ''
+  const actionType = getThinkingActionType(step)
+  const isWebSearch = /网页|网络|web/i.test(`${step.id ?? ''} ${title}`)
+  const searchResultCount = getThinkingSearchResultCount(step)
 
   const withDetail = (action) => ({
     type: 'action',
+    actionType,
+    icon: THINKING_ACTION_ICONS[actionType],
     ...action,
     narrative: description,
     reads: step.reads ?? [],
@@ -1191,39 +1268,39 @@ function buildThinkingActionFromStep(step, status = 'done') {
     detailOpenable: true,
   })
 
-  if (/定时/.test(title)) {
+  if (actionType === THINKING_ACTION_TYPES.view) {
     return withDetail({
       id: `action-${step.id}`,
-      icon: ICONS.chainView,
-      label: title || '查看定时任务',
+      label: /定时/.test(title) ? '查看定时任务' : title || '查看详情',
       loading: isActive,
       shimmer: isActive,
     })
   }
 
-  if (readFile) {
+  if (actionType === THINKING_ACTION_TYPES.search) {
     return withDetail({
       id: `action-${step.id}`,
-      icon: ICONS.chainSearch,
-      label: '查找数据',
-      chip: {
-        icon: ICONS.chainQueryTable,
-        name: readFile.name,
-      },
+      label: isWebSearch ? '查找网页' : '查找数据',
+      secondaryText:
+        isWebSearch && searchResultCount !== null ? `${searchResultCount}个结果` : '',
+      chip: readFile
+        ? {
+            icon: ICONS.chainQueryTable,
+            name: readFile.name,
+          }
+        : null,
       loading: isActive,
       shimmer: isActive,
     })
   }
 
-  if (outputFile || /分析|报告|大纲|证据/.test(title)) {
-    const isChart = /可视|图表|chart/i.test(`${title}${skillLabel}${outputFile?.name || ''}`)
+  if (actionType === THINKING_ACTION_TYPES.generate) {
     return withDetail({
       id: `action-${step.id}`,
-      icon: isActive ? null : isChart ? ICONS.chainGenerate : ICONS.chainExecute,
-      label: isChart ? title || '生成可视化图表' : title || '执行数据分析',
+      label: /^生成/.test(title) ? title : '生成可视化图表',
       chip: outputFile
         ? {
-            icon: isChart ? ICONS.chainChart : ICONS.chainAnalysisTable,
+            icon: ICONS.chainChart,
             name: outputFile.name,
           }
         : null,
@@ -1232,10 +1309,24 @@ function buildThinkingActionFromStep(step, status = 'done') {
     })
   }
 
-  if (step.skill) {
+  if (actionType === THINKING_ACTION_TYPES.execute) {
     return withDetail({
       id: `action-${step.id}`,
-      icon: isActive ? null : ICONS.chainTool,
+      label: '执行数据分析',
+      chip: outputFile
+        ? {
+            icon: ICONS.chainAnalysisTable,
+            name: outputFile.name,
+          }
+        : null,
+      loading: isActive,
+      shimmer: isActive,
+    })
+  }
+
+  if (actionType === THINKING_ACTION_TYPES.other) {
+    return withDetail({
+      id: `action-${step.id}`,
       label: getToolDisplayName(step),
       loading: isActive,
       shimmer: isActive,
@@ -1244,7 +1335,6 @@ function buildThinkingActionFromStep(step, status = 'done') {
 
   return withDetail({
     id: `action-${step.id}`,
-    icon: ICONS.chainThought,
     label: '思考过程',
     loading: isActive,
     shimmer: isActive,
@@ -1309,9 +1399,11 @@ function ThinkingToolRow({ label, toolName, shimmer = false, open = false, expan
 }
 
 function ThinkingActionRow({
+  actionType = THINKING_ACTION_TYPES.other,
   icon,
   label,
   chip = null,
+  secondaryText = '',
   loading = false,
   shimmer = false,
   open = false,
@@ -1321,7 +1413,7 @@ function ThinkingActionRow({
 }) {
   const className = `session-thinking__action${shimmer ? ' is-shining' : ''}${loading ? ' is-loading' : ''}${
     open ? ' is-open' : ''
-  }${expandable ? ' is-expandable' : ''}`
+  }${expandable ? ' is-expandable' : ''} session-thinking__action--${actionType}`
   const content = (
     <>
       <span className="session-thinking__action-main">
@@ -1333,6 +1425,9 @@ function ThinkingActionRow({
           </span>
         )}
         <span className="session-thinking__action-label">{label}</span>
+        {secondaryText ? (
+          <span className="session-thinking__action-secondary">{secondaryText}</span>
+        ) : null}
         {chip ? (
           <span className="session-thinking__action-chip">
             <span className="dora-icon icon-16 session-thinking__action-chip-icon" aria-hidden="true">
@@ -1349,11 +1444,11 @@ function ThinkingActionRow({
   )
 
   const row = expandable ? (
-    <button type="button" className={className} aria-expanded={open} onClick={onToggle}>
+    <button type="button" className={className} data-action-type={actionType} aria-expanded={open} onClick={onToggle}>
       {content}
     </button>
   ) : (
-    <div className={className}>{content}</div>
+    <div className={className} data-action-type={actionType}>{content}</div>
   )
 
   return (
@@ -1381,7 +1476,6 @@ function ThinkingDetailDrawer({ detail, onClose }) {
         aria-modal="true"
         aria-label={detail.label || detail.title || '节点详情'}
       >
-        <div className="session-thinking-drawer__grabber" aria-hidden="true" />
         <header className="session-thinking-drawer__header">
           <button
             type="button"
@@ -1397,31 +1491,33 @@ function ThinkingDetailDrawer({ detail, onClose }) {
           <span className="session-thinking-drawer__header-spacer" aria-hidden="true" />
         </header>
         <div className="session-thinking-drawer__body">
-          {detail.chip ? (
-            <div className="session-thinking-drawer__chip">
-              <span className="dora-icon icon-16" aria-hidden="true">
-                {detail.chip.icon}
-              </span>
-              <span>{detail.chip.name}</span>
-            </div>
-          ) : null}
-          {detail.narrative ? (
-            <p className="session-thinking-drawer__narrative">{detail.narrative}</p>
-          ) : null}
-          {detail.reads?.length || detail.outputs?.length ? (
-            <div className="session-thinking-drawer__refs">
-              <ThinkingFileRefs label="读取：" files={detail.reads} />
-              <ThinkingFileRefs label="产物：" files={detail.outputs} />
-            </div>
-          ) : null}
-          {detail.code ? (
-            <pre className="session-thinking-drawer__code">
-              <code>{detail.code}</code>
-            </pre>
-          ) : null}
-          {!detail.narrative && !detail.reads?.length && !detail.outputs?.length && !detail.code ? (
-            <p className="session-thinking-drawer__empty">暂无更多详情</p>
-          ) : null}
+          <div className="session-thinking-drawer__content">
+            {detail.chip ? (
+              <div className="session-thinking-drawer__chip">
+                <span className="dora-icon icon-16" aria-hidden="true">
+                  {detail.chip.icon}
+                </span>
+                <span>{detail.chip.name}</span>
+              </div>
+            ) : null}
+            {detail.narrative ? (
+              <p className="session-thinking-drawer__narrative">{detail.narrative}</p>
+            ) : null}
+            {detail.reads?.length || detail.outputs?.length ? (
+              <div className="session-thinking-drawer__refs">
+                <ThinkingFileRefs label="读取：" files={detail.reads} />
+                <ThinkingFileRefs label="产物：" files={detail.outputs} />
+              </div>
+            ) : null}
+            {detail.code ? (
+              <pre className="session-thinking-drawer__code">
+                <code>{detail.code}</code>
+              </pre>
+            ) : null}
+            {!detail.narrative && !detail.reads?.length && !detail.outputs?.length && !detail.code ? (
+              <p className="session-thinking-drawer__empty">暂无更多详情</p>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>,
@@ -1570,6 +1666,7 @@ export default function SessionThread({
   completedSessionMeta,
   onGenerationComplete,
   onFollowUp,
+  onShowMobileToast,
   isMobileViewport = false,
 }) {
   const [thinkingExpanded, setThinkingExpanded] = useState(false)
@@ -1591,8 +1688,6 @@ export default function SessionThread({
   const [activeAssistantResultTurnId, setActiveAssistantResultTurnId] = useState(null)
   const [copiedAssistantTurnId, setCopiedAssistantTurnId] = useState(null)
   const [assistantFeedbackByTurn, setAssistantFeedbackByTurn] = useState({})
-  const [copyToastVisible, setCopyToastVisible] = useState(false)
-  const [feedbackToast, setFeedbackToast] = useState(null)
   const [resultContextMenu, setResultContextMenu] = useState(null)
   const [resultSelectionBubble, setResultSelectionBubble] = useState(null)
   const [expandedTurnIds, setExpandedTurnIds] = useState({})
@@ -1605,7 +1700,6 @@ export default function SessionThread({
   const collapseTimerRef = useRef(null)
   const copyResetTimerRef = useRef(null)
   const desktopCopyResetTimerRef = useRef(null)
-  const feedbackToastTimerRef = useRef(null)
   const resultLongPressRef = useRef(null)
   const selectedResultSummaryRef = useRef(null)
   const suppressResultClickRef = useRef(false)
@@ -1788,7 +1882,12 @@ export default function SessionThread({
       if (!copied) throw new Error('copy-failed')
       setCopiedUserTurnId(turnId)
       setCopiedAssistantTurnId(null)
-      setCopyToastVisible(true)
+      onShowMobileToast?.({
+        kind: 'copy',
+        message: '复制成功',
+        icon: ICONS.toastSuccessFilled,
+        duration: 3000,
+      })
       if (copyResetTimerRef.current) {
         window.clearTimeout(copyResetTimerRef.current)
       }
@@ -1796,17 +1895,15 @@ export default function SessionThread({
         copyResetTimerRef.current = null
         setCopiedUserTurnId(null)
         setCopiedAssistantTurnId(null)
-        setCopyToastVisible(false)
       }, 3000)
     } catch {
       setCopiedUserTurnId(null)
-      setCopyToastVisible(false)
       if (copyResetTimerRef.current) {
         window.clearTimeout(copyResetTimerRef.current)
         copyResetTimerRef.current = null
       }
     }
-  }, [])
+  }, [onShowMobileToast])
 
   const handleCopyAssistantResult = useCallback(async (turnId, copyText) => {
     if (!copyText) return
@@ -1816,7 +1913,12 @@ export default function SessionThread({
       if (!copied) throw new Error('copy-failed')
       setCopiedUserTurnId(null)
       setCopiedAssistantTurnId(turnId)
-      setCopyToastVisible(true)
+      onShowMobileToast?.({
+        kind: 'copy',
+        message: '复制成功',
+        icon: ICONS.toastSuccessFilled,
+        duration: 3000,
+      })
       if (copyResetTimerRef.current) {
         window.clearTimeout(copyResetTimerRef.current)
       }
@@ -1824,32 +1926,23 @@ export default function SessionThread({
         copyResetTimerRef.current = null
         setCopiedUserTurnId(null)
         setCopiedAssistantTurnId(null)
-        setCopyToastVisible(false)
       }, 3000)
     } catch {
       setCopiedAssistantTurnId(null)
-      setCopyToastVisible(false)
       if (copyResetTimerRef.current) {
         window.clearTimeout(copyResetTimerRef.current)
         copyResetTimerRef.current = null
       }
     }
-  }, [])
+  }, [onShowMobileToast])
 
   const showFeedbackToast = useCallback((type) => {
-    if (feedbackToastTimerRef.current) {
-      window.clearTimeout(feedbackToastTimerRef.current)
-    }
-
-    setFeedbackToast({
-      id: `${type}-${Date.now()}`,
+    onShowMobileToast?.({
+      kind: 'feedback',
       message: type === 'like' ? '感谢支持' : '感谢反馈，我们会继续改进',
+      duration: 3000,
     })
-    feedbackToastTimerRef.current = window.setTimeout(() => {
-      feedbackToastTimerRef.current = null
-      setFeedbackToast(null)
-    }, 3000)
-  }, [])
+  }, [onShowMobileToast])
 
   const clearResultLongPress = useCallback(() => {
     if (resultLongPressRef.current?.timer) {
@@ -2027,6 +2120,35 @@ export default function SessionThread({
   }, [closeResultFloatingPanels, resultContextMenu, resultSelectionBubble])
 
   useEffect(() => {
+    if (!isMobileViewport || (!activeUserMetaTurnId && !activeAssistantResultTurnId)) {
+      return undefined
+    }
+
+    const handleOutsideMetaPointerDown = (event) => {
+      const clickedUserEntry = event.target.closest?.('.session-thread__user-entry')
+      const clickedAssistantResult = event.target.closest?.('.session-thread__result')
+
+      if (clickedUserEntry) {
+        setActiveAssistantResultTurnId(null)
+        return
+      }
+
+      if (clickedAssistantResult) {
+        setActiveUserMetaTurnId(null)
+        return
+      }
+
+      setActiveUserMetaTurnId(null)
+      setActiveAssistantResultTurnId(null)
+    }
+
+    document.addEventListener('pointerdown', handleOutsideMetaPointerDown, true)
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsideMetaPointerDown, true)
+    }
+  }, [activeAssistantResultTurnId, activeUserMetaTurnId, isMobileViewport])
+
+  useEffect(() => {
     clearCollapseTimer()
     setThinkingExpanded(false)
     setThinkingCollapsed(isStaticCompletedView)
@@ -2099,10 +2221,6 @@ export default function SessionThread({
         window.clearTimeout(desktopCopyResetTimerRef.current)
         desktopCopyResetTimerRef.current = null
       }
-      if (feedbackToastTimerRef.current) {
-        window.clearTimeout(feedbackToastTimerRef.current)
-        feedbackToastTimerRef.current = null
-      }
       clearResultLongPress()
     },
     [clearCollapseTimer, clearResultLongPress],
@@ -2136,7 +2254,6 @@ export default function SessionThread({
     setActiveAssistantResultTurnId(null)
     setCopiedAssistantTurnId(null)
     setAssistantFeedbackByTurn({})
-    setCopyToastVisible(false)
     closeResultFloatingPanels()
   }, [closeResultFloatingPanels, resetExpandKey])
 
@@ -2253,9 +2370,11 @@ export default function SessionThread({
         return (
           <Fragment key={child.id}>
             <ThinkingActionRow
+              actionType={child.actionType}
               icon={child.icon}
               label={child.label}
               chip={child.chip}
+              secondaryText={child.secondaryText}
               loading={child.loading}
               shimmer={child.shimmer}
               open={childOpen}
@@ -2353,9 +2472,11 @@ export default function SessionThread({
                     {item.actions.map((action) => (
                       <ThinkingActionRow
                         key={action.id}
+                        actionType={action.actionType}
                         icon={action.icon}
                         label={action.label}
                         chip={action.chip}
+                        secondaryText={action.secondaryText}
                         loading={action.loading}
                         shimmer={action.shimmer}
                         expandable={Boolean(action.detailOpenable)}
@@ -2717,32 +2838,6 @@ export default function SessionThread({
           {renderUserTurn(currentTurn, { showMeta: true })}
         </Fragment>
       ) : null}
-
-      {isMobileViewport && copyToastVisible && typeof document !== 'undefined'
-        ? createPortal(
-            <div className="session-thread__copy-toast" role="status" aria-live="polite">
-              <span aria-hidden="true" className="dora-icon session-thread__copy-toast-icon">
-                {ICONS.toastSuccessFilled}
-              </span>
-              <span>复制成功</span>
-            </div>,
-            document.body,
-          )
-        : null}
-
-      {isMobileViewport && feedbackToast && typeof document !== 'undefined'
-        ? createPortal(
-            <div
-              key={feedbackToast.id}
-              className="session-thread__feedback-toast"
-              role="status"
-              aria-live="polite"
-            >
-              {feedbackToast.message}
-            </div>,
-            document.body,
-          )
-        : null}
 
       {isMobileViewport && thinkingDetailDrawer && typeof document !== 'undefined' ? (
         <ThinkingDetailDrawer detail={thinkingDetailDrawer} onClose={closeThinkingDetailDrawer} />

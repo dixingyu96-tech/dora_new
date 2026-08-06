@@ -10460,8 +10460,8 @@ select {
   border-radius: var(--fd-border-radius);
   background: transparent;
   color: var(--fd-color-text);
-  font-size: var(--fd-font-size);
-  line-height: var(--fd-line-height);
+  font-size: var(--fd-font-size-lg);
+  line-height: var(--fd-line-height-lg);
   text-align: left;
   white-space: nowrap;
 }
@@ -10487,14 +10487,14 @@ select {
 
 .session-thread__result-context-menu button .dora-icon {
   display: inline-flex;
-  flex: 0 0 16px;
+  flex: 0 0 22px;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 22px;
+  height: 22px;
   color: var(--fd-color-icon-normal);
-  font-size: 16px;
-  line-height: 16px;
+  font-size: 22px;
+  line-height: 22px;
 }
 
 .session-thread__result-context-menu button.is-active .dora-icon {
@@ -10532,8 +10532,8 @@ select {
   border-radius: var(--fd-border-radius);
   background: transparent;
   color: var(--fd-color-text);
-  font-size: var(--fd-font-size);
-  line-height: var(--fd-line-height);
+  font-size: var(--fd-font-size-lg);
+  line-height: var(--fd-line-height-lg);
   white-space: nowrap;
 }
 
@@ -10543,10 +10543,14 @@ select {
 }
 
 .session-thread__selection-bubble button .dora-icon {
-  width: 16px;
-  height: 16px;
-  font-size: 16px;
-  line-height: 16px;
+  display: inline-flex;
+  flex: 0 0 22px;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  font-size: 22px;
+  line-height: 22px;
 }
 
 .session-thread__selection-bubble-divider {
@@ -10900,6 +10904,12 @@ select {
 
 .session-thinking__action-label {
   flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.session-thinking__action-secondary {
+  flex-shrink: 0;
+  color: var(--fd-color-text-quaternary);
   white-space: nowrap;
 }
 
@@ -11862,8 +11872,7 @@ select {
   .attach-connect-dialog {
     position: relative;
     width: 100%;
-    height: 95svh;
-    max-height: 95svh;
+    height: auto;
     border-radius: 20px 20px 0 0;
     box-shadow: none;
     animation: mobile-attachment-drawer-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -16618,7 +16627,7 @@ select {
     position: absolute;
     inset: 0;
     border: 0;
-    background: rgba(9, 30, 64, 0.45);
+    background: rgba(0, 0, 0, 0.55);
     animation: mobile-attachment-backdrop-in 0.2s ease-out both;
   }
 
@@ -16629,34 +16638,24 @@ select {
     flex-direction: column;
     box-sizing: border-box;
     width: 100%;
-    max-height: min(78vh, 640px);
     overflow: hidden;
     border-radius: 20px 20px 0 0;
     background: var(--fd-color-bg-container);
     animation: mobile-attachment-drawer-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
-  .session-thinking-drawer__grabber {
-    position: absolute;
-    top: 5px;
-    left: 50%;
-    width: 58px;
-    height: 4px;
-    border-radius: 100px;
-    background: var(--fd-color-fill-tertiary, #ccc);
-    transform: translateX(-50%);
-  }
-
   .session-thinking-drawer__header {
     display: grid;
-    flex: 0 0 auto;
+    box-sizing: border-box;
+    flex: 0 0 68px;
     grid-template-columns: 56px minmax(0, 1fr) 56px;
     align-items: center;
     gap: var(--fd-gap-xl);
     width: 100%;
-    min-height: 56px;
-    padding: var(--fd-padding-layout) var(--fd-padding-layout) var(--fd-padding-layout-xs);
-    box-sizing: border-box;
+    height: 68px;
+    min-height: 68px;
+    padding: var(--fd-padding-layout);
+    background: var(--fd-color-bg-container);
   }
 
   .session-thinking-drawer__close {
@@ -16701,13 +16700,26 @@ select {
 
   .session-thinking-drawer__body {
     display: flex;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     flex-direction: column;
-    gap: var(--fd-gap-xl);
     min-height: 0;
-    padding: var(--fd-padding-layout-xs) var(--fd-padding-layout) max(var(--fd-padding-layout-xl), env(safe-area-inset-bottom));
-    overflow: auto;
+    padding: 0 var(--fd-padding-layout) max(var(--fd-padding-layout), env(safe-area-inset-bottom));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .session-thinking-drawer__content {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--fd-gap);
+    width: 100%;
+    padding: var(--fd-padding-layout-sm) var(--fd-padding-layout);
+    border: 1px solid var(--fd-color-border-secondary);
+    border-radius: 12px;
+    background: var(--fd-color-bg-container-grey);
   }
 
   .session-thinking-drawer__chip {
@@ -16733,9 +16745,10 @@ select {
 
   .session-thinking-drawer__narrative {
     margin: 0;
-    color: var(--fd-color-text);
+    color: var(--fd-color-text-tertiary);
     font-size: var(--fd-font-size);
     line-height: var(--fd-line-height);
+    white-space: pre-wrap;
     word-break: break-word;
   }
 
@@ -16748,10 +16761,11 @@ select {
 
   .session-thinking-drawer__code {
     margin: 0;
-    padding: var(--fd-padding-layout-xs);
+    padding: var(--fd-padding-layout-sm);
     overflow: auto;
-    border-radius: var(--fd-border-radius-sm, 4px);
-    background: var(--fd-color-bg-container-grey, #f8f9fc);
+    border: 1px solid var(--fd-color-border-secondary);
+    border-radius: var(--fd-border-radius-lg, 8px);
+    background: var(--fd-color-bg-container);
     color: var(--fd-color-text-secondary);
     font-size: 12px;
     line-height: 18px;
@@ -17075,6 +17089,8 @@ select {
   .session-thread__feedback-toast,
   .mobile-model-toast {
     font-size: var(--fd-font-size, 14px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   .session-thread__copy-toast :is(.dora-icon, img, svg),
@@ -17114,6 +17130,19 @@ select {
     height: 16px;
     font-size: 16px;
     line-height: 16px;
+  }
+
+  :is(
+    .attach-connect-dialog,
+    .mobile-attachment-drawer,
+    .mobile-bi-drawer,
+    .mobile-avatar-menu,
+    .experts-mobile-alert-drawer,
+    .session-thinking-drawer,
+    .mobile-model-drawer
+  ) {
+    max-height: 90vh;
+    max-height: 90svh;
   }
 }
 

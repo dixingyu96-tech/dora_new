@@ -1,0 +1,122 @@
+/*
+ * 移动端点赞 / 点踩反馈动效
+ * 适用断点：viewport width <= 599px
+ *
+ * 选中赞或踩时，将 .session-thread__result-feedback-icon
+ * 添加到当前选中的字体图标元素上，即可播放回弹动效。
+ */
+
+@media (max-width: 599px) {
+  .session-thread__result-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--fd-gap, 8px);
+    min-height: 24px;
+  }
+
+  .session-thread__result-action-group {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--fd-gap, 8px);
+  }
+
+  .session-thread__result-action {
+    display: inline-flex;
+    flex: 0 0 24px;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--fd-border-radius, 6px);
+    background: transparent;
+    color: var(--fd-color-icon, rgba(9, 30, 64, 0.78));
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .session-thread__result-action .dora-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    line-height: 16px;
+  }
+
+  .session-thread__result-action.is-active {
+    color: var(--fd-color-text, #091e40);
+  }
+
+  .session-thread__result-feedback-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    overflow: visible;
+    font-size: 16px;
+    line-height: 16px;
+    transform-origin: center;
+    animation: mobile-feedback-icon-pop 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* 点赞 / 点踩后的页面居中轻 Toast。 */
+  .session-thread__feedback-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 10020;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 82px;
+    height: 40px;
+    padding: 9px 13px;
+    border-radius: var(--fd-border-radius, 6px);
+    background: rgba(0, 0, 0, 0.66);
+    color: var(--fd-color-text-white, #fff);
+    font-size: var(--fd-font-size, 14px);
+    line-height: var(--fd-line-height, 22px);
+    white-space: nowrap;
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transform: translate(-50%, -50%);
+    animation: mobile-feedback-toast-in 0.16s ease-out both;
+  }
+}
+
+@keyframes mobile-feedback-icon-pop {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.72);
+  }
+
+  62% {
+    opacity: 1;
+    transform: scale(1.14);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes mobile-feedback-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 4px));
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (max-width: 599px) and (prefers-reduced-motion: reduce) {
+  .session-thread__result-feedback-icon,
+  .session-thread__feedback-toast {
+    animation: none;
+  }
+}

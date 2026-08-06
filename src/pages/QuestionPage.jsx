@@ -3995,7 +3995,7 @@ export default function QuestionPage() {
     dora: { modelId: DEFAULT_MOBILE_MODEL_ID, thinkingEnabled: false },
     experts: { modelId: DEFAULT_MOBILE_MODEL_ID, thinkingEnabled: false },
   })
-  const [mobileModelToast, setMobileModelToast] = useState('')
+  const [mobileToast, setMobileToast] = useState(null)
   const [expertAlertsDrawerOpen, setExpertAlertsDrawerOpen] = useState(false)
   const [activeInnerAction, setActiveInnerAction] = useState('new-chat')
   const [practicesPageOpen, setPracticesPageOpen] = useState(false)
@@ -4243,7 +4243,8 @@ export default function QuestionPage() {
   const libraryRecentScrollerRef = useRef(null)
   const historyRenameInputRef = useRef(null)
   const mobileHistoryDialogInputRef = useRef(null)
-  const mobileModelToastTimerRef = useRef(null)
+  const mobileToastTimerRef = useRef(null)
+  const mobileToastIdRef = useRef(0)
   const historyRenameSkipBlurRef = useRef(false)
   const avatarBtnRef = useRef(null)
   const avatarMenuPanelRef = useRef(null)
@@ -7254,15 +7255,28 @@ export default function QuestionPage() {
     )
   }
 
-  const showMobileModelSwitchToast = () => {
-    if (mobileModelToastTimerRef.current) {
-      window.clearTimeout(mobileModelToastTimerRef.current)
+  const showMobileToast = useCallback(({ kind = 'feedback', message, icon = '', duration = 3000 }) => {
+    if (!message) return
+    if (mobileToastTimerRef.current) {
+      window.clearTimeout(mobileToastTimerRef.current)
     }
-    setMobileModelToast('切换成功')
-    mobileModelToastTimerRef.current = window.setTimeout(() => {
-      mobileModelToastTimerRef.current = null
-      setMobileModelToast('')
-    }, 1800)
+
+    mobileToastIdRef.current += 1
+    const toastId = mobileToastIdRef.current
+    setMobileToast({ id: toastId, kind, message, icon })
+    mobileToastTimerRef.current = window.setTimeout(() => {
+      mobileToastTimerRef.current = null
+      setMobileToast((current) => (current?.id === toastId ? null : current))
+    }, duration)
+  }, [])
+
+  const showMobileModelSwitchToast = () => {
+    showMobileToast({
+      kind: 'model',
+      message: '切换成功',
+      icon: ICONS.toastSuccessFilled,
+      duration: 1800,
+    })
   }
 
   const selectMobileModel = (modelId) => {
@@ -9367,6 +9381,7 @@ export default function QuestionPage() {
       completedSessionMeta={activeSessionCompletedMeta}
       onGenerationComplete={handleSessionGenerationComplete}
       onFollowUp={handleAssistantFollowUp}
+      onShowMobileToast={isMobileViewport ? showMobileToast : undefined}
       isMobileViewport={isMobileViewport}
     />
   )
@@ -10102,7 +10117,11 @@ export default function QuestionPage() {
     setMobileModelDrawerOpen(false)
     setExpertAlertsDrawerOpen(false)
     setMobileHistoryDialog(null)
-    setMobileModelToast('')
+    setMobileToast(null)
+    if (mobileToastTimerRef.current) {
+      window.clearTimeout(mobileToastTimerRef.current)
+      mobileToastTimerRef.current = null
+    }
   }, [isMobileViewport])
 
   useEffect(() => {
@@ -10133,8 +10152,8 @@ export default function QuestionPage() {
 
   useEffect(
     () => () => {
-      if (mobileModelToastTimerRef.current) {
-        window.clearTimeout(mobileModelToastTimerRef.current)
+      if (mobileToastTimerRef.current) {
+        window.clearTimeout(mobileToastTimerRef.current)
       }
     },
     [],
@@ -11718,10 +11737,30 @@ export default function QuestionPage() {
       {renderMobileBiDrawer()}
       {renderMobileModelDrawer()}
       {renderExpertAlertsDrawer()}
-      {isMobileViewport && mobileModelToast ? (
-        <div className="mobile-model-toast" role="status" aria-live="polite">
-          <span className="dora-icon" aria-hidden="true">{ICONS.toastSuccessFilled}</span>
-          <span>{mobileModelToast}</span>
+      {isMobileViewport && mobileToast ? (
+        <div
+          key={mobileToast.id}
+          className={
+            mobileToast.kind === 'copy'
+              ? 'session-thread__copy-toast'
+              : mobileToast.kind === 'model'
+                ? 'mobile-model-toast'
+                : 'session-thread__feedback-toast'
+          }
+          role="status"
+          aria-live="polite"
+        >
+          {mobileToast.icon ? (
+            <span
+              className={`dora-icon${
+                mobileToast.kind === 'copy' ? ' session-thread__copy-toast-icon' : ''
+              }`}
+              aria-hidden="true"
+            >
+              {mobileToast.icon}
+            </span>
+          ) : null}
+          <span>{mobileToast.message}</span>
         </div>
       ) : null}
       <aside className={`sidebar${expertMobileSearchOpen || libraryMobileSearchOpen ? ' sidebar--mobile-search-hidden' : ''}`}>
