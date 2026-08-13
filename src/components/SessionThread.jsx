@@ -2882,7 +2882,7 @@ export default function SessionThread({
         <div
           className={`session-thinking is-stopped session-thinking--history ${
             isHistoryExpanded ? 'is-expanded' : 'is-collapsed'
-          }`}
+          }${isMobileViewport && isHistoryExpanded ? ' has-completion-divider' : ''}`}
         >
           <ThinkingMetaRow
             label={thinkingSummary}
@@ -2899,6 +2899,9 @@ export default function SessionThread({
                 : null
             }
           />
+          {isMobileViewport && isHistoryExpanded ? (
+            <div className="session-thinking__completion-divider" aria-hidden="true" />
+          ) : null}
           {isMobileViewport && isHistoryExpanded
             ? renderThinkingStreamItems(historyStreamItems)
             : null}
@@ -3042,7 +3045,11 @@ export default function SessionThread({
           <div
             className={`session-thinking ${thinkingExpanded ? 'is-expanded' : ''} ${
               thinkingCollapsing ? 'is-collapsing' : ''
-            } ${thinkingCollapsed ? 'is-collapsed' : ''} ${!isGenerating ? 'is-stopped' : ''}`}
+            } ${thinkingCollapsed ? 'is-collapsed' : ''} ${!isGenerating ? 'is-stopped' : ''}${
+              summaryRowOpen && (stream.phase === 'done' || isStaticCompletedView)
+                ? ' has-completion-divider'
+                : ''
+            }`}
           >
             {showThinkingSummaryRow ? (
               <ThinkingMetaRow
@@ -3053,8 +3060,8 @@ export default function SessionThread({
               />
             ) : null}
 
-            {summaryRowOpen ? (
-              <div className="session-thinking__divider" aria-hidden="true" />
+            {summaryRowOpen && (stream.phase === 'done' || isStaticCompletedView) ? (
+              <div className="session-thinking__completion-divider" aria-hidden="true" />
             ) : null}
 
             {showThinkingStream ? renderThinkingStreamItems(thinkingStreamItems) : null}

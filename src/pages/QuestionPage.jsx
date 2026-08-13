@@ -12,6 +12,7 @@ import doraLogoImage from '../assets/images/dora-logo.png'
 import avatarImage from '../assets/images/avatar.png'
 import mobileProfileAvatarImage from '../assets/images/mobile-profile-avatar.png'
 import mobileUserMenuAvatarImage from '../assets/images/mobile-user-menu-avatar.png'
+import mobileNewMessageImage from '../assets/images/mobile-new-message.svg'
 import { FINEBI_ASSET_ICONS } from '../assets/images/finebiAssetIcons'
 import btnBiImage from '../assets/images/btn_bi.png'
 import attachDashboardImage from '../assets/images/attach_dashboard.png'
@@ -332,6 +333,83 @@ const MOBILE_MODEL_OPTIONS = [
   },
 ]
 const DEFAULT_MOBILE_MODEL_ID = 'deepseek-v4-flash'
+const MOBILE_DORA_DAYPART_ASSETS = {
+  morning: {
+    greeting: '早上好，有什么灵感？',
+    sun: 'http://localhost:3845/assets/7a59e34ff9ed318a73f31bb5882adaf875fdb17a.svg',
+    clouds: ['http://localhost:3845/assets/22c75ac85f8b04fca7e222a1a0b26abed3c9e9f6.png'],
+  },
+  forenoon: {
+    greeting: '上午好，今天做什么？',
+    sun: 'http://localhost:3845/assets/84fdb3e4f62c8714afc6c9b3f24503cb4ef9572c.svg',
+    clouds: [
+      'http://localhost:3845/assets/ae64823797e69c41a02f347799ef6553f28346cc.png',
+      'http://localhost:3845/assets/89b829133c40315437fc1bfdadf35cb7813813c6.png',
+    ],
+  },
+  afternoon: {
+    greeting: '下午好 👋',
+    sun: 'http://localhost:3845/assets/d701990f5957d1b46c117ecc04ed692f8acf72c3.svg',
+    clouds: [
+      'http://localhost:3845/assets/ae64823797e69c41a02f347799ef6553f28346cc.png',
+      'http://localhost:3845/assets/13b0a1f8905369b4c137fc075f3e6296047cadfe.png',
+    ],
+  },
+  evening: {
+    greeting: '有什么需要收尾的吗？',
+    moon: 'http://localhost:3845/assets/2ec135d73a13a91d5f0edf64384660e14f547e2a.png',
+    glow: 'http://localhost:3845/assets/a970184102b0261526c1c0388814c2427fb3254b.png',
+    clouds: [
+      'http://localhost:3845/assets/7c2badf7f8389432d9729aef48454c929701c1e4.png',
+      'http://localhost:3845/assets/f3a832190a7ad5e83349d5650e0c2cf15c5eb7c7.png',
+    ],
+    sparkles: ['http://localhost:3845/assets/cb1fdbb381d1b8016470780fba98d007e63bd5ec.png'],
+  },
+  night: {
+    greeting: '夜深了',
+    moon: 'http://localhost:3845/assets/2ec135d73a13a91d5f0edf64384660e14f547e2a.png',
+    glow: 'http://localhost:3845/assets/a970184102b0261526c1c0388814c2427fb3254b.png',
+    clouds: ['http://localhost:3845/assets/e3a2c8455340ea6de2c2e9ffc4b774364769c3c5.png'],
+    sparkles: [
+      'http://localhost:3845/assets/6815e69859e2b00321ec6b762cbe4b6b6bb0bb30.png',
+      'http://localhost:3845/assets/5550e6a4911656c2d74d784151fd31a9183598f3.png',
+      'http://localhost:3845/assets/1ea7c938df56a2c0ea30e9374ac64302d8b8b2e5.png',
+      'http://localhost:3845/assets/df60ddcb1f5e26fe1ed0a87e198a9c7c631bca41.png',
+    ],
+  },
+}
+
+const getMobileDoraDaypart = (date = new Date()) => {
+  const minutes = date.getHours() * 60 + date.getMinutes()
+  if (minutes < 360) return 'night'
+  if (minutes < 540) return 'morning'
+  if (minutes < 720) return 'forenoon'
+  if (minutes < 1110) return 'afternoon'
+  return 'evening'
+}
+
+const MOBILE_DORA_EXPERT_PUSHES = [
+  {
+    title: '客户画像分析日报这个定时任务的名称如果很长很长展示不下',
+    summary: '跟踪客户行为，识别潜在需求，提升客户满意度',
+    agentTitle: '智能agent 121',
+    time: '12:00',
+    isNew: true,
+  },
+  {
+    title: '库存周转效率周报',
+    summary: '监控库存流动情况，识别滞销产品，优化供应链管理',
+    agentTitle: '智能报告',
+    time: '11:00',
+    isNew: true,
+  },
+  {
+    title: '促销活动销售月度报告',
+    summary: '评估各类促销活动的实际效果，指导未来活动策划',
+    agentTitle: '销售洞察助手',
+    time: '10:00',
+  },
+]
 const EXECUTION_PLAN_ITEMS = [
   '明确分析口径与指标范围',
   '匹配可用业务模型并生成查询',
@@ -854,19 +932,6 @@ const insertRefIntoComposerSegments = (segments, mentionStart, mentionEnd, refSe
 
 const removeComposerRefSegment = (segments, refId) =>
   mergeAdjacentComposerTextSegments(normalizeComposerSegments({ composerSegments: segments }).filter((segment) => segment.id !== refId))
-
-const findSourceFileComposerRef = (segments, file) => {
-  const normalized = normalizeComposerSegments({ composerSegments: segments })
-  return (
-    normalized.find(
-      (segment) =>
-        segment.type === 'ref' &&
-        ((file.sessionFileId && segment.fileId === file.sessionFileId) ||
-          segment.fileId === file.id ||
-          segment.label === file.title),
-    ) ?? null
-  )
-}
 
 const appendComposerRefSegment = (segments, refSegment) => {
   const normalized = normalizeComposerSegments({ composerSegments: segments })
@@ -4075,6 +4140,7 @@ export default function QuestionPage() {
   const [sessionFilesPanelOpen, setSessionFilesPanelOpen] = useState(false)
   const [sessionFilesPanelFullscreen, setSessionFilesPanelFullscreen] = useState(false)
   const [sessionFileRefPreviewOpen, setSessionFileRefPreviewOpen] = useState(false)
+  const [mobileSessionFilesDrawerOpen, setMobileSessionFilesDrawerOpen] = useState(false)
   const [librarySessionFilesModalOpen, setLibrarySessionFilesModalOpen] = useState(false)
   const [attachConnectModal, setAttachConnectModal] = useState(null)
   const [attachConnectSearch, setAttachConnectSearch] = useState('')
@@ -5006,6 +5072,12 @@ export default function QuestionPage() {
   const currentScheduleAgentAvatar = isExpertDetailView ? activeExpertCard?.icon ?? agentDefaultAvatarImage : activeDoraImage
   const isScheduleView = activeInnerAction === 'schedule' && (activeNav === 'dora' || isExpertDetailView)
   const isDoraAskPage = activeNav === 'dora' && !isLibraryDetailView && !isScheduleView
+  const isReturningDoraUser = sessionStates.dora.historyItems.length > 0
+  const showMobileReturningDoraHome =
+    isMobileViewport && isDoraAskPage && !isQuestionMode && !mobileNewChatPageOpen && isReturningDoraUser
+  const mobileDoraDaypart = getMobileDoraDaypart()
+  const mobileDoraDaypartConfig = MOBILE_DORA_DAYPART_ASSETS[mobileDoraDaypart]
+  const mobileDoraRecentSessions = sessionStates.dora.historyItems.slice(0, 5)
   const isInnerAvatarGroupCollapsed = Boolean(innerAvatarGroupCollapsed[activeSessionStateKey])
   const activeLibraryKey = activeLibraryItem ? getLibraryItemKey(activeLibraryItem) : ''
   const libraryChatSessions = useMemo(
@@ -5842,20 +5914,8 @@ export default function QuestionPage() {
     handleComposerInput(scope)
   }
 
-  const toggleSourceFileCitation = (scope, file) => {
+  const addSourceFileCitation = (scope, file) => {
     const currentSegments = normalizeComposerSegments(getSessionStateForScope(scope))
-    const existingRef = findSourceFileComposerRef(currentSegments, file)
-
-    if (existingRef) {
-      const nextSegments = removeComposerRefSegment(currentSegments, existingRef.id)
-      updateComposerSegments(scope, nextSegments)
-      requestAnimationFrame(() => {
-        syncComposerEditorFromSegments(nextSegments)
-        senderEditorRef.current?.focus()
-      })
-      return
-    }
-
     const refSegment = createComposerRefSegment({
       label: file.title,
       icon: file.icon,
@@ -7997,19 +8057,22 @@ export default function QuestionPage() {
     { className = 'session-files-panel__action-btn session-files-panel__action-btn--cite' } = {},
   ) => {
     const citationFile = toComposerCitationFile(file)
-    const citedRef = findSourceFileComposerRef(composerSegments, citationFile)
-    const isCited = Boolean(citedRef)
 
     return (
       <IconButton
-        tip={isCited ? '取消引用' : '引用'}
+        tip="引用"
         size="sm"
         className={className}
-        aria-label={isCited ? '取消引用' : '引用'}
-        aria-pressed={isCited}
-        onClick={() => toggleSourceFileCitation(activeSessionScope, citationFile)}
+        aria-label="引用"
+        onClick={() => {
+          addSourceFileCitation(activeSessionScope, citationFile)
+          if (mobileSessionFilesDrawerOpen) {
+            setMobileSessionFilesDrawerOpen(false)
+            closeSessionFilePreview()
+          }
+        }}
       >
-        {renderSessionCiteActionIcon(isCited)}
+        {renderSessionCiteActionIcon(false)}
       </IconButton>
     )
   }
@@ -8884,18 +8947,44 @@ export default function QuestionPage() {
 
   const renderSessionFilesSurface = ({ variant = 'panel', onClose, surfaceRef, style, className = '' }) => {
     const isModal = variant === 'modal'
-    const SurfaceTag = isModal ? 'div' : 'aside'
+    const isMobileDrawer = variant === 'mobile-drawer'
+    const SurfaceTag = isModal || isMobileDrawer ? 'div' : 'aside'
+    const renderSessionFilesTabs = () => (
+      <div className="session-files-panel__tabs" role="tablist" aria-label="会话文件分类">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={sessionFilesTab === 'materials'}
+          className={`session-files-panel__tab${sessionFilesTab === 'materials' ? ' active' : ''}`}
+          onClick={() => setSessionFilesTab('materials')}
+        >
+          来源
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={sessionFilesTab === 'output'}
+          className={`session-files-panel__tab${sessionFilesTab === 'output' ? ' active' : ''}`}
+          onClick={() => setSessionFilesTab('output')}
+        >
+          产出
+        </button>
+      </div>
+    )
 
     return (
       <SurfaceTag
+        id={isMobileDrawer ? 'mobile-session-files-drawer' : undefined}
         ref={surfaceRef}
         className={`session-files-panel${isModal ? ' session-files-panel--modal' : ''}${
+          isMobileDrawer ? ' session-files-panel--mobile-drawer' : ''
+        }${
           !isModal && sessionSplitEntered ? ' session-files-panel--entered' : ''
         }${!isModal && sessionFilesPanelFullscreen ? ' session-files-panel--fullscreen' : ''}${
           activeSessionPreviewFile ? ' session-files-panel--source-preview' : ''
         }${className}`}
-        role={isModal ? 'dialog' : undefined}
-        aria-modal={isModal ? 'true' : undefined}
+        role={isModal || isMobileDrawer ? 'dialog' : undefined}
+        aria-modal={isModal || isMobileDrawer ? 'true' : undefined}
         aria-label="会话文件"
         style={style}
         onClick={isModal ? (event) => event.stopPropagation() : undefined}
@@ -8904,28 +8993,28 @@ export default function QuestionPage() {
           renderSessionFilePreviewPanel()
         ) : (
           <>
+        {isMobileDrawer ? (
+          <>
+            <header className="session-files-panel__mobile-header">
+              <button
+                type="button"
+                className="session-files-panel__mobile-close"
+                aria-label="关闭会话文件"
+                onClick={onClose}
+              >
+                <span className="dora-icon" aria-hidden="true">{ICONS.close}</span>
+              </button>
+              <h2>会话文件</h2>
+              <span className="session-files-panel__mobile-header-spacer" aria-hidden="true" />
+            </header>
+            <div className="session-files-panel__mobile-tabs-shell">
+              {renderSessionFilesTabs()}
+            </div>
+          </>
+        ) : (
         <header className="session-files-panel__header">
           <div className="session-files-panel__tabs-shell">
-            <div className="session-files-panel__tabs" role="tablist" aria-label="会话文件分类">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={sessionFilesTab === 'materials'}
-                className={`session-files-panel__tab${sessionFilesTab === 'materials' ? ' active' : ''}`}
-                onClick={() => setSessionFilesTab('materials')}
-              >
-                来源
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={sessionFilesTab === 'output'}
-                className={`session-files-panel__tab${sessionFilesTab === 'output' ? ' active' : ''}`}
-                onClick={() => setSessionFilesTab('output')}
-              >
-                产出
-              </button>
-            </div>
+            {renderSessionFilesTabs()}
           </div>
           <div className="session-files-panel__header-actions">
             <IconButton
@@ -8940,6 +9029,7 @@ export default function QuestionPage() {
             </IconButton>
           </div>
         </header>
+        )}
 
         {sessionFilesTab === 'output' ? (
             <>
@@ -9063,6 +9153,26 @@ export default function QuestionPage() {
     )
 
   const renderLibrarySessionFilesModal = () => renderSessionFilesModal(() => setLibrarySessionFilesModalOpen(false))
+
+  const renderMobileSessionFilesDrawer = () => {
+    if (!mobileSessionFilesDrawerOpen) return null
+
+    return createPortal(
+      <div className="mobile-session-files-layer" role="presentation">
+        <button
+          type="button"
+          className="mobile-session-files-backdrop"
+          aria-label="关闭会话文件"
+          onClick={() => setMobileSessionFilesDrawerOpen(false)}
+        />
+        {renderSessionFilesSurface({
+          variant: 'mobile-drawer',
+          onClose: () => setMobileSessionFilesDrawerOpen(false),
+        })}
+      </div>,
+      document.body,
+    )
+  }
 
   const sessionAssistantName = isExpertDetailView ? activeExpertCard?.title ?? 'Agent' : 'Dora'
   const sessionAssistantAvatar = isExpertDetailView
@@ -9274,6 +9384,113 @@ export default function QuestionPage() {
       {renderDesktopPracticesFooter()}
       {renderMobileRecommendationsFooter()}
     </>
+  )
+
+  const renderMobileDoraDaypartIllustration = () => (
+    <div className={`mobile-dora-daypart mobile-dora-daypart--${mobileDoraDaypart}`} aria-hidden="true">
+      {mobileDoraDaypartConfig.glow ? (
+        <img className="mobile-dora-daypart__glow" src={mobileDoraDaypartConfig.glow} alt="" />
+      ) : null}
+      {mobileDoraDaypartConfig.sun ? (
+        <img className="mobile-dora-daypart__sun" src={mobileDoraDaypartConfig.sun} alt="" />
+      ) : null}
+      {mobileDoraDaypartConfig.moon ? (
+        <img className="mobile-dora-daypart__moon" src={mobileDoraDaypartConfig.moon} alt="" />
+      ) : null}
+      {mobileDoraDaypartConfig.clouds.map((src, index) => (
+        <img key={`${mobileDoraDaypart}-cloud-${index}`} className={`mobile-dora-daypart__cloud mobile-dora-daypart__cloud--${index + 1}`} src={src} alt="" />
+      ))}
+      {mobileDoraDaypartConfig.sparkles?.map((src, index) => (
+        <img key={`${mobileDoraDaypart}-sparkle-${index}`} className={`mobile-dora-daypart__sparkle mobile-dora-daypart__sparkle--${index + 1}`} src={src} alt="" />
+      ))}
+    </div>
+  )
+
+  const renderMobileDoraFeedItem = ({ title, summary, agentTitle, time, isNew, onClick }) => {
+    const sourceExpert = expertCards.find((card) => card.title === agentTitle)
+    return (
+      <button type="button" className="mobile-dora-feed-item" onClick={onClick}>
+        <span className="mobile-dora-feed-item__title-row">
+          {isNew ? <img className="mobile-dora-feed-item__new" src={mobileNewMessageImage} alt="新内容" /> : null}
+          <strong>{title}</strong>
+        </span>
+        <span className="mobile-dora-feed-item__summary">{summary}</span>
+        <span className="mobile-dora-feed-item__meta">
+          <span className="mobile-dora-feed-item__agent">
+            <img src={sourceExpert?.mobileIcon ?? sourceExpert?.icon ?? agentDefaultAvatarImage} alt="" />
+            <span>{agentTitle}</span>
+          </span>
+          <time>{time}</time>
+        </span>
+      </button>
+    )
+  }
+
+  const renderMobileReturningDoraHome = () => (
+    <section className="mobile-dora-returning-home" aria-label="Dora 首页">
+      <div className="mobile-dora-returning-card">
+        {renderMobileDoraDaypartIllustration()}
+        <h1>{mobileDoraDaypartConfig.greeting}</h1>
+        <div className="mobile-dora-feed-section mobile-dora-feed-section--expert">
+          <div className="mobile-dora-feed-section__header">
+            <h2>专家推送</h2>
+            <button type="button" onClick={() => setActiveNav('experts')}>
+              更多 <span className="dora-icon" aria-hidden="true">{ICONS.arrowRight}</span>
+            </button>
+          </div>
+          <div className="mobile-dora-feed-section__list">
+            {MOBILE_DORA_EXPERT_PUSHES.map((item) => {
+              const sourceExpert = expertCards.find((card) => card.title === item.agentTitle) ?? expertCards[0]
+              return (
+                <Fragment key={item.title}>
+                  {renderMobileDoraFeedItem({
+                    ...item,
+                    onClick: () => {
+                      setActiveNav('experts')
+                      openExpertCard(sourceExpert)
+                    },
+                  })}
+                </Fragment>
+              )
+            })}
+          </div>
+        </div>
+        <div className="mobile-dora-feed-section mobile-dora-feed-section--recent">
+          <div className="mobile-dora-feed-section__header">
+            <h2>最近会话</h2>
+          </div>
+          <div className="mobile-dora-feed-section__list">
+            {mobileDoraRecentSessions.map((item, index) => (
+              <Fragment key={item.id}>
+                {renderMobileDoraFeedItem({
+                  title: item.label,
+                  summary: index === 0 ? '通过深入分析客户的行为模式，识别潜在需求与机会' : '查看会话中的数据分析结果与业务建议',
+                  agentTitle: 'Dora',
+                  time: new Date(item.sentAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }),
+                  isNew: Boolean(item.badge),
+                  onClick: () => openHistorySession(item),
+                })}
+              </Fragment>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        className="mobile-dora-returning-sender"
+        aria-label="开始新聊天"
+        onClick={() => {
+          startNewAgentChat()
+          setMobileNewChatPageOpen(true)
+        }}
+      >
+        <span>输入任何您想查询或分析的问题</span>
+        <span className="mobile-dora-returning-sender__send">
+          <span className="dora-icon" aria-hidden="true">{ICONS.send}</span>
+        </span>
+      </button>
+    </section>
   )
 
   const handleAssistantFollowUp = (text) => {
@@ -9542,7 +9759,18 @@ export default function QuestionPage() {
                 </h2>
               </div>
               <div className="mobile-session-header__actions">
-                <button type="button" className="mobile-session-header__action" aria-label="会话文件" aria-disabled="true">
+                <button
+                  type="button"
+                  className="mobile-session-header__action"
+                  aria-label="会话文件"
+                  aria-controls="mobile-session-files-drawer"
+                  aria-expanded={mobileSessionFilesDrawerOpen}
+                  onClick={() => {
+                    closeMobileCatalog()
+                    setMobileAvatarMenuOpen(false)
+                    setMobileSessionFilesDrawerOpen(true)
+                  }}
+                >
                   <span className="dora-icon" aria-hidden="true">{ICONS.sessionFile}</span>
                 </button>
                 <button type="button" className="mobile-session-header__action" aria-label="分享">
@@ -9744,6 +9972,29 @@ export default function QuestionPage() {
       setActiveSessionSourceFileId(null)
     }
   }, [librarySessionFilesModalOpen])
+
+  useEffect(() => {
+    if (!mobileSessionFilesDrawerOpen) return undefined
+
+    const previousOverflow = document.body.style.overflow
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setMobileSessionFilesDrawerOpen(false)
+    }
+
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [mobileSessionFilesDrawerOpen])
+
+  useEffect(() => {
+    if (!isMobileViewport || !isQuestionMode) {
+      setMobileSessionFilesDrawerOpen(false)
+    }
+  }, [isMobileViewport, isQuestionMode])
 
   useEffect(() => {
     if (!activeLibraryItem) {
@@ -13278,6 +13529,8 @@ export default function QuestionPage() {
                         ))}
                       </div>
                     </section>
+                  ) : showMobileReturningDoraHome ? (
+                    renderMobileReturningDoraHome()
                   ) : (
                     <>
                       <section className="hero dora-stage__hero">
@@ -13362,6 +13615,7 @@ export default function QuestionPage() {
         </div>
       </main>
       {librarySessionFilesModalOpen ? renderLibrarySessionFilesModal() : null}
+      {renderMobileSessionFilesDrawer()}
       {renderAttachConnectModal()}
       {renderLibraryChatSessionMenuPortal()}
       {renderHistorySessionMenuPortal()}
