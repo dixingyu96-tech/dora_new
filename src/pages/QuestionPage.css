@@ -4901,6 +4901,10 @@ button.library-detail-main__source--icon-only .library-detail-main__source-label
   color: var(--fd-color-text-placeholder);
 }
 
+.attach-connect-search__clear {
+  display: none;
+}
+
 .attach-connect-dialog__sidebar {
   display: flex;
   flex-direction: column;
@@ -12255,7 +12259,7 @@ select {
   .attach-connect-dialog__sidebar {
     flex: 1 1 auto !important;
     width: 100% !important;
-    gap: var(--fd-gap-xl);
+    gap: 12px;
     padding-right: 0;
   }
 
@@ -12282,15 +12286,38 @@ select {
     flex: 0 0 var(--fd-control-height-lg);
     height: var(--fd-control-height-lg);
     gap: var(--fd-gap);
+    padding: 0 var(--fd-padding);
     border: 0;
     border-radius: var(--fd-border-radius, 6px);
     background: var(--fd-color-bg-container-grey);
+    font-size: var(--fd-font-size-lg, 16px);
+    line-height: var(--fd-line-height-lg, 24px);
   }
 
   .attach-connect-search:hover,
   .attach-connect-search:focus-within {
     border-color: transparent;
     box-shadow: none;
+  }
+
+  .attach-connect-search__clear {
+    display: inline-flex;
+    flex: 0 0 16px;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--fd-color-icon);
+  }
+
+  .attach-connect-search__clear .dora-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    line-height: 16px;
   }
 
   .attach-connect-tree {
@@ -12302,8 +12329,8 @@ select {
     flex: 1 1 auto;
     flex-direction: column;
     min-height: 0;
-    margin-top: calc(-1 * var(--fd-gap-xl));
-    padding: 0 var(--fd-padding);
+    margin-top: -4px;
+    padding: 0;
     overflow-y: auto;
     scrollbar-width: none;
   }
@@ -12317,9 +12344,11 @@ select {
     flex: 0 0 auto;
     align-items: center;
     gap: var(--fd-gap);
-    min-height: 69px;
-    padding: var(--fd-padding-layout-sm) 0;
-    border-bottom: 1px solid var(--fd-color-split);
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 var(--fd-padding);
+    border: 0;
   }
 
   .attach-connect-mobile-list__empty {
@@ -12336,14 +12365,24 @@ select {
 
   .attach-connect-mobile-list__item .attach-connect-tree__checkbox,
   .attach-connect-mobile-list__item .attach-connect-tree__checkbox-box {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .attach-connect-mobile-list__item .attach-connect-tree__checkbox--checked .attach-connect-tree__checkbox-box::after {
+    top: 4px;
+    left: 7px;
+    width: 6px;
+    height: 10px;
   }
 
   .attach-connect-mobile-list__icon {
-    flex: 0 0 36px;
-    width: 36px;
-    height: 36px;
+    display: inline-flex;
+    flex: 0 0 22px;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
   }
 
   .attach-connect-mobile-list__icon img {
@@ -12356,32 +12395,45 @@ select {
   .attach-connect-mobile-list__content {
     display: flex;
     flex: 1 1 auto;
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    gap: var(--fd-gap-sm, 4px);
     min-width: 0;
-    padding: 0;
+    height: 100%;
+    padding: 0 0 0 var(--attach-connect-mobile-indent, 0px);
+    border: 0;
+    background: transparent;
+    color: var(--fd-color-text, rgba(9, 30, 64, 0.9));
     text-align: left;
   }
 
-  .attach-connect-mobile-list__label,
-  .attach-connect-mobile-list__path {
-    display: block;
-    width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .attach-connect-mobile-list__content:is(:hover, :active, :focus, :focus-visible),
+  .attach-connect-search__clear:is(:hover, :active, :focus, :focus-visible) {
+    outline: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .attach-connect-mobile-list__caret {
+    display: inline-flex;
+    flex: 0 0 22px;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    color: var(--fd-color-icon);
+    font-size: 22px;
+    line-height: 22px;
   }
 
   .attach-connect-mobile-list__label {
-    color: var(--fd-color-text-heading);
-    font-size: var(--fd-font-size-lg);
-    line-height: var(--fd-line-height-lg);
-  }
-
-  .attach-connect-mobile-list__path {
-    color: var(--fd-color-text-placeholder);
-    font-size: var(--fd-font-size-sm);
-    line-height: var(--fd-line-height-sm);
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    color: inherit;
+    font-size: var(--fd-font-size-lg, 16px);
+    line-height: var(--fd-line-height-lg, 24px);
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .attach-connect-dialog__sidebar-foot,
@@ -14397,21 +14449,20 @@ select {
 
   .experts-mobile-alert-banner__art {
     position: absolute;
-    top: 4px;
-    left: -10px;
-    width: 40px;
+    top: 0;
+    left: 0;
+    width: 34px;
     height: 40px;
     overflow: hidden;
     pointer-events: none;
   }
 
   .experts-mobile-alert-banner__art img {
-    position: absolute;
-    top: -30%;
-    left: -30%;
-    width: 160%;
-    height: 160%;
+    display: block;
+    width: 34px;
+    height: 40px;
     max-width: none;
+    object-fit: contain;
   }
 
   .experts-mobile-alert-banner__text {
@@ -14903,28 +14954,60 @@ select {
     flex: 1 1 auto;
     flex-direction: column;
     min-height: 0;
+    overflow: visible;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #f5faff 12%, var(--fd-color-bg-container-grey, #f8f9fc) 100%);
+  }
+
+  .mobile-dora-returning-feeds {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior-y: contain;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    border: 1px solid var(--fd-color-white, #fff);
-    border-radius: 16px;
-    background: linear-gradient(180deg, #f5faff 12%, var(--fd-color-bg-container-grey, #f8f9fc) 100%);
+    border-radius: 0 0 16px 16px;
   }
 
-  .mobile-dora-returning-card::-webkit-scrollbar {
+  .mobile-dora-returning-feeds::-webkit-scrollbar {
     display: none;
   }
 
-  .mobile-dora-returning-card > h1 {
+  .mobile-dora-greeting {
+    position: relative;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    padding: var(--fd-padding-layout, 16px);
+    padding-bottom: calc(var(--fd-padding-layout, 16px) + 16px);
+    margin-bottom: -16px;
+  }
+
+  .mobile-dora-greeting::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+    border: 1px solid var(--fd-color-white, #fff);
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+    background: #f5faff;
+  }
+
+  .mobile-dora-greeting > h1 {
     position: relative;
     z-index: 2;
-    flex: 0 0 60px;
-    box-sizing: border-box;
-    width: 100%;
     margin: 0;
-    padding: var(--fd-padding-layout, 16px);
+    padding-right: 123px;
     color: var(--fd-color-text-heading, rgba(9, 30, 64, 0.9));
     font-size: var(--fd-font-size-heading-4, 20px);
     font-weight: 600;
@@ -14932,180 +15015,35 @@ select {
     white-space: nowrap;
   }
 
+  /* Figma 16237:36266 下午天气组：115×84，相对卡片 left 239 / top -12 / right 16 */
   .mobile-dora-daypart {
     position: absolute;
-    z-index: 1;
-    top: 0;
+    top: -12px;
     right: 16px;
-    width: 128px;
-    height: 96px;
+    z-index: 1;
+    width: 115px;
+    height: 84px;
+    overflow: visible;
     pointer-events: none;
   }
 
-  .mobile-dora-daypart img {
+  /* Lottie 画板 156×156，有效画面约 115×84，偏移裁到设计框 */
+  .mobile-dora-daypart__lottie {
     position: absolute;
+    top: -36px;
+    left: -21px;
+    width: 156px;
+    height: 156px;
+  }
+
+  .mobile-dora-daypart__lottie svg {
     display: block;
-    max-width: none;
-    object-fit: contain;
-  }
-
-  .mobile-dora-daypart__sun,
-  .mobile-dora-daypart__moon,
-  .mobile-dora-daypart__glow {
-    animation: mobile-dora-celestial-float 4.6s ease-in-out infinite;
-  }
-
-  .mobile-dora-daypart__glow {
-    animation-name: mobile-dora-celestial-float, mobile-dora-glow-breathe;
-    animation-duration: 4.6s, 3.8s;
-    animation-timing-function: ease-in-out, ease-in-out;
-    animation-iteration-count: infinite, infinite;
-  }
-
-  .mobile-dora-daypart__cloud {
-    animation: mobile-dora-cloud-drift 5.2s ease-in-out infinite;
-  }
-
-  .mobile-dora-daypart__cloud--2 {
-    animation-delay: -2.6s;
-    animation-direction: alternate-reverse;
-  }
-
-  .mobile-dora-daypart__sparkle {
-    animation: mobile-dora-sparkle-breathe 2.8s ease-in-out infinite;
-    transform-origin: center;
-  }
-
-  .mobile-dora-daypart__sparkle--2 { animation-delay: -0.7s; }
-  .mobile-dora-daypart__sparkle--3 { animation-delay: -1.4s; }
-  .mobile-dora-daypart__sparkle--4 { animation-delay: -2.1s; }
-
-  .mobile-dora-daypart--morning .mobile-dora-daypart__sun {
-    top: 1px;
-    right: 13px;
-    width: 62px;
-    height: 62px;
-  }
-
-  .mobile-dora-daypart--morning .mobile-dora-daypart__cloud--1 {
-    top: 27px;
-    right: 16px;
-    width: 102px;
-    height: 60px;
-    transform: scaleX(-1);
-  }
-
-  .mobile-dora-daypart--forenoon .mobile-dora-daypart__sun,
-  .mobile-dora-daypart--afternoon .mobile-dora-daypart__sun {
-    top: 2px;
-    right: 9px;
-    width: 84px;
-    height: 84px;
-  }
-
-  .mobile-dora-daypart--forenoon .mobile-dora-daypart__cloud--1 {
-    top: 0;
-    right: 0;
-    width: 48px;
-    height: 28px;
-  }
-
-  .mobile-dora-daypart--forenoon .mobile-dora-daypart__cloud--2 {
-    top: 48px;
-    right: 35px;
-    width: 70px;
-    height: 42px;
-    transform: scaleX(-1);
-  }
-
-  .mobile-dora-daypart--afternoon .mobile-dora-daypart__cloud--1 {
-    top: 3px;
-    left: 5px;
-    width: 48px;
-    height: 28px;
-  }
-
-  .mobile-dora-daypart--afternoon .mobile-dora-daypart__cloud--2 {
-    top: 50px;
-    right: 0;
-    width: 52px;
-    height: 31px;
-    transform: scaleX(-1);
-  }
-
-  .mobile-dora-daypart--evening .mobile-dora-daypart__glow,
-  .mobile-dora-daypart--night .mobile-dora-daypart__glow {
-    top: -1px;
-    right: 4px;
-    width: 120px;
-    height: 120px;
-  }
-
-  .mobile-dora-daypart--evening .mobile-dora-daypart__moon,
-  .mobile-dora-daypart--night .mobile-dora-daypart__moon {
-    top: 1px;
-    right: 8px;
-    width: 73px;
-    height: 80px;
-  }
-
-  .mobile-dora-daypart--evening .mobile-dora-daypart__cloud--1 {
-    top: 47px;
-    left: 5px;
-    width: 62px;
-    height: 36px;
-    transform: scaleX(-1);
-  }
-
-  .mobile-dora-daypart--evening .mobile-dora-daypart__cloud--2 {
-    top: 0;
-    right: 0;
-    width: 49px;
-    height: 28px;
-    transform: scaleX(-1);
-  }
-
-  .mobile-dora-daypart--evening .mobile-dora-daypart__sparkle--1 {
-    top: 3px;
-    left: 12px;
-    width: 36px;
-    height: 38px;
-  }
-
-  .mobile-dora-daypart--night .mobile-dora-daypart__cloud--1 {
-    top: 46px;
-    left: 3px;
-    width: 65px;
-    height: 38px;
-    transform: scaleX(-1);
-  }
-
-  .mobile-dora-daypart--night .mobile-dora-daypart__sparkle--1 { top: 30px; right: 0; width: 30px; height: 34px; }
-  .mobile-dora-daypart--night .mobile-dora-daypart__sparkle--2 { top: 1px; right: 0; width: 18px; height: 18px; }
-  .mobile-dora-daypart--night .mobile-dora-daypart__sparkle--3 { top: 21px; right: -7px; width: 18px; height: 18px; }
-  .mobile-dora-daypart--night .mobile-dora-daypart__sparkle--4 { top: 8px; right: 23px; width: 19px; height: 19px; }
-
-  @keyframes mobile-dora-celestial-float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(4px); }
-  }
-
-  @keyframes mobile-dora-cloud-drift {
-    0%, 100% { translate: 0 0; }
-    50% { translate: 5px 2px; }
-  }
-
-  @keyframes mobile-dora-glow-breathe {
-    0%, 100% { opacity: 0.82; }
-    50% { opacity: 1; }
-  }
-
-  @keyframes mobile-dora-sparkle-breathe {
-    0%, 100% { opacity: 0.45; scale: 0.88; }
-    50% { opacity: 1; scale: 1.08; }
+    width: 100%;
+    height: 100%;
   }
 
   .mobile-dora-feed-section {
+    --mobile-dora-ticket-notch: 8px;
     position: relative;
     z-index: 2;
     box-sizing: border-box;
@@ -15113,12 +15051,27 @@ select {
     flex-direction: column;
     width: 100%;
     padding: 12px 16px 16px;
-    background: rgba(255, 255, 255, 0.96);
+    background: var(--fd-color-white, #fff);
+    /* boxShadowSubtle：mask 会裁掉 box-shadow，用等价 drop-shadow */
+    filter: drop-shadow(0 0 2px rgba(9, 30, 64, 0.02)) drop-shadow(0 1px 4px rgba(9, 30, 64, 0.06));
   }
 
   .mobile-dora-feed-section--expert {
     flex: 0 0 316px;
     border-radius: 16px 16px 0 0;
+    /* Figma 16237:36067 Subtract：底边左右各挖 16×16 圆 */
+    -webkit-mask-image:
+      radial-gradient(circle var(--mobile-dora-ticket-notch) at 0 100%, transparent var(--mobile-dora-ticket-notch), #000 calc(var(--mobile-dora-ticket-notch) + 0.5px)),
+      radial-gradient(circle var(--mobile-dora-ticket-notch) at 100% 100%, transparent var(--mobile-dora-ticket-notch), #000 calc(var(--mobile-dora-ticket-notch) + 0.5px));
+    -webkit-mask-size: 51% 100%, 51% 100%;
+    -webkit-mask-position: left, right;
+    -webkit-mask-repeat: no-repeat;
+    mask-image:
+      radial-gradient(circle var(--mobile-dora-ticket-notch) at 0 100%, transparent var(--mobile-dora-ticket-notch), #000 calc(var(--mobile-dora-ticket-notch) + 0.5px)),
+      radial-gradient(circle var(--mobile-dora-ticket-notch) at 100% 100%, transparent var(--mobile-dora-ticket-notch), #000 calc(var(--mobile-dora-ticket-notch) + 0.5px));
+    mask-size: 51% 100%, 51% 100%;
+    mask-position: left, right;
+    mask-repeat: no-repeat;
   }
 
   .mobile-dora-feed-section--recent {
@@ -15127,6 +15080,44 @@ select {
     padding: 12px 16px;
     border-top: 1px dashed var(--fd-color-border-secondary, #e6e9ef);
     border-radius: 0 0 16px 16px;
+    /* Figma 16237:36123 Subtract：顶边左右各挖 16×16 圆，与上块拼成票根孔 */
+    -webkit-mask-image:
+      radial-gradient(circle var(--mobile-dora-ticket-notch) at 0 0, transparent var(--mobile-dora-ticket-notch), #000 calc(var(--mobile-dora-ticket-notch) + 0.5px)),
+      radial-gradient(circle var(--mobile-dora-ticket-notch) at 100% 0, transparent var(--mobile-dora-ticket-notch), #000 calc(var(--mobile-dora-ticket-notch) + 0.5px));
+    -webkit-mask-size: 51% 100%, 51% 100%;
+    -webkit-mask-position: left, right;
+    -webkit-mask-repeat: no-repeat;
+    mask-image:
+      radial-gradient(circle var(--mobile-dora-ticket-notch) at 0 0, transparent var(--mobile-dora-ticket-notch), #000 calc(var(--mobile-dora-ticket-notch) + 0.5px)),
+      radial-gradient(circle var(--mobile-dora-ticket-notch) at 100% 0, transparent var(--mobile-dora-ticket-notch), #000 calc(var(--mobile-dora-ticket-notch) + 0.5px));
+    mask-size: 51% 100%, 51% 100%;
+    mask-position: left, right;
+    mask-repeat: no-repeat;
+  }
+
+  .mobile-dora-feed-ticket {
+    position: relative;
+    z-index: 3;
+    flex: 0 0 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .mobile-dora-feed-ticket__notch {
+    position: absolute;
+    top: -8px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--fd-color-bg-container-grey, #f8f9fc);
+  }
+
+  .mobile-dora-feed-ticket__notch--left {
+    left: -8px;
+  }
+
+  .mobile-dora-feed-ticket__notch--right {
+    right: -8px;
   }
 
   .mobile-dora-feed-section__header {
@@ -15160,18 +15151,14 @@ select {
     color: #6f35de;
   }
 
-  .mobile-dora-feed-section--recent .mobile-dora-feed-section__header {
-    flex-basis: 24px;
-    height: 24px;
-  }
-
   .mobile-dora-feed-section__header h2::after {
     position: absolute;
     z-index: -1;
-    right: 0;
-    bottom: 1px;
     left: 0;
+    bottom: 1px;
+    width: 64px;
     height: 7px;
+    clip-path: polygon(0 0, 100% 0, 100% 57%, 0 100%);
     background: linear-gradient(90deg, #b9d8ff 0%, rgba(185, 216, 255, 0) 100%);
     content: '';
   }
@@ -15417,11 +15404,6 @@ select {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .mobile-dora-daypart__sun,
-    .mobile-dora-daypart__moon,
-    .mobile-dora-daypart__glow,
-    .mobile-dora-daypart__cloud,
-    .mobile-dora-daypart__sparkle,
     .mobile-dora-returning-sender::before,
     .mobile-dora-returning-sender::after {
       animation: none;

@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import lottie from 'lottie-web'
 import { marked } from 'marked'
 import activeDoraImage from '../assets/images/dora_选中.png'
 import activeExpertsImage from '../assets/images/专家团_选中.png'
@@ -13,6 +14,18 @@ import avatarImage from '../assets/images/avatar.png'
 import mobileProfileAvatarImage from '../assets/images/mobile-profile-avatar.png'
 import mobileUserMenuAvatarImage from '../assets/images/mobile-user-menu-avatar.png'
 import mobileNewMessageImage from '../assets/images/mobile-new-message.svg'
+import mobileModelKimiImage from '../assets/images/model-kimi.png'
+import mobileModelDeepseekImage from '../assets/images/model-deepseek.png'
+import mobileModelGlmImage from '../assets/images/model-glm.png'
+import mobileModelQwenImage from '../assets/images/model-qwen.png'
+import mobileModelCustomImage from '../assets/images/model-custom.png'
+import expertAlertBannerImage from '../assets/images/expert-alert-banner.png'
+import scheduleTaskIconImage from '../assets/images/schedule-task.png'
+import morningDaypartLottie from '../assets/lottie/morning.json'
+import forenoonDaypartLottie from '../assets/lottie/forenoon.json'
+import afternoonDaypartLottie from '../assets/lottie/afternoon.json'
+import eveningDaypartLottie from '../assets/lottie/evening.json'
+import nightDaypartLottie from '../assets/lottie/night.json'
 import { FINEBI_ASSET_ICONS } from '../assets/images/finebiAssetIcons'
 import btnBiImage from '../assets/images/btn_bi.png'
 import attachDashboardImage from '../assets/images/attach_dashboard.png'
@@ -306,76 +319,53 @@ const MOBILE_MODEL_OPTIONS = [
   {
     id: 'kimi-k3',
     label: 'Kimi K3',
-    icon: 'http://localhost:3845/assets/c5981a36a1ea1daebc61a4635ccc4ee8acaf8a26.png',
+    icon: mobileModelKimiImage,
     supportsVision: true,
   },
   {
     id: 'deepseek-v4-flash',
     label: 'Deepseek-V4-Flash',
-    icon: 'http://localhost:3845/assets/1c2be4e0fc42b96c71848b39f5ec676c4d63f099.png',
+    icon: mobileModelDeepseekImage,
     supportsVision: true,
   },
   {
     id: 'glm-5-1',
     label: 'GLM-5.1',
-    icon: 'http://localhost:3845/assets/cf674d8da96676cd40639f9431092ba7b523eae1.png',
+    icon: mobileModelGlmImage,
   },
   {
     id: 'qwen-3-7-plus',
     label: 'Qwen3.7 plus',
-    icon: 'http://localhost:3845/assets/551767c11e37e4352d73eaf5ee7124a868d109db.png',
+    icon: mobileModelQwenImage,
     supportsVision: true,
   },
   {
     id: 'custom-model',
     label: '这是用户自定义的模型名称',
-    icon: 'http://localhost:3845/assets/b22821b3a34c500fc47a0c2f9699da79b9d7f3cd.png',
+    icon: mobileModelCustomImage,
   },
 ]
 const DEFAULT_MOBILE_MODEL_ID = 'deepseek-v4-flash'
 const MOBILE_DORA_DAYPART_ASSETS = {
   morning: {
     greeting: '早上好，有什么灵感？',
-    sun: 'http://localhost:3845/assets/7a59e34ff9ed318a73f31bb5882adaf875fdb17a.svg',
-    clouds: ['http://localhost:3845/assets/22c75ac85f8b04fca7e222a1a0b26abed3c9e9f6.png'],
+    lottie: morningDaypartLottie,
   },
   forenoon: {
     greeting: '上午好，今天做什么？',
-    sun: 'http://localhost:3845/assets/84fdb3e4f62c8714afc6c9b3f24503cb4ef9572c.svg',
-    clouds: [
-      'http://localhost:3845/assets/ae64823797e69c41a02f347799ef6553f28346cc.png',
-      'http://localhost:3845/assets/89b829133c40315437fc1bfdadf35cb7813813c6.png',
-    ],
+    lottie: forenoonDaypartLottie,
   },
   afternoon: {
     greeting: '下午好 👋',
-    sun: 'http://localhost:3845/assets/d701990f5957d1b46c117ecc04ed692f8acf72c3.svg',
-    clouds: [
-      'http://localhost:3845/assets/ae64823797e69c41a02f347799ef6553f28346cc.png',
-      'http://localhost:3845/assets/13b0a1f8905369b4c137fc075f3e6296047cadfe.png',
-    ],
+    lottie: afternoonDaypartLottie,
   },
   evening: {
     greeting: '有什么需要收尾的吗？',
-    moon: 'http://localhost:3845/assets/2ec135d73a13a91d5f0edf64384660e14f547e2a.png',
-    glow: 'http://localhost:3845/assets/a970184102b0261526c1c0388814c2427fb3254b.png',
-    clouds: [
-      'http://localhost:3845/assets/7c2badf7f8389432d9729aef48454c929701c1e4.png',
-      'http://localhost:3845/assets/f3a832190a7ad5e83349d5650e0c2cf15c5eb7c7.png',
-    ],
-    sparkles: ['http://localhost:3845/assets/cb1fdbb381d1b8016470780fba98d007e63bd5ec.png'],
+    lottie: eveningDaypartLottie,
   },
   night: {
     greeting: '夜深了',
-    moon: 'http://localhost:3845/assets/2ec135d73a13a91d5f0edf64384660e14f547e2a.png',
-    glow: 'http://localhost:3845/assets/a970184102b0261526c1c0388814c2427fb3254b.png',
-    clouds: ['http://localhost:3845/assets/e3a2c8455340ea6de2c2e9ffc4b774364769c3c5.png'],
-    sparkles: [
-      'http://localhost:3845/assets/6815e69859e2b00321ec6b762cbe4b6b6bb0bb30.png',
-      'http://localhost:3845/assets/5550e6a4911656c2d74d784151fd31a9183598f3.png',
-      'http://localhost:3845/assets/1ea7c938df56a2c0ea30e9374ac64302d8b8b2e5.png',
-      'http://localhost:3845/assets/df60ddcb1f5e26fe1ed0a87e198a9c7c631bca41.png',
-    ],
+    lottie: nightDaypartLottie,
   },
 }
 
@@ -386,6 +376,34 @@ const getMobileDoraDaypart = (date = new Date()) => {
   if (minutes < 720) return 'forenoon'
   if (minutes < 1110) return 'afternoon'
   return 'evening'
+}
+
+function MobileDoraDaypartLottie({ animation }) {
+  const containerRef = useRef(null)
+
+  useEffect(() => {
+    const node = containerRef.current
+    if (!node) return undefined
+    node.replaceChildren()
+    const data = JSON.parse(JSON.stringify(animation))
+    const item = lottie.loadAnimation({
+      container: node,
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      animationData: data,
+      rendererSettings: {
+        preserveAspectRatio: 'xMidYMid meet',
+      },
+    })
+    item.setLoop(true)
+    item.play()
+    return () => {
+      item.destroy()
+    }
+  }, [animation])
+
+  return <div className="mobile-dora-daypart__lottie" ref={containerRef} />
 }
 
 const MOBILE_DORA_EXPERT_PUSHES = [
@@ -1553,6 +1571,10 @@ const filterAttachConnectTreeNodes = (nodes, query) => {
     return acc
   }, [])
 }
+
+const hasAttachConnectMobileTreeContent = (node) =>
+  node.kind !== 'folder' ||
+  Boolean(node.children?.some((child) => hasAttachConnectMobileTreeContent(child)))
 
 const ATTACH_CONNECT_DIMENSIONS = [
   { id: 'dim-1', label: '权限测试_销售运营分析情况汇总表' },
@@ -2986,8 +3008,7 @@ const parseMessageBadgeCount = (badge) => {
 const sumMessageBadgeCounts = (items) =>
   items.reduce((sum, item) => sum + parseMessageBadgeCount(item.badge), 0)
 
-const EXPERT_ALERT_BANNER_IMAGE =
-  'http://localhost:3845/assets/baf3d14b74f8075b8afb228d349f14bc1a297642.png'
+const EXPERT_ALERT_BANNER_IMAGE = expertAlertBannerImage
 
 const formatNavBadgeCount = (count) => (count > 99 ? '99+' : count)
 const formatHistoryBadgeCount = (count) => (count > 99 ? '99+' : count > 0 ? `${count}` : '')
@@ -3438,8 +3459,7 @@ const createScheduleTask = ({
   enabled,
 })
 
-const SCHEDULE_TASK_ICON_ASSET =
-  'http://localhost:3845/assets/5bc447a2465a33e470ff994a4cafbfd714eb69ca.png'
+const SCHEDULE_TASK_ICON_ASSET = scheduleTaskIconImage
 
 const normalizeScheduleTaskTitle = (value = '') =>
   value
@@ -6649,7 +6669,7 @@ export default function QuestionPage() {
     setAttachConnectTreeContentIcons(nextTreeContentIcons)
     setAttachConnectSearch('')
     setAttachConnectCheckedIds(new Set(nextScopeDefaults.checkedIds))
-    setAttachConnectExpandedIds(new Set(nextScopeDefaults.expandedIds))
+    setAttachConnectExpandedIds(new Set(isMobileViewport ? [] : nextScopeDefaults.expandedIds))
     setAttachConnectActiveTreeNodeId(nextScopeDefaults.activeId)
     setAttachConnectActiveDimensionId('dim-1')
     setAttachConnectTableView('detail')
@@ -6717,7 +6737,7 @@ export default function QuestionPage() {
     setAttachConnectOwnerScope(ownerScope)
     setAttachConnectSearch('')
     setAttachConnectCheckedIds(new Set(scopeDefaults.checkedIds))
-    setAttachConnectExpandedIds(new Set(scopeDefaults.expandedIds))
+    setAttachConnectExpandedIds(new Set(isMobileViewport ? [] : scopeDefaults.expandedIds))
     setAttachConnectActiveTreeNodeId(scopeDefaults.activeId)
   }
 
@@ -6797,13 +6817,25 @@ export default function QuestionPage() {
     const forceExpandTree = Boolean(query)
     const filteredTreeNodes = filterAttachConnectTreeNodes(currentAttachConnectTreeNodes, query)
     const visibleTreeNodes = filteredTreeNodes.flatMap((node) => (node.kind === 'root' ? node.children ?? [] : [node]))
-    const flattenAttachConnectNodes = (nodes, path = []) =>
-      nodes.flatMap((node) => {
-        const nextPath = node.kind === 'root' ? path : [...path, node.label]
-        if (node.children?.length) return flattenAttachConnectNodes(node.children, nextPath)
-        return [{ node, path: path.filter(Boolean) }]
+    const orderMobileAttachConnectNodes = (nodes) => [
+      ...nodes.filter((node) => node.kind === 'folder'),
+      ...nodes.filter((node) => node.kind !== 'folder'),
+    ]
+    const buildMobileVisibleTreeNodes = (nodes, level = 0) =>
+      orderMobileAttachConnectNodes(
+        nodes.filter((node) => hasAttachConnectMobileTreeContent(node)),
+      ).flatMap((node) => {
+        const isRoot = node.kind === 'root'
+        const hasChildren = Boolean(node.children?.length)
+        const isExpanded = forceExpandTree || attachConnectExpandedIds.has(node.id)
+        const row = isRoot ? [] : [{ node, level }]
+        const childRows =
+          (isRoot || (hasChildren && isExpanded)) && node.children?.length
+            ? buildMobileVisibleTreeNodes(node.children, isRoot ? level : level + 1)
+            : []
+        return [...row, ...childRows]
       })
-    const mobileVisibleTreeNodes = flattenAttachConnectNodes(filteredTreeNodes)
+    const mobileVisibleTreeNodes = buildMobileVisibleTreeNodes(filteredTreeNodes)
 
     const renderAttachConnectTreeNodes = (nodes, level = 0) =>
       nodes.flatMap((node) => {
@@ -6951,29 +6983,50 @@ export default function QuestionPage() {
                   ))}
                 </div>
               ) : null}
-              <label className="attach-connect-search">
+              <div className="attach-connect-search" role="search">
                 <span className="dora-icon attach-connect-search__icon" aria-hidden="true">
                   {ICONS.search}
                 </span>
                 <input
                   type="text"
                   className="attach-connect-search__input"
-                  placeholder={`搜索${currentAttachAssetLabel}`}
+                  placeholder={
+                    isMobileViewport && attachConnectModal.assetType === 'analysis-theme'
+                      ? '输入标题'
+                      : `搜索${currentAttachAssetLabel}`
+                  }
                   value={attachConnectSearch}
                   onChange={(event) => setAttachConnectSearch(event.target.value)}
                 />
-              </label>
+                {attachConnectSearch ? (
+                  <button
+                    type="button"
+                    className="attach-connect-search__clear"
+                    aria-label="清空搜索"
+                    onClick={() => setAttachConnectSearch('')}
+                  >
+                    <span className="dora-icon" aria-hidden="true">{ICONS.close}</span>
+                  </button>
+                ) : null}
+              </div>
               <div className="attach-connect-tree" role="tree" aria-label={currentAttachAssetLabel}>
                 {renderAttachConnectTreeNodes(visibleTreeNodes)}
               </div>
-              <div className="attach-connect-mobile-list" role="list" aria-label={currentAttachAssetLabel}>
+              <div className="attach-connect-mobile-list" role="tree" aria-label={currentAttachAssetLabel}>
                 {query && !mobileVisibleTreeNodes.length ? (
                   <div className="attach-connect-mobile-list__empty">暂无搜索结果</div>
                 ) : null}
-                {mobileVisibleTreeNodes.map(({ node, path }) => {
+                {mobileVisibleTreeNodes.map(({ node, level }) => {
+                  const hasChildren = Boolean(node.children?.length)
+                  const isFolder = node.kind === 'folder'
+                  const isExpanded = forceExpandTree || attachConnectExpandedIds.has(node.id)
                   const checkState = getAttachConnectCheckState(node, attachConnectCheckedIds)
                   const iconSrc =
-                    attachConnectModal.assetType === 'analysis-theme'
+                    isFolder
+                      ? isExpanded
+                        ? attachTreeFolderOpenImage
+                        : attachTreeFolderClosedImage
+                      : attachConnectModal.assetType === 'analysis-theme'
                       ? attachConnectTreeContentIcons[node.id] ?? ATTACH_CONNECT_ANALYSIS_THEME_DIMENSION_IMAGES[0]
                       : node.icon
                         ? node.icon
@@ -6981,33 +7034,44 @@ export default function QuestionPage() {
                         ? attachDashboardImage
                         : attachTreeLeafImage
                   return (
-                    <div key={`mobile-${node.id}`} className="attach-connect-mobile-list__item" role="listitem">
-                      <label className={`attach-connect-tree__checkbox attach-connect-tree__checkbox--${checkState}`}>
-                        <input
-                          type="checkbox"
-                          className="attach-connect-tree__checkbox-input"
-                          checked={checkState === 'checked'}
-                          onChange={(event) => toggleAttachConnectTreeNode(node.id, event.target.checked)}
-                        />
-                        <span className="attach-connect-tree__checkbox-box" aria-hidden="true" />
-                      </label>
-                      <span className="attach-connect-mobile-list__icon" aria-hidden="true">
-                        <img src={iconSrc} alt="" />
-                      </span>
+                    <div
+                      key={`mobile-${node.id}`}
+                      className={`attach-connect-mobile-list__item${isFolder ? ' is-folder' : ''}`}
+                      role="treeitem"
+                      aria-level={level + 1}
+                      aria-expanded={hasChildren ? isExpanded : undefined}
+                      style={{ '--attach-connect-mobile-indent': `${level * 26}px` }}
+                    >
                       <button
                         type="button"
                         className="attach-connect-mobile-list__content"
                         onClick={() => handleAttachConnectTreeContentClick(node)}
                       >
+                        {isFolder ? (
+                          <span className="dora-icon attach-connect-mobile-list__caret" aria-hidden="true">
+                            {hasChildren && isExpanded ? ICONS.triangleDown : ICONS.triangleRight}
+                          </span>
+                        ) : null}
+                        <span className="attach-connect-mobile-list__icon" aria-hidden="true">
+                          <img src={iconSrc} alt="" />
+                        </span>
                         <span className="attach-connect-mobile-list__label">
                           {highlightSearchText(node.label, attachConnectSearch)}
                         </span>
-                        {path.length ? (
-                          <span className="attach-connect-mobile-list__path">
-                            {highlightSearchText(path.join('/'), attachConnectSearch)}
-                          </span>
-                        ) : null}
                       </button>
+                      <label className={`attach-connect-tree__checkbox attach-connect-tree__checkbox--${checkState}`}>
+                        <input
+                          ref={(element) => {
+                            if (element) element.indeterminate = checkState === 'indeterminate'
+                          }}
+                          type="checkbox"
+                          className="attach-connect-tree__checkbox-input"
+                          checked={checkState === 'checked'}
+                          onClick={(event) => event.stopPropagation()}
+                          onChange={(event) => toggleAttachConnectTreeNode(node.id, event.target.checked)}
+                        />
+                        <span className="attach-connect-tree__checkbox-box" aria-hidden="true" />
+                      </label>
                     </div>
                   )
                 })}
@@ -9388,21 +9452,7 @@ export default function QuestionPage() {
 
   const renderMobileDoraDaypartIllustration = () => (
     <div className={`mobile-dora-daypart mobile-dora-daypart--${mobileDoraDaypart}`} aria-hidden="true">
-      {mobileDoraDaypartConfig.glow ? (
-        <img className="mobile-dora-daypart__glow" src={mobileDoraDaypartConfig.glow} alt="" />
-      ) : null}
-      {mobileDoraDaypartConfig.sun ? (
-        <img className="mobile-dora-daypart__sun" src={mobileDoraDaypartConfig.sun} alt="" />
-      ) : null}
-      {mobileDoraDaypartConfig.moon ? (
-        <img className="mobile-dora-daypart__moon" src={mobileDoraDaypartConfig.moon} alt="" />
-      ) : null}
-      {mobileDoraDaypartConfig.clouds.map((src, index) => (
-        <img key={`${mobileDoraDaypart}-cloud-${index}`} className={`mobile-dora-daypart__cloud mobile-dora-daypart__cloud--${index + 1}`} src={src} alt="" />
-      ))}
-      {mobileDoraDaypartConfig.sparkles?.map((src, index) => (
-        <img key={`${mobileDoraDaypart}-sparkle-${index}`} className={`mobile-dora-daypart__sparkle mobile-dora-daypart__sparkle--${index + 1}`} src={src} alt="" />
-      ))}
+      <MobileDoraDaypartLottie animation={mobileDoraDaypartConfig.lottie} />
     </div>
   )
 
@@ -9430,48 +9480,56 @@ export default function QuestionPage() {
     <section className="mobile-dora-returning-home" aria-label="Dora 首页">
       <div className="mobile-dora-returning-card">
         {renderMobileDoraDaypartIllustration()}
-        <h1>{mobileDoraDaypartConfig.greeting}</h1>
-        <div className="mobile-dora-feed-section mobile-dora-feed-section--expert">
-          <div className="mobile-dora-feed-section__header">
-            <h2>专家推送</h2>
-            <button type="button" onClick={() => setActiveNav('experts')}>
-              更多 <span className="dora-icon" aria-hidden="true">{ICONS.arrowRight}</span>
-            </button>
+        <div className="mobile-dora-greeting">
+          <h1>{mobileDoraDaypartConfig.greeting}</h1>
+        </div>
+        <div className="mobile-dora-returning-feeds">
+          <div className="mobile-dora-feed-section mobile-dora-feed-section--expert">
+            <div className="mobile-dora-feed-section__header">
+              <h2>专家提醒</h2>
+              <button type="button" onClick={() => setActiveNav('experts')}>
+                更多 <span className="dora-icon" aria-hidden="true">{ICONS.arrowRight}</span>
+              </button>
+            </div>
+            <div className="mobile-dora-feed-section__list">
+              {MOBILE_DORA_EXPERT_PUSHES.map((item) => {
+                const sourceExpert = expertCards.find((card) => card.title === item.agentTitle) ?? expertCards[0]
+                return (
+                  <Fragment key={item.title}>
+                    {renderMobileDoraFeedItem({
+                      ...item,
+                      onClick: () => {
+                        setActiveNav('experts')
+                        openExpertCard(sourceExpert)
+                      },
+                    })}
+                  </Fragment>
+                )
+              })}
+            </div>
           </div>
-          <div className="mobile-dora-feed-section__list">
-            {MOBILE_DORA_EXPERT_PUSHES.map((item) => {
-              const sourceExpert = expertCards.find((card) => card.title === item.agentTitle) ?? expertCards[0]
-              return (
-                <Fragment key={item.title}>
+          <div className="mobile-dora-feed-ticket" aria-hidden="true">
+            <span className="mobile-dora-feed-ticket__notch mobile-dora-feed-ticket__notch--left" />
+            <span className="mobile-dora-feed-ticket__notch mobile-dora-feed-ticket__notch--right" />
+          </div>
+          <div className="mobile-dora-feed-section mobile-dora-feed-section--recent">
+            <div className="mobile-dora-feed-section__header">
+              <h2>最近会话</h2>
+            </div>
+            <div className="mobile-dora-feed-section__list">
+              {mobileDoraRecentSessions.map((item, index) => (
+                <Fragment key={item.id}>
                   {renderMobileDoraFeedItem({
-                    ...item,
-                    onClick: () => {
-                      setActiveNav('experts')
-                      openExpertCard(sourceExpert)
-                    },
+                    title: item.label,
+                    summary: index === 0 ? '通过深入分析客户的行为模式，识别潜在需求与机会' : '查看会话中的数据分析结果与业务建议',
+                    agentTitle: 'Dora',
+                    time: new Date(item.sentAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }),
+                    isNew: Boolean(item.badge),
+                    onClick: () => openHistorySession(item),
                   })}
                 </Fragment>
-              )
-            })}
-          </div>
-        </div>
-        <div className="mobile-dora-feed-section mobile-dora-feed-section--recent">
-          <div className="mobile-dora-feed-section__header">
-            <h2>最近会话</h2>
-          </div>
-          <div className="mobile-dora-feed-section__list">
-            {mobileDoraRecentSessions.map((item, index) => (
-              <Fragment key={item.id}>
-                {renderMobileDoraFeedItem({
-                  title: item.label,
-                  summary: index === 0 ? '通过深入分析客户的行为模式，识别潜在需求与机会' : '查看会话中的数据分析结果与业务建议',
-                  agentTitle: 'Dora',
-                  time: new Date(item.sentAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }),
-                  isNew: Boolean(item.badge),
-                  onClick: () => openHistorySession(item),
-                })}
-              </Fragment>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>

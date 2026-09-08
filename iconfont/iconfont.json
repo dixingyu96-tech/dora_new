@@ -6,6 +6,83 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "48436049",
+      "name": "升序排序",
+      "font_class": "shengxupaixu",
+      "unicode": "e84b",
+      "unicode_decimal": 59467
+    },
+    {
+      "icon_id": "48436050",
+      "name": "降序排序",
+      "font_class": "jiangxupaixu",
+      "unicode": "e84c",
+      "unicode_decimal": 59468
+    },
+    {
+      "icon_id": "48436045",
+      "name": "用量管理_选中",
+      "font_class": "yongliangguanli_xuanzhong",
+      "unicode": "e84d",
+      "unicode_decimal": 59469
+    },
+    {
+      "icon_id": "48436046",
+      "name": "用量管理",
+      "font_class": "yongliangguanli",
+      "unicode": "e84e",
+      "unicode_decimal": 59470
+    },
+    {
+      "icon_id": "48436044",
+      "name": "市场探索_默认",
+      "font_class": "shichangtansuo_moren",
+      "unicode": "e84f",
+      "unicode_decimal": 59471
+    },
+    {
+      "icon_id": "48353654",
+      "name": "未知网站",
+      "font_class": "weizhiwangzhan",
+      "unicode": "e84a",
+      "unicode_decimal": 59466
+    },
+    {
+      "icon_id": "48317588",
+      "name": "系统管理_选中",
+      "font_class": "xitongguanli_xuanzhong",
+      "unicode": "e849",
+      "unicode_decimal": 59465
+    },
+    {
+      "icon_id": "48310793",
+      "name": "其他类型_2",
+      "font_class": "qitaleixing_2",
+      "unicode": "e847",
+      "unicode_decimal": 59463
+    },
+    {
+      "icon_id": "48310792",
+      "name": "其他类型_1",
+      "font_class": "qitaleixing_1",
+      "unicode": "e848",
+      "unicode_decimal": 59464
+    },
+    {
+      "icon_id": "48288633",
+      "name": "维度",
+      "font_class": "weidu",
+      "unicode": "e846",
+      "unicode_decimal": 59462
+    },
+    {
+      "icon_id": "48275963",
+      "name": "全选",
+      "font_class": "quanxuan",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
       "icon_id": "48260400",
       "name": "会话链路_其他工具",
       "font_class": "huihualianlu_qitagongju",

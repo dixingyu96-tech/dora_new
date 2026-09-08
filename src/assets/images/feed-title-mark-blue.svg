@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="7" viewBox="0 0 64 7" fill="none">
+  <path d="M0 0H64V4L0 7V0Z" fill="url(#feedTitleMarkBlue)" fill-opacity="0.6"/>
+  <defs>
+    <linearGradient id="feedTitleMarkBlue" x1="0" y1="6" x2="64" y2="6" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2562FF"/>
+      <stop offset="0.8" stop-color="#BFD1FF"/>
+    </linearGradient>
+  </defs>
+</svg>

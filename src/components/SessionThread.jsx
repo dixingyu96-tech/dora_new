@@ -9,6 +9,9 @@ import outputFileHtmlImage from '../assets/images/output_file_html.png'
 import outputFileMdImage from '../assets/images/output_file_md.png'
 import outputFilePptImage from '../assets/images/output_file_ppt.png'
 import FourPointStarLoader from './FourPointStarLoader'
+import scheduleTaskIconImage from '../assets/images/schedule-task.png'
+import scheduleTaskDisabledIconImage from '../assets/images/schedule-task-disabled.png'
+import scheduleTaskDeleteIconImage from '../assets/images/schedule-task-delete.png'
 
 const ICONS = {
   expand: '\ue7aa',
@@ -79,10 +82,9 @@ const THINKING_ACTION_TYPE_ALIASES = Object.freeze({
   '其他': THINKING_ACTION_TYPES.other,
 })
 
-const SCHEDULE_TASK_ICON_ASSET =
-  'http://localhost:3845/assets/5bc447a2465a33e470ff994a4cafbfd714eb69ca.png'
-const SCHEDULE_TASK_DELETE_ICON_ASSET =
-  'http://localhost:3845/assets/a9cc2b8561d55f5e5e688b459c3baf62e45eb3c2.png'
+const SCHEDULE_TASK_ICON_ASSET = scheduleTaskIconImage
+const SCHEDULE_TASK_DISABLED_ICON_ASSET = scheduleTaskDisabledIconImage
+const SCHEDULE_TASK_DELETE_ICON_ASSET = scheduleTaskDeleteIconImage
 
 const RESULT_LONG_PRESS_MS = 520
 const RESULT_MENU_WIDTH = 108
@@ -927,7 +929,12 @@ function ScheduleTaskResultCard({ scheduleAction }) {
     .filter(Boolean)
     .join('；')
   const state = scheduleAction.action ?? 'create'
-  const icon = state === 'delete' ? SCHEDULE_TASK_DELETE_ICON_ASSET : SCHEDULE_TASK_ICON_ASSET
+  const icon =
+    state === 'delete'
+      ? SCHEDULE_TASK_DELETE_ICON_ASSET
+      : task.enabled === false
+        ? SCHEDULE_TASK_DISABLED_ICON_ASSET
+        : SCHEDULE_TASK_ICON_ASSET
 
   return (
     <section
