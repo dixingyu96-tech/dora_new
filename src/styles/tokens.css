@@ -41,8 +41,7 @@
   --fd-button-icon-radius-mlg: var(--fd-border-radius);
   --fd-button-icon-radius-lg: var(--fd-border-radius-lg);
 
-  /* 前台统一响应式断点：媒体查询中使用对应的固定值 */
-  --bp-desktop-wide: 1280px;
-  --bp-layout-full: 840px;
-  --bp-layout-single: 600px;
+  /* 布局断点。媒体查询不能读变量，请写死 768px / 767px */
+  --bp-pc: 768px;
+  --bp-h5-max: 767px;
 }

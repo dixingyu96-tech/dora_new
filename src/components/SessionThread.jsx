@@ -2595,7 +2595,7 @@ export default function SessionThread({
 
   const getTurnFileLayout = (turn) => {
     const files = turn?.userFiles ?? []
-    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 599px)').matches) {
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
       return {
         columns: files.map((file) => [file]),
         cardWidth: 188,

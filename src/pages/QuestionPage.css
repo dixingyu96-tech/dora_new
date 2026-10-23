@@ -1560,6 +1560,7 @@
 
 .experts-mobile-quick,
 .experts-mobile-all,
+.experts-mobile-all__title,
 .experts-mobile-search,
 .experts-mobile-alert-banner,
 .experts-mobile-alert-drawer-layer,
@@ -1750,7 +1751,7 @@
 .experts-main-sticky {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 20;
   flex-shrink: 0;
   margin-bottom: 16px;
   background: var(--fd-color-bg-container);
@@ -3373,6 +3374,82 @@
   align-items: center;
   gap: 12px;
   flex-wrap: nowrap;
+}
+
+/* >=768：资料库类型标签与专家团分类标签同一套外观，文案仍用资料库选项 */
+@media (min-width: 768px) {
+  .library-section--fill > .library-section__row {
+    order: 1;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .library-section--fill .library-toolbar {
+    justify-content: flex-start;
+  }
+
+  .library-section--fill > .library-mobile-tabs {
+    order: 2;
+    display: flex;
+    align-items: center;
+    gap: var(--fd-gap, 8px);
+    height: 28px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .library-section--fill > .library-grid {
+    order: 3;
+  }
+
+  .library-mobile-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .library-mobile-tab {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    height: 28px;
+    min-width: 0;
+    padding: var(--fd-padding-layout-3xs, 3px) var(--fd-padding-lg, 13px);
+    border: 1px solid var(--fd-color-zero, rgba(9, 30, 64, 0));
+    border-radius: var(--fd-border-radius, 6px);
+    background: var(--fd-color-fill-quaternary, rgba(9, 30, 64, 0.07));
+    color: var(--fd-color-text);
+    font-size: var(--fd-font-size);
+    line-height: var(--fd-line-height);
+    font-weight: 400;
+    white-space: nowrap;
+    transition:
+      background-color 0.16s ease,
+      border-color 0.16s ease,
+      color 0.16s ease,
+      box-shadow 0.16s ease;
+  }
+
+  .library-mobile-tab:hover,
+  .library-mobile-tab:focus-visible {
+    outline: none;
+    background: var(--fd-color-primary-bg);
+    color: var(--fd-color-primary-hover);
+  }
+
+  .library-mobile-tab.active {
+    background: var(--fd-color-primary);
+    border-color: var(--fd-color-primary);
+    color: var(--fd-color-text-white);
+    font-weight: 600;
+    box-shadow: none;
+  }
 }
 
 .library-card {
@@ -9753,15 +9830,18 @@ button.library-detail-main__source--icon-only .library-detail-main__source-label
   background: var(--dora-light-灰度色-11);
 }
 
-/* 宽桌面密度：限制内容宽度并增加页面呼吸感 */
-@media (min-width: 1280px) {
-  .experts-page__main,
-  .library-page__body {
-    padding: var(--fd-padding-layout-xl);
+/* >=768：专家团、资料库撑满可用宽度，左右留白固定 16px */
+@media (min-width: 768px) {
+  .experts-page__layout,
+  .library-page__body,
+  .experts-page__layout.has-side-panel .experts-page__main {
+    max-width: none;
   }
 
-  .experts-main-sticky::before {
-    inset: calc(-1 * var(--fd-padding-layout-xl)) calc(-1 * var(--fd-padding-layout-xl)) -16px;
+  .experts-page__main,
+  .library-page__body {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .experts-grid,
@@ -9769,48 +9849,6 @@ button.library-detail-main__source--icon-only .library-detail-main__source-label
     --expert-card-min-width: 300px;
     --library-card-min-width: 300px;
     gap: 20px;
-  }
-}
-
-/* 窄桌面密度：保留完整导航、侧栏与内容结构 */
-@media (min-width: 840px) and (max-width: 1279px) {
-  .expert-detail-page__body {
-    padding: 40px var(--fd-padding-layout-2xl) var(--fd-padding-layout-2xl);
-  }
-
-  .library-detail-chat {
-    flex-basis: clamp(340px, 38vw, 420px);
-    width: clamp(340px, 38vw, 420px);
-  }
-
-  .experts-grid,
-  .library-grid {
-    --expert-card-min-width: 260px;
-    --library-card-min-width: 260px;
-  }
-}
-
-/* 中屏密度：页面内部改为更紧凑的单主列排布 */
-@media (min-width: 600px) and (max-width: 839px) {
-  .expert-detail-page__body {
-    padding: 24px 20px 20px;
-    gap: 24px;
-  }
-
-  .expert-detail-page__sender,
-  .expert-detail-page__panel {
-    min-width: 0;
-  }
-
-  .expert-detail-page__body {
-    justify-content: flex-start;
-    overflow-y: auto;
-  }
-
-  .experts-grid,
-  .library-grid {
-    --expert-card-min-width: 240px;
-    --library-card-min-width: 240px;
   }
 }
 
@@ -10025,7 +10063,7 @@ select {
     transform 0.2s ease;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 768px) {
   .session-thread__user-col:hover .session-thread__user-meta,
   .session-thread__user-entry:focus-within .session-thread__user-meta {
     opacity: 1;
@@ -11810,76 +11848,8 @@ select {
   transform: none;
 }
 
-/* 600–839：保留左侧 tab，隐藏辅助侧栏，主内容独占 */
-@media (min-width: 600px) and (max-width: 839px) {
-  .schedule-page__header {
-    align-items: flex-start;
-    padding-top: 12px;
-    padding-bottom: 12px;
-  }
-
-  .schedule-page__header-note {
-    white-space: normal;
-    justify-content: flex-end;
-    text-align: right;
-  }
-
-  .schedule-toolbar {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .schedule-toolbar__filters {
-    width: 100%;
-  }
-
-  .experts-toolbar {
-    align-items: stretch;
-    flex-wrap: wrap;
-  }
-
-  .experts-toolbar__filters {
-    flex: 1 1 100%;
-    width: 100%;
-  }
-
-  .experts-create-btn {
-    margin-left: auto;
-  }
-
-  .library-section__row {
-    align-items: stretch;
-  }
-
-  .library-toolbar {
-    width: 100%;
-  }
-
-  .library-search {
-    flex: 1 1 220px;
-    width: auto;
-  }
-
-  .hero {
-    padding: 0 var(--fd-padding-layout-2xl);
-  }
-
-  .scheme-orb-banner__orb-wrap {
-    width: min(42vw, 360px);
-    height: min(42vw, 360px);
-    min-width: 220px;
-    min-height: 220px;
-    top: 32%;
-  }
-
-  .welcome--orb-layout {
-    gap: 20px;
-  }
-
-}
-
-/* < 600：手机单列 */
-@media (max-width: 599px) {
+/* <768：H5 单列 */
+@media (max-width: 767px) {
   .mobile-session-files-layer {
     position: fixed;
     inset: 0;
@@ -13072,7 +13042,8 @@ select {
 
 }
 
-@media (max-width: 839px) {
+/* <768：收起桌面侧栏和分栏，交给 H5 结构 */
+@media (max-width: 767px) {
   .inner-sidebar,
   .inner-sidebar.open {
     display: none;
@@ -13169,7 +13140,7 @@ select {
   }
 }
 
-@media (max-width: 599px) {
+@media (max-width: 767px) {
   .page--mobile-library-detail .sidebar {
     display: none;
   }
@@ -14507,6 +14478,7 @@ select {
 
   .experts-mobile-quick h2,
   .experts-mobile-all__title {
+    display: block;
     height: 24px;
     margin: 0;
     color: var(--fd-color-text-heading);
@@ -14936,7 +14908,7 @@ select {
 }
 
 /* Figma 12516:49183 — Dora 首页最小展示界面（402 × 874） */
-@media (max-width: 599px) {
+@media (max-width: 767px) {
   .mobile-dora-returning-home {
     box-sizing: border-box;
     display: flex;
@@ -17383,7 +17355,7 @@ select {
     transition: none;
   }
 }
-@media (max-width: 599px) {
+@media (max-width: 767px) {
   .session-thinking__tool {
     color: var(--fd-color-text-tertiary);
   }
@@ -17947,7 +17919,7 @@ select {
   }
 }
 
-@media (max-width: 599px) and (prefers-reduced-motion: reduce) {
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
   .page--mobile-expert-detail .expert-detail-page--enter .expert-detail-page__panel-title,
   .page--mobile-expert-detail .expert-detail-page--enter .expert-detail-page__avatar,
   .page--mobile-expert-detail .expert-detail-page--enter .expert-detail-page__title,
@@ -17978,7 +17950,7 @@ select {
   pointer-events: none;
 }
 
-@media (max-width: 599px) {
+@media (max-width: 767px) {
   .sidebar.sidebar--mobile-search-hidden {
     display: none;
   }

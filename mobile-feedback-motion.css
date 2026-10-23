@@ -1,12 +1,12 @@
 /*
  * 移动端点赞 / 点踩反馈动效
- * 适用断点：viewport width <= 599px
+ * 适用断点：viewport width < 768px
  *
  * 选中赞或踩时，将 .session-thread__result-feedback-icon
  * 添加到当前选中的字体图标元素上，即可播放回弹动效。
  */
 
-@media (max-width: 599px) {
+@media (max-width: 767px) {
   .session-thread__result-actions {
     display: flex;
     align-items: center;
@@ -114,7 +114,7 @@
   }
 }
 
-@media (max-width: 599px) and (prefers-reduced-motion: reduce) {
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
   .session-thread__result-feedback-icon,
   .session-thread__feedback-toast {
     animation: none;

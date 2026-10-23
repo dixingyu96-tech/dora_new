@@ -199,7 +199,7 @@ function OverflowTooltipText({ text, className, tipPlacement = 'top', anchorSele
   }, [])
 
   const showTip = () => {
-    if (window.matchMedia('(max-width: 599px)').matches) return
+    if (window.matchMedia('(max-width: 767px)').matches) return
     if (!shouldShowTip()) return
     updateTipPosition()
     setTipVisible(true)
@@ -314,7 +314,7 @@ const ICONS = {
 
 const EXECUTION_PLAN_TRIGGER_RATE = 0.5
 const EXECUTION_PLAN_STEP_INTERVAL_MS = 2200
-const MOBILE_VIEWPORT_MEDIA_QUERY = '(max-width: 599px)'
+const MOBILE_VIEWPORT_MEDIA_QUERY = '(max-width: 767px)'
 const MOBILE_MODEL_OPTIONS = [
   {
     id: 'kimi-k3',
@@ -5541,7 +5541,7 @@ export default function QuestionPage() {
   }
 
   const openAttachmentPicker = () => {
-    if (window.matchMedia('(max-width: 599px)').matches) {
+    if (window.matchMedia('(max-width: 767px)').matches) {
       setMobileAttachmentDrawerOpen(true)
       return
     }
@@ -5554,7 +5554,7 @@ export default function QuestionPage() {
   }
 
   const openBiAssetPicker = (assetType = BI_ATTACH_MENU_ITEMS[0].id) => {
-    if (window.matchMedia('(max-width: 599px)').matches) {
+    if (window.matchMedia('(max-width: 767px)').matches) {
       setMobileBiDrawerOpen(true)
       return
     }
@@ -7694,7 +7694,7 @@ export default function QuestionPage() {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape' && !mobileHistoryDialog) setMobileCatalogOpen(false)
     }
-    const shouldLockPage = window.matchMedia('(max-width: 599px)').matches
+    const shouldLockPage = window.matchMedia('(max-width: 767px)').matches
     const previousOverflow = document.body.style.overflow
     if (shouldLockPage) document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', handleKeyDown)
@@ -13253,15 +13253,6 @@ export default function QuestionPage() {
                           </div>
 
                           <div className="library-toolbar">
-                            <FieldSelect
-                              classPrefix="library"
-                              value={libraryFilter}
-                              options={LIBRARY_FILTER_OPTIONS}
-                              onChange={setLibraryFilter}
-                              ariaLabel="筛选类型"
-                              dropdownClassName="library-select-dropdown"
-                            />
-
                             <label className="library-search">
                               <span className="dora-icon library-search__icon" aria-hidden="true">
                                 {ICONS.search}
@@ -13274,6 +13265,15 @@ export default function QuestionPage() {
                                 placeholder="搜索名称/来源对话/来源Agent"
                               />
                             </label>
+
+                            <FieldSelect
+                              classPrefix="library"
+                              value={libraryFilter}
+                              options={LIBRARY_FILTER_OPTIONS}
+                              onChange={setLibraryFilter}
+                              ariaLabel="筛选类型"
+                              dropdownClassName="library-select-dropdown"
+                            />
                           </div>
                         </div>
 
